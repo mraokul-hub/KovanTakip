@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap / Kaydol - Kovan Takip</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .login-container { background: #fff; border: 1px solid #ddd; padding: 30px; border-radius: 8px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 20px; }
+        .form-grup { margin-bottom: 15px; text-align: left; }
+        .form-grup label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-grup input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .buton-grup { display: flex; gap: 10px; margin-top: 20px; }
+        .buton { flex-grow: 1; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; }
+        .buton-primary { background-color: #007bff; }
+        .buton-primary:hover { background-color: #0056b3; }
+        .buton-secondary { background-color: #6c757d; }
+        .buton-secondary:hover { background-color: #5a6268; }
+        .hata-mesaji { color: red; margin-top: 15px; font-weight: bold; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Kovan Takip Sistemi</h1>
+        <div class="form-grup">
+            <label for="email">E-posta Adresi</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-grup">
+            <label for="password">Şifre</label>
+            <input type="password" id="password" required>
+        </div>
+        <div class="buton-grup">
+            <button id="loginBtn" class="buton buton-primary">Giriş Yap</button>
+            <button id="registerBtn" class="buton buton-secondary">Kaydol</button>
+        </div>
+        <p id="hataMesaji" class="hata-mesaji" style="display: none;"></p>
+    </div>
+
+    <script>
+        // 1. ADIM: Firebase Proje Bilgilerinizi Buraya Yapıştırın
+        const firebaseConfig = {
+          apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // KENDİ BİLGİLERİNİZLE DEĞİŞTİRİN
+          authDomain: "kovan-takip-4c054.firebaseapp.com",
+          projectId: "kovan-takip-4c054",
+          storageBucket: "kovan-takip-4c054.appspot.com",
+          messagingSenderId: "783431210365",
+          appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814"
+        };
+
+        // 2. ADIM: Firebase'i Başlatma
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(); // Auth servisini al
+        const db = firebase.firestore(); // Firestore servisini al (gerekirse diye)
+        console.log("Firebase başlatıldı.");
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const hataMesajiElementi = document.getElementById('hataMesaji');
+
+        // Oturum durumunu dinle
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            // Kullanıcı giriş yapmışsa, kovanlarım sayfasına yönlendir
+            console.log("Kullanıcı giriş yaptı:", user.uid);
+            window.location.href = 'kovanlarim.html'; // Giriş başarılıysa yönlendir
+          } else {
+            // Kullanıcı çıkış yapmışsa veya hiç giriş yapmamışsa
+            console.log("Kullanıcı oturumu kapalı.");
+          }
+        });
+
+        // Hata mesajını gösterme fonksiyonu
+        function hataGoster(mesaj) {
+            hataMesajiElementi.textContent = mesaj;
+            hataMesajiElementi.style.display = 'block';
+        }
+
+        // Giriş Yap Butonu
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            hataMesajiElementi.style.display = 'none'; // Önceki hatayı gizle
+
+            if (!email || !password) {
+                hataGoster("E-posta ve şifre alanları boş bırakılamaz.");
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Giriş başarılı, onAuthStateChanged yönlendirecek
+                    console.log("Giriş başarılı:", userCredential.user.uid);
+                })
+                .catch((error) => {
+                    console.error("Giriş hatası:", error.code, error.message);
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        hataGoster("E-posta veya şifre hatalı.");
+                    } else {
+                        hataGoster("Giriş sırasında bir hata oluştu: " + error.message);
+                    }
+                });
+        });
+
+        // Kaydol Butonu
+        registerBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            hataMesajiElementi.style.display = 'none'; // Önceki hatayı gizle
+
+            if (!email || !password) {
+                hataGoster("E-posta ve şifre alanları boş bırakılamaz.");
+                return;
+            }
+            if (password.length < 6) {
+                 hataGoster("Şifre en az 6 karakter olmalıdır.");
+                 return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Kayıt başarılı, onAuthStateChanged yönlendirecek
+                    console.log("Kayıt başarılı:", userCredential.user.uid);
+                })
+                .catch((error) => {
+                    console.error("Kayıt hatası:", error.code, error.message);
+                    if (error.code === 'auth/email-already-in-use') {
+                        hataGoster("Bu e-posta adresi zaten kullanılıyor.");
+                    } else {
+                        hataGoster("Kayıt sırasında bir hata oluştu: " + error.message);
+                    }
+                });
+        });
+
+    </script>
+</body>
+</html>
