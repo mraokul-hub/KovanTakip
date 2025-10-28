@@ -7,17 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* MOBİL UYUM İÇİN EKLENDİ */
         * { box-sizing: border-box; }
 
-        /* --- TEMEL STİLLER --- */
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         h1 { color: #333; margin-right: auto; font-size: 1.5em; }
         .user-info { display: flex; align-items: center; gap: 10px; margin-left: auto; }
         .user-email { font-weight: bold; color: #555; font-size: 0.9em; }
 
-        /* --- BUTON STİLLERİ --- */
         .ana-buton-grup { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; margin-top: 10px; justify-content: flex-end; }
         .buton { color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; font-size: 0.85em; white-space: nowrap; }
         .geri-btn { background-color: #6c757d; } .geri-btn:hover { background-color: #5a6268; }
@@ -26,20 +23,16 @@
         .kaydet-btn { background-color: #28a745; } .kaydet-btn:hover { background-color: #218838; } .kaydet-btn:disabled { background-color: #aaa; cursor: not-allowed; }
         .logout-btn { background-color: #ffc107; color: #333; } .logout-btn:hover { background-color: #e0a800; }
         
-        /* İKONLAR İÇİN HİZALAMA EKLENDİ */
         .buton i, .kayit-ekleme-formu button i { margin-right: 6px; }
 
-        /* --- DETAY ve DÜZENLEME KARTLARI --- */
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .info-card, .edit-form-container { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; grid-column: span 1; }
         
-        /* GÖRSEL GÜNCELLENDİ: Kartlara renkli üst kenarlık */
-        .kovan-bilgi-card { border-top: 4px solid #8d6e63; } /* Kahverengi */
-        .ana-ari-card { border-top: 4px solid #ffc107; } /* Sarı */
+        .kovan-bilgi-card { border-top: 4px solid #8d6e63; } 
+        .ana-ari-card { border-top: 4px solid #ffc107; } 
         
         .edit-form-container { grid-column: span 2; }
         
-        /* GÖRSEL GÜNCELLENDİ: Bölüm başlıkları (h2) için flex ve resim stili */
         .info-card h2, .edit-form-container h2, .kayitlar-bolumu h2 {
             margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 1.2em;
             display: flex;
@@ -53,7 +46,6 @@
             border-radius: 4px;
         }
 
-        /* GÖRSEL GÜNCELLENDİ: Düzenleme formu içindeki alt başlıklar (h3) */
         .edit-form-container h3 {
             display: flex;
             align-items: center;
@@ -64,7 +56,7 @@
             padding-bottom: 5px;
         }
         .edit-form-container .section-image {
-            width: 30px; /* h3 içindekiler biraz daha küçük */
+            width: 30px; 
             height: auto;
             max-height: 30px;
         }
@@ -72,16 +64,13 @@
         .info-card p { font-size: 1em; line-height: 1.5; margin: 8px 0; }
         .info-card strong { color: #333; min-width: 130px; display: inline-block; }
 
-        /* --- FORM STİLLERİ --- */
         .form-grup { margin-bottom: 12px; }
         .form-grup label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9em; color: #555;}
         .form-grup input, .form-grup select, .form-grup textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em; }
         .checkbox-grup { display: flex; align-items: center; } .checkbox-grup input { width: auto; margin-right: 8px; }
 
-        /* --- KAYIT BÖLÜMLERİ --- */
         .kayitlar-bolumu { grid-column: span 2; margin-top: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; }
         
-        /* GÖRSEL GÜNCELLENDİ: Kayıt bölümü başlıklarına renkler */
         #bolum-bakim h2 { color: #007bff; }
         #bolum-hastalik h2 { color: #dc3545; }
         #bolum-hasat h2 { color: #28a745; }
@@ -91,25 +80,18 @@
         .kayit-ekleme-formu button { background-color: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .kayit-ekleme-formu button:hover { background-color: #218838; } .kayit-ekleme-formu button:disabled { background-color: #aaa; }
 
-        /* Kayıt Listesi Stilleri */
-        .kayit-listesi-item { position: relative; border: 1px solid #eee; background: #fafafa; padding: 12px 15px; margin-top: 10px; border-radius: 4px; padding-right: 125px; /* Butonlara yer aç */ }
+        .kayit-listesi-item { position: relative; border: 1px solid #eee; background: #fafafa; padding: 12px 15px; margin-top: 10px; border-radius: 4px; padding-right: 125px; }
         .kayit-listesi-item p { margin: 4px 0; font-size: 0.95em; line-height: 1.4; }
         .kayit-listesi-item strong { font-weight: bold; }
         .kayit-listesi-item span { font-size: 0.85em; color: #666; display: block; margin-bottom: 5px; }
         .kayit-listesi-item .buton-alan { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
         
-        /* KAYIT BUTONLARINA İKON SIĞDIRMAK İÇİN GÜNCELLEME */
         .kayit-duzenle-btn, .kayit-sil-btn, .kayit-kaydet-btn, .kayit-iptal-btn { 
             padding: 3px 8px; font-size: 0.8em; 
-            width: 30px; /* Sabit genişlik */
-            height: 24px; /* Sabit yükseklik */
-            font-size: 0.9em; /* İkonu büyüt */
-            padding: 3px; /* İçeriği ortala */
-            text-align: center;
+            width: 30px; height: 24px; font-size: 0.9em; 
+            padding: 3px; text-align: center;
         }
-        .kayit-duzenle-btn i, .kayit-sil-btn i, .kayit-kaydet-btn i, .kayit-iptal-btn i {
-             margin: 0; /* İkonu ortala */
-        }
+        .kayit-duzenle-btn i, .kayit-sil-btn i, .kayit-kaydet-btn i, .kayit-iptal-btn i { margin: 0; }
         
         .kayit-duzenle-btn { background-color: #ffc107; color: #333; } .kayit-duzenle-btn:hover { background-color: #e0a800; }
         .kayit-kaydet-btn { background-color: #28a745; } .kayit-kaydet-btn:disabled { background-color: #aaa; }
@@ -117,8 +99,7 @@
         .kayit-sil-btn { background-color: #dc3545 !important; color: white !important; }
         .kayit-sil-btn:hover { background-color: #c82333 !important; }
         .kayit-sil-btn:disabled { background-color: #aaa !important; cursor: not-allowed; }
-        
-        /* Kayıt Düzenleme Formu Görünürlüğü */
+
         .kayit-duzenleme-formu { display: none; margin-top: 5px; }
         .kayit-duzenleme-formu .form-grup { margin-bottom: 8px; }
         .kayit-listesi-item.duzenleniyor .kayit-icerik { display: none; }
@@ -132,7 +113,6 @@
         .hastalik-listesi-item { border-left: 5px solid #dc3545; } .hastalik-listesi-item strong { color: #dc3545; }
         .hasat-listesi-item { border-left: 5px solid #28a745; } .hasat-listesi-item strong { color: #28a745; }
 
-        /* Mobil Uyum */
         @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
             .info-card, .edit-form-container, .kayitlar-bolumu { grid-column: span 1; }
@@ -141,20 +121,11 @@
             .ana-buton-grup { width: 100%; margin-top: 10px; justify-content: space-between; }
             .buton { flex-grow: 1; text-align: center; }
 
-            /* MOBİL UYUMLULUK: DÜZENLEME FORMUNDAKİ İKİLİ GRİDİ TEKE DÜŞÜR */
-            .edit-form-container .grid-container {
-                grid-template-columns: 1fr;
-            }
+            .edit-form-container .grid-container { grid-template-columns: 1fr; }
 
-            /* MOBİL UYUMLULUK: Kayıt listesi butonlarına yer aç */
-            .kayit-listesi-item {
-                 padding-right: 45px; /* Mobilde buton alanı daha dar */
-            }
+            .kayit-listesi-item { padding-right: 45px; }
              .kayit-listesi-item .buton-alan {
-                 flex-direction: column; /* Butonları alt alta diz */
-                 top: 10px;
-                 right: 5px;
-                 gap: 4px;
+                 flex-direction: column; top: 10px; right: 5px; gap: 4px;
             }
         }
     </style>
@@ -187,9 +158,8 @@
     <datalist id="ilac-yontem-listesi-datalist"> <option value="Formik Asit - Damlatma"></option> <option value="Formik Asit - Ped"></option> <option value="Oksalik Asit - Damlatma"></option> <option value="Oksalik Asit - Buharlaştırma"></option> <option value="Amitraz Şerit (Varroset vb.)"></option> <option value="Timol Jel/Ped (Apiguard vb.)"></option> <option value="Organik Asit Kombinasyonu"></option> <option value="Erkek Arı Gözü Kesimi"></option> <option value="Pudra Şekeri"></option> <option value="Antibiyotik (Veteriner Tavsiyesiyle)"></option> <option value="B401 (Petek Güvesi İçin)"></option> <option value="Çerçeve Değişimi"></option> <option value="Besleme (Şurup/Kek)"></option> <option value="Diğer"></option> </datalist>
 
     <script>
-        // --- Firebase Config ve Başlatma ---
         const firebaseConfig = {
-          apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // KENDİ BİLGİLERİNİZLE DEĞİŞTİRİN
+          apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", 
           authDomain: "kovan-takip-4c054.firebaseapp.com",
           projectId: "kovan-takip-4c054",
           storageBucket: "kovan-takip-4c054.appspot.com",
@@ -200,21 +170,18 @@
         catch (e) { console.error("Firebase başlatılamadı:", e); document.body.innerHTML = '<h1>HATA</h1>'; throw e; }
         const db = firebase.firestore(); const auth = firebase.auth();
 
-        // --- HTML Element Referansları ---
         const kovanBaslik = document.getElementById('kovan-baslik');
         const detayContainer = document.getElementById('kovan-detay-container');
         const kayitlarContainer = document.getElementById('kovan-kayitlar-container');
         const logoutBtn = document.getElementById('logoutBtn');
         const userEmailElement = document.getElementById('userEmail');
 
-        // --- Global Değişkenler ---
         const urlParams = new URLSearchParams(window.location.search);
         let kovanId = null; try { kovanId = decodeURIComponent(urlParams.get('id')); } catch (e) { console.error("ID alınamadı:", e); }
         let mevcutKovanVerisi = null;
         let mevcutKullanici = null; 
         let anaDuzenlemeModu = false;
 
-        // --- Auth Durumu Dinleyicisi ---
         auth.onAuthStateChanged((user) => {
           if (user) {
             mevcutKullanici = user; 
@@ -223,10 +190,8 @@
           } else { window.location.href = 'login.html'; }
         });
 
-        // --- Çıkış Butonu ---
         logoutBtn.addEventListener('click', () => { auth.signOut().catch(e => console.error(e)); });
 
-        // --- Ana Fonksiyon: Kovan Detayını Yükle ---
         async function yukleKovanDetayi() {
             console.log("yukleKovanDetayi başladı.");
             ['duzenleBtn', 'kaydetBtn', 'iptalBtn', 'silKovanBtn'].forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = true; });
@@ -248,7 +213,6 @@
             } catch (error) { console.error("Yükleme Hatası:", error); kovanBaslik.innerText="Hata"; detayContainer.innerHTML = "<p>Veri yüklenirken hata.</p>"; }
         }
 
-        // --- Ana Buton Listener'larını Kur ---
         function kurAnaButonListenerlari() {
             const setupListener = (buttonId, event, handler) => { const button = document.getElementById(buttonId); if (button) { const newButton = button.cloneNode(true); button.parentNode.replaceChild(newButton, button); newButton.addEventListener(event, handler); console.log(`Listener kuruldu: ${buttonId}`); } else { console.error(`Buton bulunamadı: ${buttonId}`); } };
             setupListener('duzenleBtn', 'click', () => toggleAnaEditMode(true));
@@ -257,7 +221,6 @@
             setupListener('silKovanBtn', 'click', kovayiSil);
         }
 
-        // --- ANA Kovan Bilgileri İçin Görünüm/Düzenleme Geçişi ---
         function toggleAnaEditMode(isEditing) {
             console.log(`toggleAnaEditMode: ${isEditing}`);
             if (!mevcutKullanici || !mevcutKovanVerisi) return; 
@@ -270,7 +233,6 @@
             if(kaydetBtn) kaydetBtn.disabled = !isEditing; if(iptalBtn) iptalBtn.disabled = !isEditing;
         }
 
-        // --- TÜM SAYFAYI YENİDEN OLUŞTURAN ANA FONKSİYON ---
         function renderViewMode() {
             if (!mevcutKovanVerisi) { console.warn("renderViewMode: mevcutKovanVerisi yok."); return; }
             console.log("renderViewMode çağrıldı. Ana Düzenleme Modu:", anaDuzenlemeModu);
@@ -282,37 +244,39 @@
             console.log("renderViewMode tamamlandı.");
         }
 
-        // GÖRSEL GÜNCELLENDİ: 'renderAnaViewMode' fonksiyonu resimleri ve CSS sınıflarını kullanacak şekilde güncellendi
         function renderAnaViewMode(kovan) {
             console.log("renderAnaViewMode");
             const temelBilgilerCard = document.createElement('div');
-            // 'info-card' yanına 'kovan-bilgi-card' sınıfı eklendi
             temelBilgilerCard.className = 'info-card kovan-bilgi-card'; 
-            // h2 içindeki ikon, img ile değiştirildi
             temelBilgilerCard.innerHTML = `<h2><img src="5.png" alt="Kovan" class="section-image"> Kovan Bilgileri</h2> <p><strong>B. Barkod:</strong> ${kovan.barkodNo || 'N/A'}</p> <p><strong>Arı Irkı:</strong> ${kovan.ariIrki || 'N/A'}</p> <p><strong>Kovan Tipi:</strong> ${kovan.kovanTipi || 'N/A'}</p> <p><strong>Çerçeve S.:</strong> ${kovan.cerceveSayisi || 'N/A'}</p> <p><strong>Kökeni:</strong> ${kovan.kovanKokeni || 'N/A'}</p> <p><strong>Hırçınlık:</strong> ${kovan.hircinlik || 'N/A'}</p> <p><strong>Polen T.:</strong> ${kovan.polenTuzagi ? 'Var' : 'Yok'}</p> <p><strong>Delikli T.:</strong> ${kovan.tabanDelikliMi ? 'Var' : 'Yok'}</p>`;
             detayContainer.appendChild(temelBilgilerCard);
             
             const anaAriCard = document.createElement('div');
-            // 'info-card' yanına 'ana-ari-card' sınıfı eklendi
             anaAriCard.className = 'info-card ana-ari-card';
-            // h2 içindeki ikon, img ile değiştirildi
             anaAriCard.innerHTML = `<h2><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı</h2> <p><strong>Irkı:</strong> ${kovan.anaAri.anaIrki || 'N/A'}</p> <p><strong>Rengi:</strong> ${kovan.anaAri.anaRengi || 'N/A'}</p> <p><strong>Türü:</strong> ${kovan.anaAri.anaTuru || 'N/A'}</p> <p><strong>Doğum T.:</strong> ${kovan.anaAri.dogumTarihi || 'N/A'}</p> <p><strong>Değişim T.:</strong> ${kovan.anaAri.degisimTarihi || 'N/A'}</p> <p><strong>Performans:</strong> ${kovan.anaAri.performans || 'N/A'}</p>`;
             detayContainer.appendChild(anaAriCard);
         }
 
-        // GÖRSEL GÜNCELLENDİ: 'renderAnaEditMode' fonksiyonu resimleri kullanacak şekilde güncellendi
         function renderAnaEditMode(kovan) {
             console.log("renderAnaEditMode");
             const setSelected=(v1,v2)=>v1===v2?'selected':''; const setChecked=(v)=>v?'checked':'';
             const editFormContainer = document.createElement('div');
             editFormContainer.className = 'edit-form-container';
-            // Ana h2 başlığı (Düzenle) ikonlu
-            // Alt h3 başlıklar (Kovan, Ana Arı) img kullanacak
-            editFormContainer.innerHTML = `<h2><i class="fa-solid fa-pencil-alt"></i> Kovan Bilgilerini Düzenle</h2> <form id="kovanDuzenleFormu"><div class="grid-container"><div> <h3><img src="5.png" alt="Kovan" class="section-image"> Kovan</h3> <div class="form-grup"><label>Kovan No</label><input type="text" value="${kovan.kovanNo}" disabled></div> <div class="form-grup"><label>Barkod</label><input type="text" id="editBarkodNo" value="${kovan.barkodNo||''}"></div> <div class="form-grup"><label>Tip</label><select id="editKovanTipi"><option value="Langstroth" ${setSelected(kovan.kovanTipi,'Langstroth')}>L</option><option value="Dadant" ${setSelected(kovan.kovanTipi,'Dadant')}>D</option><option value="Karakovan" ${setSelected(kovan.kovanTipi,'Karakovan')}>K</option><option value="Diğer" ${setSelected(kovan.kovanTipi,'Diğer')}>Diğer</option></select></div> <div class="form-grup"><label>Irk</label><select id="editAriIrki"><option value="Kafkas" ${setSelected(kovan.ariIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.ariIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.ariIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.ariIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.ariIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.ariIrki,'Melez')}>Melez</option></select></div> <div class="form-grup"><label>Çer. Sayısı</label><input type="number" id="editCerceveSayisi" value="${kovan.cerceveSayisi||0}" min="1"></div> <div class="form-grup"><label>Köken</label><select id="editKovanKokeni"><option value="Kendi Üretimim" ${setSelected(kovan.kovanKokeni,'Kendi Üretimim')}>Kendi</option><option value="Satın Alma" ${setSelected(kovan.kovanKokeni,'Satın Alma')}>Satın</option><option value="Oğul" ${setSelected(kovan.kovanKokeni,'Oğul')}>Oğul</option></select></div> <div class="form-grup"><label>Hırçınlık</label><select id="editHircinlik"><option value="1 - Çok Sakin" ${setSelected(kovan.hircinlik,'1 - Çok Sakin')}>1</option><option value="2 - Sakin" ${setSelected(kovan.hircinlik,'2 - Sakin')}>2</option><option value="3 - Normal" ${setSelected(kovan.hircinlik,'3 - Normal')}>3</option><option value="4 - Hırçın" ${setSelected(kovan.hircinlik,'4 - Hırçın')}>4</option><option value="5 - Çok Hırçın" ${setSelected(kovan.hircinlik,'5 - Çok Hırçın')}>5</option></select></div> <div class="checkbox-grup"><input type="checkbox" id="editTabanDelikliMi" ${setChecked(kovan.tabanDelikliMi)}><label>Delikli T.</label></div> <div class="checkbox-grup"><input type="checkbox" id="editPolenTuzagi" ${setChecked(kovan.polenTuzagi)}><label>Polen T.</label></div> </div> <div> <h3><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı</h3><div class="form-grup"><label>Doğum T.</label><input type="date" id="editAnaDogumTarihi" value="${kovan.anaAri.dogumTarihi||''}"></div><div class="form-grup"><label>Ana Irkı</label><select id="editAnaIrki"><option value="Kafkas" ${setSelected(kovan.anaAri.anaIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.anaAri.anaIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.anaAri.anaIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.anaAri.anaIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.anaAri.anaIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.anaAri.anaIrki,'Melez')}>Melez</option></select></div><div class="form-grup"><label>Ana Türü</label><select id="editAnaTuru"><option value="Damızlık (F0)" ${setSelected(kovan.anaAri.anaTuru,'Damızlık (F0)')}>F0</option><option value="Çiftleşmiş (F1)" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmiş (F1)')}>F1</option><option value="Çiftleşmemiş" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmemiş')}>Çiftleşmemiş</option><option value="Kendi Ürettiğim" ${setSelected(kovan.anaAri.anaTuru,'Kendi Ürettiğim')}>Kendi</option></select></div><div class="form-grup"><label>Ana Rengi</label><select id="editAnaRengi"><option value="Boyasız" ${setSelected(kovan.anaAri.anaRengi,'Boyasız')}>Boyasız</option><option value="Beyaz" ${setSelected(kovan.anaAri.anaRengi,'Beyaz')}>Beyaz</option><option value="Sarı" ${setSelected(kovan.anaAri.anaRengi,'Sarı')}>Sarı</option><option value="Kırmızı" ${setSelected(kovan.anaAri.anaRengi,'Kırmızı')}>Kırmızı</option><option value="Yeşil" ${setSelected(kovan.anaAri.anaRengi,'Yeşil')}>Yeşil</option><option value="Mavi" ${setSelected(kovan.anaAri.anaRengi,'Mavi')}>Mavi</option></select></div><div class="form-grup"><label>Performansı</label><select id="editAnaPerformans"><option value="Çok İyi" ${setSelected(kovan.anaAri.performans,'Çok İyi')}>Çok İyi</option><option value="İyi" ${setSelected(kovan.anaAri.performans,'İyi')}>İyi</option><option value="Orta" ${setSelected(kovan.anaAri.performans,'Orta')}>Orta</option><option value="Zayıf" ${setSelected(kovan.anaAri.performans,'Zayıf')}>Zayıf</option></select></div><div class="form-grup"><label>Plan. Değ. T.</label><input type="date" id="editAnaDegisimTarihi" value="${kovan.anaAri.degisimTarihi||''}"></div></div></div></form>`;
+            // HIRÇINLIK BÖLÜMÜ GÜNCELLENDİ
+            editFormContainer.innerHTML = `<h2><i class="fa-solid fa-pencil-alt"></i> Kovan Bilgilerini Düzenle</h2> <form id="kovanDuzenleFormu"><div class="grid-container"><div> <h3><img src="5.png" alt="Kovan" class="section-image"> Kovan</h3> <div class="form-grup"><label>Kovan No</label><input type="text" value="${kovan.kovanNo}" disabled></div> <div class="form-grup"><label>Barkod</label><input type="text" id="editBarkodNo" value="${kovan.barkodNo||''}"></div> <div class="form-grup"><label>Tip</label><select id="editKovanTipi"><option value="Langstroth" ${setSelected(kovan.kovanTipi,'Langstroth')}>L</option><option value="Dadant" ${setSelected(kovan.kovanTipi,'Dadant')}>D</option><option value="Karakovan" ${setSelected(kovan.kovanTipi,'Karakovan')}>K</option><option value="Diğer" ${setSelected(kovan.kovanTipi,'Diğer')}>Diğer</option></select></div> <div class="form-grup"><label>Irk</label><select id="editAriIrki"><option value="Kafkas" ${setSelected(kovan.ariIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.ariIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.ariIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.ariIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.ariIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.ariIrki,'Melez')}>Melez</option></select></div> <div class="form-grup"><label>Çer. Sayısı</label><input type="number" id="editCerceveSayisi" value="${kovan.cerceveSayisi||0}" min="1"></div> <div class="form-grup"><label>Köken</label><select id="editKovanKokeni"><option value="Kendi Üretimim" ${setSelected(kovan.kovanKokeni,'Kendi Üretimim')}>Kendi</option><option value="Satın Alma" ${setSelected(kovan.kovanKokeni,'Satın Alma')}>Satın</option><option value="Oğul" ${setSelected(kovan.kovanKokeni,'Oğul')}>Oğul</option></select></div> 
+            
+            <div class="form-grup"><label>Hırçınlık</label><select id="editHircinlik">
+            <option value="1 - Çok Sakin" ${setSelected(kovan.hircinlik,'1 - Çok Sakin')}>1 - Çok Sakin</option>
+            <option value="2 - Sakin" ${setSelected(kovan.hircinlik,'2 - Sakin')}>2 - Sakin</option>
+            <option value="3 - Normal" ${setSelected(kovan.hircinlik,'3 - Normal')}>3 - Normal</option>
+            <option value="4 - Hırçın" ${setSelected(kovan.hircinlik,'4 - Hırçın')}>4 - Hırçın</option>
+            <option value="5 - Çok Hırçın" ${setSelected(kovan.hircinlik,'5 - Çok Hırçın')}>5 - Çok Hırçın</option>
+            </select></div> 
+            
+            <div class="checkbox-grup"><input type="checkbox" id="editTabanDelikliMi" ${setChecked(kovan.tabanDelikliMi)}><label>Delikli T.</label></div> <div class="checkbox-grup"><input type="checkbox" id="editPolenTuzagi" ${setChecked(kovan.polenTuzagi)}><label>Polen T.</label></div> </div> <div> <h3><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı</h3><div class="form-grup"><label>Doğum T.</label><input type="date" id="editAnaDogumTarihi" value="${kovan.anaAri.dogumTarihi||''}"></div><div class="form-grup"><label>Ana Irkı</label><select id="editAnaIrki"><option value="Kafkas" ${setSelected(kovan.anaAri.anaIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.anaAri.anaIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.anaAri.anaIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.anaAri.anaIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.anaAri.anaIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.anaAri.anaIrki,'Melez')}>Melez</option></select></div><div class="form-grup"><label>Ana Türü</label><select id="editAnaTuru"><option value="Damızlık (F0)" ${setSelected(kovan.anaAri.anaTuru,'Damızlık (F0)')}>F0</option><option value="Çiftleşmiş (F1)" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmiş (F1)')}>F1</option><option value="Çiftleşmemiş" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmemiş')}>Çiftleşmemiş</option><option value="Kendi Ürettiğim" ${setSelected(kovan.anaAri.anaTuru,'Kendi Ürettiğim')}>Kendi</option></select></div><div class="form-grup"><label>Ana Rengi</label><select id="editAnaRengi"><option value="Boyasız" ${setSelected(kovan.anaAri.anaRengi,'Boyasız')}>Boyasız</option><option value="Beyaz" ${setSelected(kovan.anaAri.anaRengi,'Beyaz')}>Beyaz</option><option value="Sarı" ${setSelected(kovan.anaAri.anaRengi,'Sarı')}>Sarı</option><option value="Kırmızı" ${setSelected(kovan.anaAri.anaRengi,'Kırmızı')}>Kırmızı</option><option value="Yeşil" ${setSelected(kovan.anaAri.anaRengi,'Yeşil')}>Yeşil</option><option value="Mavi" ${setSelected(kovan.anaAri.anaRengi,'Mavi')}>Mavi</option></select></div><div class="form-grup"><label>Performansı</label><select id="editAnaPerformans"><option value="Çok İyi" ${setSelected(kovan.anaAri.performans,'Çok İyi')}>Çok İyi</option><option value="İyi" ${setSelected(kovan.anaAri.performans,'İyi')}>İyi</option><option value="Orta" ${setSelected(kovan.anaAri.performans,'Orta')}>Orta</option><option value="Zayıf" ${setSelected(kovan.anaAri.performans,'Zayıf')}>Zayıf</option></select></div><div class="form-grup"><label>Plan. Değ. T.</label><input type="date" id="editAnaDegisimTarihi" value="${kovan.anaAri.degisimTarihi||''}"></div></div></div></form>`;
             detayContainer.appendChild(editFormContainer);
         }
 
-        // --- Ana Kovan Bilgilerini Kaydet ---
         async function handleUpdateSubmit(event) {
             event.preventDefault(); if (!mevcutKullanici || !mevcutKovanVerisi) return; 
             console.log("[DEBUG] Ana kovan bilgileri kaydediliyor...");
@@ -335,7 +299,6 @@
             finally { if(kaydetButonu) kaydetButonu.disabled = false; }
         }
 
-        // --- GÜVENLİ KOVAN SİLME (İkonlu hale getirildi) ---
          async function deleteSubCollection(dbRef, parentDocRef, collName){ const collRef = parentDocRef.collection(collName); const snap = await collRef.get(); if (snap.empty) return; const batch = dbRef.batch(); snap.forEach(doc => batch.delete(doc.ref)); await batch.commit(); console.log(`${collName} silindi.`); }
          async function kovayiSil() {
              if (!mevcutKullanici || !kovanId || !mevcutKovanVerisi) return; 
@@ -343,7 +306,7 @@
                  const silBtn = document.getElementById('silKovanBtn'); const duzBtn = document.getElementById('duzenleBtn');
                  try {
                      if(silBtn) silBtn.disabled = true; if(duzBtn) duzBtn.disabled = true; 
-                     if(silBtn) silBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Siliniyor..."; // İKONLU GÜNCELLEME
+                     if(silBtn) silBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Siliniyor..."; 
                  const docRef = db.collection("kovanlar").doc(kovanId);
                  await deleteSubCollection(db, docRef, "bakimKayitlari");
                  await deleteSubCollection(db, docRef, "hastalikKayitlari");
@@ -351,17 +314,16 @@
                  await docRef.delete();
                  alert("Kovan başarıyla silindi."); window.location.href = "kovanlarim.html";
              } catch (error) { console.error("Silme hatası:", error); alert("Hata: " + error.message); if(silBtn) silBtn.disabled = false; if(duzBtn) duzBtn.disabled = false; 
-                 if(silBtn) silBtn.innerHTML = "<i class='fa-solid fa-trash-can'></i> Kovanı Sil"; } // İKONLU GÜNCELLEME
+                 if(silBtn) silBtn.innerHTML = "<i class='fa-solid fa-trash-can'></i> Kovanı Sil"; } 
          }
      }
 
-    // GÖRSEL GÜNCELLENDİ: 'renderKayitBolumu' fonksiyonu resimleri ve ikonlu butonları kullanacak şekilde güncellendi
     function renderKayitBolumu(tip, baslik, collName, tarihAdi, submitFn, listeleFn) {
         console.log(`renderKayitBolumu: ${tip}`);
         const kayitAlani = document.createElement('div'); kayitAlani.className = 'kayitlar-bolumu'; kayitAlani.id = `bolum-${tip}`;
         
         let formHtml = '';
-        let baslikGorsel = ''; // İkon yerine resim değişkeni
+        let baslikGorsel = ''; 
 
         if (tip === 'bakim') { 
             baslikGorsel = `<img src="3.png" alt="Bakım" class="section-image">`;
@@ -388,9 +350,6 @@
         console.log(`renderKayitBolumu TAMAMLANDI: ${tip}`);
     }
 
-    // ======================================================
-    // --- KAYIT EKLEME FONKSİYONLARI ---
-    // ======================================================
     function gf(id, type = 'value') { const el=document.getElementById(id); if(!el) return null; return type==='number'?Number(el.value):(type==='checked'?el.checked:el.value); }
     async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={bakimTarihi:gf('bakimTarihi'), yapilanIslem:gf('yapilanIslem'), notlar:gf('bakimNotlari')}; await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); }
     async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hastalikAdi:gf('hastalikAdi'), tedaviTarihi:gf('tedaviTarihi'), kullanilanIlac:gf('kullanilanIlac'), notlar:gf('hastalikNotlari')}; await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); }
@@ -406,9 +365,6 @@
          finally { if(btn) btn.disabled = false; }
      }
 
-    // ======================================================
-    // --- KAYIT LİSTELEME FONKSİYONLARI ---
-    // ======================================================
     async function bakimKayitlariniListele(kId) { await listeleKayitlar(kId, 'bakim', 'bakimKayitlari', 'bakimTarihi', renderBakimKaydi); }
     async function hastalikKayitlariniListele(kId) { await listeleKayitlar(kId, 'hastalik', 'hastalikKayitlari', 'tedaviTarihi', renderHastalikKaydi); }
     async function hasatKayitlariniListele(kId) { await listeleKayitlar(kId, 'hasat', 'hasatKayitlari', 'hasatTarihi', renderHasatKaydi); }
@@ -425,7 +381,6 @@
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
-    // GÖRSEL GÜNCELLENDİ: Kayıt listeleme butonları ikonlu hale getirildi
     function renderBakimKaydi(listEl, id, kayit) {
         const t = kayit.bakimTarihi ? new Date(kayit.bakimTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'bakim-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
@@ -454,9 +409,6 @@
         listEl.appendChild(k);
     }
 
-    // ======================================================
-    // --- KAYIT DÜZENLEME FONKSİYONLARI ---
-    // ======================================================
     function toggleKayitEditMode(kayitId, tip, duzenlemeyeGec) {
         console.log(`toggleKayitEditMode: ${kayitId}, ${tip}, ${duzenlemeyeGec}`);
         const kayitElementi = document.getElementById(`kayit-${kayitId}`);
@@ -489,7 +441,6 @@
         finally { if(kaydetButonu) kaydetButonu.disabled = false; }
     }
 
-    // --- KAYIT SİLME (GENEL) ---
     async function handleKayitSil(altCollName, kayitId) {
          console.log(`handleKayitSil: ${altCollName}, ${kayitId}`);
         if (!mevcutKullanici || !kovanId) return; 
