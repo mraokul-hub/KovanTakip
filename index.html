@@ -4,14 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Kovan Ekle - Kovan Takip</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* Önceki stilleriniz aynı kalabilir */
+        /* MOBİL UYUM İÇİN EKLENDİ */
+        * { box-sizing: border-box; }
+
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
         h1 { color: #333; }
         form { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 700px; margin: auto; }
         .form-bolumu { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-        .form-bolumu h2 { color: #007bff; margin-top: 0; }
+        
+        /* GÖRSEL GÜNCELLENDİ: h2 başlıkları için flex eklendi */
+        .form-bolumu h2 { 
+            color: #333; /* Renk ana temaya uysun */
+            margin-top: 0; 
+            display: flex;
+            align-items: center;
+            font-size: 1.5em;
+        }
+        
+        /* GÖRSEL GÜNCELLENDİ: Bölüm resimleri için stil */
+        .section-image {
+            width: 40px;
+            height: auto;
+            max-height: 40px;
+            margin-right: 12px;
+            border-radius: 4px;
+        }
+
+        /* İKONLAR İÇİN HİZALAMA EKLENDİ */
+        h1 i, .nav-link i, button[type="submit"] i, .logout-btn i { margin-right: 8px; }
+
         .form-grup { margin-bottom: 10px; }
         .form-grup label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         .form-grup input[type="text"],
@@ -32,11 +56,55 @@
              padding: 10px; text-decoration: none; border-radius: 5px; max-width: 700px; margin: 20px auto;
         }
         .nav-link:hover { background-color: #0056b3; }
-        /* YENİ EKLENEN BUTON STİLLERİ */
-        .header { display: flex; justify-content: space-between; align-items: center; max-width: 740px; margin: 0 auto 10px auto; padding: 0 20px;}
+        
+        /* BAŞLIK (HEADER) STİLLERİ GÜNCELLENDİ */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 740px; 
+            margin: 0 auto 10px auto; 
+            padding: 0 20px;
+            flex-wrap: wrap; /* Mobil için wrap eklendi */
+        }
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px; /* Mobil için eklendi */
+        }
+        /* Orijinal 'div' -> 'div.user-info' olarak güncellendi */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         .logout-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .logout-btn:hover { background-color: #c82333; }
         .user-email { font-weight: bold; color: #555; }
+
+        /* MOBİL UYUMLULUK (HEADER İÇİN) */
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0;
+            }
+            .header h1 {
+                text-align: center;
+                font-size: 1.5em;
+            }
+            .user-info {
+                justify-content: space-between;
+                width: 100%;
+                margin-top: 10px;
+            }
+            .logout-btn {
+                flex-grow: 1; /* Butonun büyümesini sağlar */
+                text-align: center;
+            }
+            .user-email {
+                font-size: 0.9em;
+            }
+        }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -46,18 +114,18 @@
 <body>
 
     <div class="header">
-        <h1>Yeni Kovan Kayıt Formu</h1>
-        <div>
+        <h1><i class="fa-solid fa-plus"></i> Yeni Kovan Kayıt Formu</h1>
+        <div class="user-info">
             <span id="userEmail" class="user-email"></span>
-            <button id="logoutBtn" class="logout-btn">Çıkış Yap</button>
+            <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
         </div>
     </div>
 
-    <a href="kovanlarim.html" class="nav-link">Mevcut Kovanları Görüntüle</a>
+    <a href="kovanlarim.html" class="nav-link"><i class="fa-solid fa-list-ul"></i> Mevcut Kovanları Görüntüle</a>
 
     <form id="kovanTakipFormu">
         <div class="form-bolumu">
-            <h2>Kovan Temel Bilgileri</h2>
+            <h2><img src="5.png" alt="Kovan" class="section-image"> Kovan Temel Bilgileri</h2>
             <div class="form-grup">
                 <label for="kovanNo">Kovan Numarası (Benzersiz olmalı, Örn: Kovan-01)</label>
                 <input type="text" id="kovanNo" name="kovanNo" required>
@@ -119,7 +187,7 @@
         </div>
 
         <div class="form-bolumu">
-            <h2>Ana Arı Bilgileri</h2>
+            <h2><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı Bilgileri</h2>
             <div class="form-grup">
                 <label for="anaDogumTarihi">Ana Arı Doğum Tarihi</label>
                 <input type="date" id="anaDogumTarihi" name="anaDogumTarihi">
@@ -170,7 +238,7 @@
             </div>
         </div>
 
-        <button type="submit">Kovan Bilgilerini Kaydet</button>
+        <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Kovan Bilgilerini Kaydet</button>
     </form>
 
 <script>
@@ -187,45 +255,37 @@
     // 2. ADIM: Firebase'i Başlatma
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth(); // Auth servisini al
+    const auth = firebase.auth(); 
     console.log("Firebase bağlanıldı.");
 
     const form = document.getElementById('kovanTakipFormu');
     const logoutBtn = document.getElementById('logoutBtn');
     const userEmailElement = document.getElementById('userEmail');
-    let mevcutKullanici = null; // Giriş yapmış kullanıcıyı tutmak için
+    let mevcutKullanici = null; 
 
-    // Oturum durumunu dinle
     auth.onAuthStateChanged((user) => {
       if (user) {
-        // Kullanıcı giriş yapmış
         mevcutKullanici = user;
         console.log("Giriş yapan kullanıcı:", mevcutKullanici.uid);
-        userEmailElement.textContent = `Hoşgeldin, ${mevcutKullanici.email}`; // E-postayı göster
-        // Formu normal şekilde kullanmaya izin ver
+        userEmailElement.textContent = `Hoşgeldin, ${mevcutKullanici.email}`; 
       } else {
-        // Kullanıcı giriş yapmamış, login sayfasına yönlendir
         console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
         window.location.href = 'login.html';
       }
     });
 
-    // Çıkış Yap Butonu
     logoutBtn.addEventListener('click', () => {
         auth.signOut().then(() => {
             console.log("Çıkış yapıldı.");
-            // onAuthStateChanged zaten login.html'e yönlendirecek
         }).catch((error) => {
             console.error("Çıkış hatası:", error);
             alert("Çıkış yapılırken bir hata oluştu.");
         });
     });
 
-    // Form Gönderme İşlemi
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        // Giriş yapmış kullanıcı yoksa formu gönderme (ekstra güvenlik)
         if (!mevcutKullanici) {
             alert("Lütfen önce giriş yapın.");
             return;
@@ -233,9 +293,8 @@
 
         console.log("Form gönderildi. Veriler toplanıyor...");
 
-        // Formdaki Tüm Verileri Toplama
         const kovanVerisi = {
-            userId: mevcutKullanici.uid, // GÜVENLİK İÇİN KULLANICI ID'SİNİ EKLE
+            userId: mevcutKullanici.uid, 
             kovanNo: form.kovanNo.value,
             barkodNo: form.barkodNo.value,
             kovanTipi: form.kovanTipi.value,
@@ -257,11 +316,6 @@
             sonGuncelleme: new Date()
         };
 
-        // Veriyi Veritabanına Gönderme
-        // Dikkat: Kovan Numarasını (kovanNo) ID olarak kullanıyoruz.
-        // Farklı kullanıcılar aynı kovanNo'yu kullanırsa birbirlerinin verisini ezebilirler.
-        // Daha güvenli bir yöntem, Firebase'in otomatik ID üretmesini sağlamaktır.
-        // Şimdilik mevcut yapıyı koruyoruz.
         db.collection("kovanlar").doc(kovanVerisi.kovanNo).set(kovanVerisi)
             .then(() => {
                 console.log("Kovan başarıyla kaydedildi!");
@@ -270,7 +324,6 @@
             })
             .catch((error) => {
                 console.error("Veritabanına yazarken hata oluştu: ", error);
-                 // Firestore Kuralları hatası genellikle burada yakalanır
                  if (error.code === 'permission-denied') {
                      alert("Hata: Bu işlemi yapmak için izniniz yok. Firestore kurallarınızı kontrol edin.");
                  } else {
