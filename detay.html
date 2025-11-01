@@ -69,6 +69,13 @@
         .form-grup input, .form-grup select, .form-grup textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em; }
         .checkbox-grup { display: flex; align-items: center; } .checkbox-grup input { width: auto; margin-right: 8px; }
 
+        /* FOTOĞRAF EKLEME ALANI İÇİN CSS EKLENDİ */
+        .form-grup input[type="file"] {
+            padding: 5px;
+            background-color: #f9f9f9;
+            font-size: 0.9em;
+        }
+
         .kayitlar-bolumu { grid-column: span 2; margin-top: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; }
         
         #bolum-bakim h2 { color: #007bff; }
@@ -78,7 +85,8 @@
         .kayit-ekleme-formu { background-color: #fdfdfd; border: 1px dashed #ccc; border-radius: 5px; padding: 15px; margin-top: 15px; margin-bottom: 20px; }
         .kayit-ekleme-formu h3 { margin-top: 0; color: #333; font-size: 1.1em; }
         .kayit-ekleme-formu button { background-color: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
-        .kayit-ekleme-formu button:hover { background-color: #218838; } .kayit-ekleme-formu button:disabled { background-color: #aaa; }
+        .kayit-ekleme-formu button:hover { background-color: #218838; } 
+        .kayit-ekleme-formu button:disabled { background-color: #aaa; cursor: not-allowed; } /* 'disabled' stili eklendi */
 
         .kayit-listesi-item { position: relative; border: 1px solid #eee; background: #fafafa; padding: 12px 15px; margin-top: 10px; border-radius: 4px; padding-right: 125px; }
         .kayit-listesi-item p { margin: 4px 0; font-size: 0.95em; line-height: 1.4; }
@@ -86,6 +94,22 @@
         .kayit-listesi-item span { font-size: 0.85em; color: #666; display: block; margin-bottom: 5px; }
         .kayit-listesi-item .buton-alan { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
         
+        /* EKLENEN FOTOĞRAFLAR İÇİN CSS EKLENDİ */
+        .kayit-fotograf {
+            margin-top: 10px;
+        }
+        .kayit-fotograf img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .kayit-fotograf img:hover {
+            transform: scale(1.1);
+        }
+
         .kayit-duzenle-btn, .kayit-sil-btn, .kayit-kaydet-btn, .kayit-iptal-btn { 
             padding: 3px 8px; font-size: 0.8em; 
             width: 30px; height: 24px; font-size: 0.9em; 
@@ -133,6 +157,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -168,7 +193,11 @@
         };
         try { firebase.initializeApp(firebaseConfig); console.log("Firebase başlatıldı."); }
         catch (e) { console.error("Firebase başlatılamadı:", e); document.body.innerHTML = '<h1>HATA</h1>'; throw e; }
-        const db = firebase.firestore(); const auth = firebase.auth();
+        
+        // --- YENİ SERVİS EKLENDİ ---
+        const db = firebase.firestore(); 
+        const auth = firebase.auth();
+        const storage = firebase.storage(); // Firebase Storage servisi
 
         const kovanBaslik = document.getElementById('kovan-baslik');
         const detayContainer = document.getElementById('kovan-detay-container');
@@ -257,12 +286,12 @@
             detayContainer.appendChild(anaAriCard);
         }
 
+        // ÖNCEKİ İSTEĞİNİZE GÖRE DÜZELTİLMİŞTİ
         function renderAnaEditMode(kovan) {
             console.log("renderAnaEditMode");
             const setSelected=(v1,v2)=>v1===v2?'selected':''; const setChecked=(v)=>v?'checked':'';
             const editFormContainer = document.createElement('div');
             editFormContainer.className = 'edit-form-container';
-            // HIRÇINLIK BÖLÜMÜ GÜNCELLENDİ
             editFormContainer.innerHTML = `<h2><i class="fa-solid fa-pencil-alt"></i> Kovan Bilgilerini Düzenle</h2> <form id="kovanDuzenleFormu"><div class="grid-container"><div> <h3><img src="5.png" alt="Kovan" class="section-image"> Kovan</h3> <div class="form-grup"><label>Kovan No</label><input type="text" value="${kovan.kovanNo}" disabled></div> <div class="form-grup"><label>Barkod</label><input type="text" id="editBarkodNo" value="${kovan.barkodNo||''}"></div> <div class="form-grup"><label>Tip</label><select id="editKovanTipi"><option value="Langstroth" ${setSelected(kovan.kovanTipi,'Langstroth')}>L</option><option value="Dadant" ${setSelected(kovan.kovanTipi,'Dadant')}>D</option><option value="Karakovan" ${setSelected(kovan.kovanTipi,'Karakovan')}>K</option><option value="Diğer" ${setSelected(kovan.kovanTipi,'Diğer')}>Diğer</option></select></div> <div class="form-grup"><label>Irk</label><select id="editAriIrki"><option value="Kafkas" ${setSelected(kovan.ariIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.ariIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.ariIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.ariIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.ariIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.ariIrki,'Melez')}>Melez</option></select></div> <div class="form-grup"><label>Çer. Sayısı</label><input type="number" id="editCerceveSayisi" value="${kovan.cerceveSayisi||0}" min="1"></div> <div class="form-grup"><label>Köken</label><select id="editKovanKokeni"><option value="Kendi Üretimim" ${setSelected(kovan.kovanKokeni,'Kendi Üretimim')}>Kendi</option><option value="Satın Alma" ${setSelected(kovan.kovanKokeni,'Satın Alma')}>Satın</option><option value="Oğul" ${setSelected(kovan.kovanKokeni,'Oğul')}>Oğul</option></select></div> 
             
             <div class="form-grup"><label>Hırçınlık</label><select id="editHircinlik">
@@ -318,6 +347,7 @@
          }
      }
 
+    // GÖRSEL GÜNCELLENDİ: 'renderKayitBolumu' fonksiyonu resimleri ve ikonlu butonları kullanacak şekilde güncellendi
     function renderKayitBolumu(tip, baslik, collName, tarihAdi, submitFn, listeleFn) {
         console.log(`renderKayitBolumu: ${tip}`);
         const kayitAlani = document.createElement('div'); kayitAlani.className = 'kayitlar-bolumu'; kayitAlani.id = `bolum-${tip}`;
@@ -327,15 +357,30 @@
 
         if (tip === 'bakim') { 
             baslikGorsel = `<img src="3.png" alt="Bakım" class="section-image">`;
-            formHtml = `<h3>Yeni Bakım Kaydı</h3> <div class="form-grup"><label for="bakimTarihi">Tarih</label><input type="date" id="bakimTarihi" required></div> <div class="form-grup"><label for="yapilanIslem">Yapılan İşlem</label><input type="text" id="yapilanIslem" required></div> <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Bakım Kaydı</h3> 
+                        <div class="form-grup"><label for="bakimTarihi">Tarih</label><input type="date" id="bakimTarihi" required></div> 
+                        <div class="form-grup"><label for="yapilanIslem">Yapılan İşlem</label><input type="text" id="yapilanIslem" required></div> 
+                        <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> 
+                        <div class="form-grup"><label for="bakimFotograf">Fotoğraf Ekle (Opsiyonel)</label><input type="file" id="bakimFotograf" accept="image/*" capture></div>
+                        <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hastalik') { 
             baslikGorsel = `<img src="4.png" alt="Hastalık" class="section-image">`;
-            formHtml = `<h3>Yeni Hastalık Kaydı</h3> <div class="form-grup"><label for="hastalikAdi">Hastalık/Zararlı</label><input type="text" id="hastalikAdi" list="hastalik-listesi-datalist" required></div> <div class="form-grup"><label for="tedaviTarihi">Tarih</label><input type="date" id="tedaviTarihi" required></div> <div class="form-grup"><label for="kullanilanIlac">İlaç/Yöntem</label><input type="text" id="kullanilanIlac" list="ilac-yontem-listesi-datalist" required></div> <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Hastalık Kaydı</h3> 
+                        <div class="form-grup"><label for="hastalikAdi">Hastalık/Zararlı</label><input type="text" id="hastalikAdi" list="hastalik-listesi-datalist" required></div> 
+                        <div class="form-grup"><label for="tedaviTarihi">Tarih</label><input type="date" id="tedaviTarihi" required></div> 
+                        <div class="form-grup"><label for="kullanilanIlac">İlaç/Yöntem</label><input type="text" id="kullanilanIlac" list="ilac-yontem-listesi-datalist" required></div> 
+                        <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> 
+                        <div class="form-grup"><label for="hastalikFotograf">Fotoğraf Ekle (Opsiyonel)</label><input type="file" id="hastalikFotograf" accept="image/*" capture></div>
+                        <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hasat') { 
             baslikGorsel = `<img src="2.png" alt="Hasat" class="section-image">`;
-            formHtml = `<h3>Yeni Hasat Kaydı</h3> <div class="form-grup"><label for="hasatTarihi">Tarih</label><input type="date" id="hasatTarihi" required></div> <div class="form-grup"><label for="hasatMiktari">Miktar (kg)</label><input type="number" id="hasatMiktari" min="0" step="0.1" required></div> <div class="form-grup"><label for="hasatNotlari">Notlar</label><textarea id="hasatNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Hasat Kaydı</h3> 
+                        <div class="form-grup"><label for="hasatTarihi">Tarih</label><input type="date" id="hasatTarihi" required></div> 
+                        <div class="form-grup"><label for="hasatMiktari">Miktar (kg)</label><input type="number" id="hasatMiktari" min="0" step="0.1" required></div> 
+                        <div class="form-grup"><label for="hasatNotlari">Notlar</label><textarea id="hasatNotlari" rows="2"></textarea></div> 
+                        <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else { return; }
         
@@ -350,21 +395,118 @@
         console.log(`renderKayitBolumu TAMAMLANDI: ${tip}`);
     }
 
+    // ======================================================
+    // --- KAYIT EKLEME FONKSİYONLARI (GÜNCELLENDİ) ---
+    // ======================================================
     function gf(id, type = 'value') { const el=document.getElementById(id); if(!el) return null; return type==='number'?Number(el.value):(type==='checked'?el.checked:el.value); }
-    async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={bakimTarihi:gf('bakimTarihi'), yapilanIslem:gf('yapilanIslem'), notlar:gf('bakimNotlari')}; await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); }
-    async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hastalikAdi:gf('hastalikAdi'), tedaviTarihi:gf('tedaviTarihi'), kullanilanIlac:gf('kullanilanIlac'), notlar:gf('hastalikNotlari')}; await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); }
-    async function handleHasatSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele); }
+
+    // --- 'handleBakimSubmit' GÜNCELLENDİ (Yeni 'uploadAndSave' fonksiyonunu kullanır) ---
+    async function handleBakimSubmit(e) { 
+        e.preventDefault(); if(!mevcutKullanici) return;
+        const data = {
+            bakimTarihi: gf('bakimTarihi'), 
+            yapilanIslem: gf('yapilanIslem'), 
+            notlar: gf('bakimNotlari')
+        };
+        const fileInput = document.getElementById('bakimFotograf');
+        const file = fileInput.files[0];
+        const form = document.getElementById('formBakimEkle');
+        
+        await uploadAndSave(file, 'bakimKayitlari', data, form, bakimKayitlariniListele);
+    }
+    
+    // --- 'handleHastalikSubmit' GÜNCELLENDİ (Yeni 'uploadAndSave' fonksiyonunu kullanır) ---
+    async function handleHastalikSubmit(e) { 
+        e.preventDefault(); if(!mevcutKullanici) return;
+        const data = {
+            hastalikAdi: gf('hastalikAdi'), 
+            tedaviTarihi: gf('tedaviTarihi'), 
+            kullanilanIlac: gf('kullanilanIlac'), 
+            notlar: gf('hastalikNotlari')
+        };
+        const fileInput = document.getElementById('hastalikFotograf');
+        const file = fileInput.files[0];
+        const form = document.getElementById('formHastalikEkle');
+        
+        await uploadAndSave(file, 'hastalikKayitlari', data, form, hastalikKayitlariniListele);
+    }
+
+    // --- 'handleHasatSubmit' GÜNCELLENDİ (Eski 'addKayit' fonksiyonunu kullanır) ---
+    async function handleHasatSubmit(e) { 
+        e.preventDefault(); if(!mevcutKullanici) return; 
+        const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; 
+        if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } 
+        await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele); // Sadece metin kaydı
+    }
+
+    // --- YENİ FONKSİYON (Fotoğraf Yükleme ve Kaydetme) ---
+    async function uploadAndSave(file, collName, data, form, listeleFn) {
+        console.log(`uploadAndSave: ${collName}`, data);
+        data.eklenmeTarihi = new Date();
+        const btn = form ? form.querySelector('button[type="submit"]') : null;
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yükleniyor...';
+        }
+
+        try {
+            if (file) {
+                // 1. Storage'a yükle
+                const timestamp = new Date().getTime();
+                const storagePath = `kovanlar/${kovanId}/${collName}/${timestamp}-${file.name}`;
+                const storageRef = storage.ref(storagePath);
+                
+                const uploadTask = await storageRef.put(file);
+                const downloadURL = await uploadTask.ref.getDownloadURL();
+                
+                data.fotoUrl = downloadURL;
+                data.fotoStoragePath = storagePath; // Silme işlemi için bu yolu sakla
+                console.log("Fotoğraf yüklendi:", downloadURL);
+            } else {
+                console.log("Fotoğraf seçilmedi, sadece metin kaydediliyor.");
+            }
+            
+            // 2. Firestore'a kaydet
+            const docRef = await db.collection("kovanlar").doc(kovanId).collection(collName).add(data);
+            console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`);
+            alert("Eklendi!");
+            if(form) form.reset();
+            listeleFn(kovanId);
+
+        } catch (error) {
+            console.error(`Ekleme/Yükleme hatası (${collName}):`, error);
+            alert(`Hata: ${error.message}`);
+        } finally {
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i> Ekle';
+            }
+        }
+    }
+
+    // --- 'addKayit' GÜNCELLENDİ (Sadece metin kaydı için, örn: Hasat) ---
     async function addKayit(collName, data, formId, listeleFn) {
-         console.log(`addKayit: ${collName}`, data); data.eklenmeTarihi = new Date();
-         const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
+         console.log(`addKayit (metin): ${collName}`, data);
+         data.eklenmeTarihi = new Date();
+         const form = document.getElementById(formId); 
+         const btn = form ? form.querySelector('button[type="submit"]') : null;
          if(btn) btn.disabled = true;
          try {
              const docRef = await db.collection("kovanlar").doc(kovanId).collection(collName).add(data);
-             console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); alert("Eklendi!"); if(form) form.reset(); listeleFn(kovanId);
-         } catch (error) { console.error(`Ekleme hatası (${collName}):`, error); alert(`Hata: ${error.message}`); }
+             console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); 
+             alert("Eklendi!"); 
+             if(form) form.reset(); 
+             listeleFn(kovanId);
+         } catch (error) { 
+             console.error(`Ekleme hatası (${collName}):`, error); 
+             alert(`Hata: ${error.message}`); 
+         }
          finally { if(btn) btn.disabled = false; }
      }
 
+    // ======================================================
+    // --- KAYIT LİSTELEME FONKSİYONLARI (GÜNCELLENDİ) ---
+    // ======================================================
     async function bakimKayitlariniListele(kId) { await listeleKayitlar(kId, 'bakim', 'bakimKayitlari', 'bakimTarihi', renderBakimKaydi); }
     async function hastalikKayitlariniListele(kId) { await listeleKayitlar(kId, 'hastalik', 'hastalikKayitlari', 'tedaviTarihi', renderHastalikKaydi); }
     async function hasatKayitlariniListele(kId) { await listeleKayitlar(kId, 'hasat', 'hasatKayitlari', 'hasatTarihi', renderHasatKaydi); }
@@ -381,24 +523,67 @@
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
+    // --- 'renderBakimKaydi' GÜNCELLENDİ (Fotoğraf gösterme eklendi) ---
     function renderBakimKaydi(listEl, id, kayit) {
         const t = kayit.bakimTarihi ? new Date(kayit.bakimTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'bakim-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
+        
+        // Fotoğraf varsa HTML'e ekle
+        const fotoHtml = kayit.fotoUrl ? `<div class="kayit-fotograf"><a href="${kayit.fotoUrl}" target="_blank" title="Fotoğrafı büyük gör"><img src="${kayit.fotoUrl}" alt="Bakım Fotoğrafı"></a></div>` : '';
+
         k.innerHTML = `
-            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.yapilanIslem||'?'}</strong> ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}</div>
-            <div class="kayit-duzenleme-formu"> <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.bakimTarihi||''}"></div><div class="form-grup"><label>İşlem</label><input type="text" value="${kayit.yapilanIslem||''}"></div><div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div></div>
-            <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','bakim',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('bakimKayitlari','${id}','bakim')" title="Kaydet"><i class="fa-solid fa-check"></i></button> <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','bakim',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('bakimKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
+            <div class="kayit-icerik">
+                <span>Tarih: ${t}</span>
+                <strong>${kayit.yapilanIslem||'?'}</strong> 
+                ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}
+                ${fotoHtml}
+            </div>
+            <div class="kayit-duzenleme-formu"> 
+                <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.bakimTarihi||''}"></div>
+                <div class="form-grup"><label>İşlem</label><input type="text" value="${kayit.yapilanIslem||''}"></div>
+                <div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div>
+                </div>
+            <div class="buton-alan"> 
+                <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','bakim',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> 
+                <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('bakimKayitlari','${id}','bakim')" title="Kaydet"><i class="fa-solid fa-check"></i></button> 
+                <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','bakim',false)" title="İptal"><i class="fa-solid fa-times"></i></button> 
+                <button class="buton kayit-sil-btn" onclick="handleKayitSil('bakimKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> 
+            </div>`;
         listEl.appendChild(k);
     }
+
+    // --- 'renderHastalikKaydi' GÜNCELLENDİ (Fotoğraf gösterme eklendi) ---
     function renderHastalikKaydi(listEl, id, kayit) {
         const t = kayit.tedaviTarihi ? new Date(kayit.tedaviTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'hastalik-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
+        
+        // Fotoğraf varsa HTML'e ekle
+        const fotoHtml = kayit.fotoUrl ? `<div class="kayit-fotograf"><a href="${kayit.fotoUrl}" target="_blank" title="Fotoğrafı büyük gör"><img src="${kayit.fotoUrl}" alt="Hastalık Fotoğrafı"></a></div>` : '';
+
         k.innerHTML = `
-            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.hastalikAdi||'?'}</strong><p>Yöntem: ${kayit.kullanilanIlac||'?'}</p>${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}</div>
-            <div class="kayit-duzenleme-formu"> <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.tedaviTarihi||''}"></div><div class="form-grup"><label>Hastalık</label><input type="text" list="hastalik-listesi-datalist" value="${kayit.hastalikAdi||''}"></div><div class="form-grup"><label>İlaç/Yöntem</label><input type="text" list="ilac-yontem-listesi-datalist" value="${kayit.kullanilanIlac||''}"></div><div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div></div>
-            <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','hastalik',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('hastalikKayitlari','${id}','hastalik')" title="Kaydet"><i class="fa-solid fa-check"></i></button> <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','hastalik',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('hastalikKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
+            <div class="kayit-icerik">
+                <span>Tarih: ${t}</span>
+                <strong>${kayit.hastalikAdi||'?'}</strong>
+                <p>Yöntem: ${kayit.kullanilanIlac||'?'}</p>
+                ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}
+                ${fotoHtml}
+            </div>
+            <div class="kayit-duzenleme-formu"> 
+                <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.tedaviTarihi||''}"></div>
+                <div class="form-grup"><label>Hastalık</label><input type="text" list="hastalik-listesi-datalist" value="${kayit.hastalikAdi||''}"></div>
+                <div class="form-grup"><label>İlaç/Yöntem</label><input type="text" list="ilac-yontem-listesi-datalist" value="${kayit.kullanilanIlac||''}"></div>
+                <div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div>
+                </div>
+            <div class="buton-alan"> 
+                <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','hastalik',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> 
+                <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('hastalikKayitlari','${id}','hastalik')" title="Kaydet"><i class="fa-solid fa-check"></i></button> 
+                <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','hastalik',false)" title="İptal"><i class="fa-solid fa-times"></i></button> 
+                <button class="buton kayit-sil-btn" onclick="handleKayitSil('hastalikKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> 
+            </div>`;
         listEl.appendChild(k);
     }
+    
+    // --- 'renderHasatKaydi' (Değişiklik yok) ---
     function renderHasatKaydi(listEl, id, kayit) {
         const t = kayit.hasatTarihi ? new Date(kayit.hasatTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'hasat-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
@@ -409,6 +594,9 @@
         listEl.appendChild(k);
     }
 
+    // ======================================================
+    // --- KAYIT DÜZENLEME/SİLME FONKSİYONLARI (GÜNCELLENDİ) ---
+    // ======================================================
     function toggleKayitEditMode(kayitId, tip, duzenlemeyeGec) {
         console.log(`toggleKayitEditMode: ${kayitId}, ${tip}, ${duzenlemeyeGec}`);
         const kayitElementi = document.getElementById(`kayit-${kayitId}`);
@@ -417,6 +605,7 @@
         else { kayitElementi.classList.remove('duzenleniyor'); }
     }
 
+    // --- 'handleKayitGuncelle' (Sadece metin günceller, fotoğrafı değiştirmez) ---
     async function handleKayitGuncelle(collName, kayitId, tip) {
         console.log(`handleKayitGuncelle: ${collName}, ${kayitId}, ${tip}`);
         if (!mevcutKullanici || !kovanId) return; 
@@ -430,8 +619,18 @@
             else if (tip === 'hasat') { guncelVeri = { hasatTarihi: formEl.querySelector('input[type="date"]').value, hasatMiktari: Number(formEl.querySelector('input[type="number"]').value), notlar: formEl.querySelector('textarea').value }; if (isNaN(guncelVeri.hasatMiktari) || guncelVeri.hasatMiktari <= 0) { alert("Miktar > 0"); if(kaydetButonu) kaydetButonu.disabled=false; return; } }
             else { return; }
             guncelVeri.sonGuncelleme = new Date();
-            console.log("Güncellenecek Kayıt:", guncelVeri);
-            await db.collection("kovanlar").doc(kovanId).collection(collName).doc(kayitId).update(guncelVeri);
+            
+            // Fotoğraf URL'sini ve yolunu koru (Eğer varsa)
+            const docRef = db.collection("kovanlar").doc(kovanId).collection(collName).doc(kayitId);
+            const doc = await docRef.get();
+            if (doc.exists && doc.data().fotoUrl) {
+                guncelVeri.fotoUrl = doc.data().fotoUrl;
+                guncelVeri.fotoStoragePath = doc.data().fotoStoragePath;
+            }
+
+            console.log("Güncellenecek Kayıt (Metin):", guncelVeri);
+            await docRef.update(guncelVeri);
+
             alert("Kayıt güncellendi!");
             toggleKayitEditMode(kayitId, tip, false);
              if (tip === 'bakim') bakimKayitlariniListele(kovanId); 
@@ -441,19 +640,48 @@
         finally { if(kaydetButonu) kaydetButonu.disabled = false; }
     }
 
+    // --- 'handleKayitSil' GÜNCELLENDİ (Storage'dan da siler) ---
     async function handleKayitSil(altCollName, kayitId) {
          console.log(`handleKayitSil: ${altCollName}, ${kayitId}`);
         if (!mevcutKullanici || !kovanId) return; 
-        if (confirm(`Bu kaydı silmek istediğinizden emin misiniz?`)) {
+        if (confirm(`Bu kaydı silmek istediğinizden emin misiniz? (Varsa fotoğrafı da silinecektir)`)) {
              const kayitEl = document.getElementById(`kayit-${kayitId}`);
              const silButonu = kayitEl ? kayitEl.querySelector('.kayit-sil-btn') : null;
+             if(silButonu) silButonu.disabled = true;
+
+             const docRef = db.collection("kovanlar").doc(kovanId).collection(altCollName).doc(kayitId);
+
              try {
-                 if(silButonu) silButonu.disabled = true;
-                 await db.collection("kovanlar").doc(kovanId).collection(altCollName).doc(kayitId).delete();
-                 console.log("Kayıt silindi."); alert("Kayıt silindi.");
+                 // 1. Silmeden önce belgeyi al
+                 const doc = await docRef.get();
+                 if (doc.exists && doc.data().fotoStoragePath) {
+                     // 2. Fotoğraf varsa, Storage'dan sil
+                     const storagePath = doc.data().fotoStoragePath;
+                     console.log(`Fotoğraf siliniyor: ${storagePath}`);
+                     await storage.ref(storagePath).delete();
+                     console.log("Fotoğraf Storage'dan silindi.");
+                 }
+                 
+                 // 3. Firestore belgesini sil
+                 await docRef.delete();
+                 
+                 console.log("Kayıt silindi."); 
+                 alert("Kayıt silindi.");
                  if(kayitEl) kayitEl.remove(); 
-             } catch (error) { console.error(`${altCollName} silme hatası:`, error); alert(`Hata: ${error.message}`); if(silButonu) silButonu.disabled = false; }
-        } else { console.log("Silme iptal edildi."); }
+             } catch (error) { 
+                 console.error(`${altCollName} silme hatası:`, error); 
+                 // Eğer belge silinir ama fotoğraf silinemezse (örn: yetki)
+                 if (error.code === 'storage/object-not-found') {
+                     console.warn("Storage'da silinecek fotoğraf bulunamadı, ancak kayıt silindi.");
+                     if(kayitEl) kayitEl.remove();
+                 } else {
+                     alert(`Hata: ${error.message}`); 
+                 }
+                 if(silButonu) silButonu.disabled = false; 
+             }
+        } else { 
+            console.log("Silme iptal edildi."); 
+        }
     }
 
 </script>
