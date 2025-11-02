@@ -159,11 +159,13 @@
         });
     });
 
-    async function kovanlariYukle(userId) {
+    // *** GÜNCELLENDİ: Fonksiyon parametresi 'kullaniciId' olarak değiştirildi ***
+    async function kovanlariYukle(kullaniciId) {
         listContainer.innerHTML = "<p>Kovanlar yükleniyor...</p>"; 
         try {
+            // *** GÜNCELLENDİ: Güvenlik kuralıyla eşleşmesi için 'kullaniciId' sorgusu yapıldı ***
             const querySnapshot = await db.collection("kovanlar")
-                                          .where("userId", "==", userId) 
+                                          .where("kullaniciId", "==", kullaniciId) // 'userId' -> 'kullaniciId'
                                           .get();
 
             if (querySnapshot.empty) {
@@ -174,11 +176,13 @@
             listContainer.innerHTML = ''; 
             querySnapshot.forEach((doc) => {
                 const kovan = doc.data();
-                const kovanId = doc.id; 
+                const kovanId = doc.id; // Bu, 'Kovan-01' gibi kovanNo'yu tutar
 
                 const kart = document.createElement('div');
                 kart.className = 'kovan-karti';
-                kart.addEventListener('click', () => detayGor(kovanId));
+                
+                // Not: kovanId (doc.id) = kovan.kovanNo olmalı (index.html'deki kayda göre)
+                kart.addEventListener('click', () => detayGor(kovanId)); 
 
                 // GÖRSEL GÜNCELLENDİ: 5.png
                  kart.innerHTML = `
@@ -209,8 +213,10 @@
         }
     }
 
-    function detayGor(kovanId) {
-        window.location.href = `detay.html?id=${encodeURIComponent(kovanId)}`;
+    // *** GÜNCELLENDİ: detay.html'nin beklediği 'kovanNo' parametresine yönlendirme yapıldı ***
+    function detayGor(kovanNo) {
+        // 'id=' yerine 'kovanNo=' kullanıldı
+        window.location.href = `detay.html?kovanNo=${encodeURIComponent(kovanNo)}`;
     }
 </script>
 </body>
