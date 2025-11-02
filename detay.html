@@ -113,11 +113,19 @@
         .hastalik-listesi-item { border-left: 5px solid #dc3545; } .hastalik-listesi-item strong { color: #dc3545; }
         .hasat-listesi-item { border-left: 5px solid #28a745; } .hasat-listesi-item strong { color: #28a745; }
 
-        /* --- YENİ EKLENEN FOTOĞRAF STİLLERİ --- */
+        /* --- YENİ FOTOĞRAF STİLLERİ EKLENDİ --- */
         .hidden { display: none; }
         .photo-area { margin-top: 10px; border: 1px dashed #ccc; padding: 10px; text-align: center; }
         .photo-area img { max-width: 100%; max-height: 200px; height: auto; display: block; margin: 10px auto; border: 1px solid #ddd; }
-        .btn-foto { background-color: #4CAF50; margin-top: 5px; }
+        
+        /* FOTOĞRAF BUTONUNUN GÖRÜNMESİ İÇİN CSS EKLENDİ */
+        .btn-foto { 
+            background-color: #4CAF50; /* Yeşil renk */
+            color: white; 
+            margin-top: 5px; 
+            margin-bottom: 10px; /* Altındaki boşluk için eklendi */
+        }
+        
         .kayit-fotografi { max-width: 100%; max-height: 300px; height: auto; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
         /* --- BİTİŞ: FOTOĞRAF STİLLERİ --- */
 
@@ -187,9 +195,9 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         
-        // DÜZELTME 1: URL okuması 'id' parametresini de kapsayacak şekilde bırakıldı (Bu zaten doğruydu).
+        // DÜZELTME 1: URL okuması 'id' parametresini okuyor (kovanlarim.html ile uyumlu)
         let kovanId = null; 
-        try { kovanId = decodeURIComponent(urlParams.get('kovanNo') || urlParams.get('id')); } // 'kovanNo' veya 'id'
+        try { kovanId = decodeURIComponent(urlParams.get('id')); } // Sadece 'id' okunuyor
         catch (e) { console.error("ID alınamadı:", e); }
         
         let mevcutKovanVerisi = null;
@@ -213,7 +221,7 @@
             if (!mevcutKullanici || !kovanId) { 
                 console.warn("Kullanıcı/ID eksik. Kullanıcı:", !!mevcutKullanici, "KovanID:", kovanId); 
                 kovanBaslik.innerText = "Hata: Kovan ID Bulunamadı";
-                detayContainer.innerHTML = "<p>URL'den 'kovanNo' veya 'id' parametresi okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
+                detayContainer.innerHTML = "<p>URL'den 'id' parametresi okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
                 kayitlarContainer.innerHTML = "";
                 return; 
             }
@@ -225,7 +233,7 @@
                     const kovanData = docSnap.data();
                     
                     // --- KRİTİK DÜZELTME 2: 'kullaniciId' -> 'userId' olarak değiştirildi ---
-                    // Artık 'rules.txt' ve 'index.html' ile uyumlu.
+                    // Artık 'rules.txt'  ve 'index.html'  ile uyumlu.
                     if (!kovanData.userId || kovanData.userId !== mevcutKullanici.uid) { 
                         console.error("Yetki Hatası: Belge sahibi (" + kovanData.userId + ") ile kullanıcı (" + mevcutKullanici.uid + ") eşleşmiyor."); 
                         kovanBaslik.innerText = "Erişim Reddedildi"; 
@@ -370,6 +378,7 @@
                 <div class="form-grup"><label for="bakimTarihi">Tarih</label><input type="date" id="bakimTarihi" required></div> 
                 <div class="form-grup"><label for="yapilanIslem">Yapılan İşlem</label><input type="text" id="yapilanIslem" required></div> 
                 <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> 
+                
                 <button type="button" class="buton btn-foto" onclick="document.getElementById('bakimFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
                 <input type="file" id="bakimFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'bakimPreview', 'bakimPhotoData')">
                 <div class="photo-area" id="bakimPreviewArea" style="display:none;">
@@ -385,6 +394,7 @@
                 <div class="form-grup"><label for="tedaviTarihi">Tarih</label><input type="date" id="tedaviTarihi" required></div> 
                 <div class="form-grup"><label for="kullanilanIlac">İlaç/Yöntem</label><input type="text" id="kullanilanIlac" list="ilac-yontem-listesi-datalist" required></div> 
                 <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> 
+                
                 <button type="button" class="buton btn-foto" onclick="document.getElementById('hastalikFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
                 <input type="file" id="hastalikFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'hastalikPreview', 'hastalikPhotoData')">
                 <div class="photo-area" id="hastalikPreviewArea" style="display:none;">
@@ -489,7 +499,7 @@
          data.eklenmeTarihi = new Date();
          
          // --- KRİTİK DÜZELTME 3: 'userId' alt kayıtlara eklendi ---
-         // Bu, 'rules.txt' dosyanızdaki alt koleksiyon kuralıyla  uyum için ZORUNLUDUR.
+         // Bu, 'rules.txt'  dosyanızdaki (satır 9) alt koleksiyon kuralıyla uyum için ZORUNLUDUR.
          data.userId = mevcutKullanici.uid;
          
          const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
