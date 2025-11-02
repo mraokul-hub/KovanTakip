@@ -203,11 +203,11 @@
             console.log("yukleKovanDetayi başladı.");
             ['duzenleBtn', 'kaydetBtn', 'iptalBtn', 'silKovanBtn'].forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = true; });
             
-            // kovanId'nin null olup olmadığını burada kontrol et (Daha iyi hata mesajı için güncellendi)
+            // kovanId'nin null olup olmadığını burada kontrol et
             if (!mevcutKullanici || !kovanId) { 
                 console.warn("Kullanıcı/ID eksik. Kullanıcı:", !!mevcutKullanici, "KovanID:", kovanId); 
                 kovanBaslik.innerText = "Hata: Kovan ID Bulunamadı";
-                detayContainer.innerHTML = "<p>URL'den 'kovanNo' parametresi okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
+                detayContainer.innerHTML = "<p>URL'den kovan ID'si okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
                 kayitlarContainer.innerHTML = "";
                 return; 
             }
@@ -248,7 +248,8 @@
             }
         }
 
-        // --- GERİ KALAN TÜM JAVASCRIPT KODU (Değiştirilmedi) ---
+        // --- GERİ KALAN TÜM JAVASCRIPT KODU DEĞİŞTİRİLMEDİ ---
+        // (Sadece 'addKayit' fonksiyonuna küçük bir güvenlik eklemesi yapıldı)
 
         function kurAnaButonListenerlari() {
             const setupListener = (buttonId, event, handler) => { const button = document.getElementById(buttonId); if (button) { const newButton = button.cloneNode(true); button.parentNode.replaceChild(newButton, button); newButton.addEventListener(event, handler); console.log(`Listener kuruldu: ${buttonId}`); } else { console.error(`Buton bulunamadı: ${buttonId}`); } };
@@ -396,6 +397,7 @@
          console.log(`addKayit: ${collName}`, data); 
          data.eklenmeTarihi = new Date();
          // --- 3. DÜZELTME: Alt koleksiyon kayıtlarına da kimlik eklendi ---
+         // Bu, gelecekte alt koleksiyonlara özel kurallar eklerseniz hayat kurtarır.
          data.kullaniciId = mevcutKullanici.uid;
          data.kullaniciEmail = mevcutKullanici.email;
          

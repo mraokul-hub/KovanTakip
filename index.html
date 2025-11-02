@@ -293,10 +293,8 @@
 
         console.log("Form gönderildi. Veriler toplanıyor...");
 
-        // *** GÜNCELLENDİ: Güvenlik kurallarıyla eşleşmesi için 'kullaniciId' kullanıldı ***
         const kovanVerisi = {
-            kullaniciId: mevcutKullanici.uid, // 'userId' -> 'kullaniciId' olarak değiştirildi
-            kullaniciEmail: mevcutKullanici.email, // Raporlama için eklendi
+            userId: mevcutKullanici.uid, 
             kovanNo: form.kovanNo.value,
             barkodNo: form.barkodNo.value,
             kovanTipi: form.kovanTipi.value,
