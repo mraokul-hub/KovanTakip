@@ -113,6 +113,15 @@
         .hastalik-listesi-item { border-left: 5px solid #dc3545; } .hastalik-listesi-item strong { color: #dc3545; }
         .hasat-listesi-item { border-left: 5px solid #28a745; } .hasat-listesi-item strong { color: #28a745; }
 
+        /* --- YENİ EKLENEN FOTOĞRAF STİLLERİ --- */
+        .hidden { display: none; }
+        .photo-area { margin-top: 10px; border: 1px dashed #ccc; padding: 10px; text-align: center; }
+        .photo-area img { max-width: 100%; max-height: 200px; height: auto; display: block; margin: 10px auto; border: 1px solid #ddd; }
+        .btn-foto { background-color: #4CAF50; margin-top: 5px; }
+        .kayit-fotografi { max-width: 100%; max-height: 300px; height: auto; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
+        /* --- BİTİŞ: FOTOĞRAF STİLLERİ --- */
+
+
         @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
             .info-card, .edit-form-container, .kayitlar-bolumu { grid-column: span 1; }
@@ -158,7 +167,6 @@
     <datalist id="ilac-yontem-listesi-datalist"> <option value="Formik Asit - Damlatma"></option> <option value="Formik Asit - Ped"></option> <option value="Oksalik Asit - Damlatma"></option> <option value="Oksalik Asit - Buharlaştırma"></option> <option value="Amitraz Şerit (Varroset vb.)"></option> <option value="Timol Jel/Ped (Apiguard vb.)"></option> <option value="Organik Asit Kombinasyonu"></option> <option value="Erkek Arı Gözü Kesimi"></option> <option value="Pudra Şekeri"></option> <option value="Antibiyotik (Veteriner Tavsiyesiyle)"></option> <option value="B401 (Petek Güvesi İçin)"></option> <option value="Çerçeve Değişimi"></option> <option value="Besleme (Şurup/Kek)"></option> <option value="Diğer"></option> </datalist>
 
     <script>
-        // SCRIPT İÇERİĞİ (HATALAR DÜZELTİLDİ)
         const firebaseConfig = {
           apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", 
           authDomain: "kovan-takip-4c054.firebaseapp.com",
@@ -179,10 +187,9 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         
-        // --- 1. DÜZELTME: 'kovanNo' parametresi okundu ('id' yerine) ---
-        // kovanlarim.html (File 5) 'kovanNo' gönderiyor, bu kod onu okuyor.
+        // DÜZELTME 1: URL okuması 'id' parametresini de kapsayacak şekilde bırakıldı (Bu zaten doğruydu).
         let kovanId = null; 
-        try { kovanId = decodeURIComponent(urlParams.get('kovanNo') || urlParams.get('id')); } // 'kovanNo' öncelikli
+        try { kovanId = decodeURIComponent(urlParams.get('kovanNo') || urlParams.get('id')); } // 'kovanNo' veya 'id'
         catch (e) { console.error("ID alınamadı:", e); }
         
         let mevcutKovanVerisi = null;
@@ -203,11 +210,10 @@
             console.log("yukleKovanDetayi başladı.");
             ['duzenleBtn', 'kaydetBtn', 'iptalBtn', 'silKovanBtn'].forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = true; });
             
-            // kovanId'nin null olup olmadığını burada kontrol et
             if (!mevcutKullanici || !kovanId) { 
                 console.warn("Kullanıcı/ID eksik. Kullanıcı:", !!mevcutKullanici, "KovanID:", kovanId); 
                 kovanBaslik.innerText = "Hata: Kovan ID Bulunamadı";
-                detayContainer.innerHTML = "<p>URL'den kovan ID'si okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
+                detayContainer.innerHTML = "<p>URL'den 'kovanNo' veya 'id' parametresi okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
                 kayitlarContainer.innerHTML = "";
                 return; 
             }
@@ -218,12 +224,12 @@
                 if (docSnap.exists) {
                     const kovanData = docSnap.data();
                     
-                    // --- 2. DÜZELTME: 'userId' -> 'kullaniciId' olarak değiştirildi ---
-                    // Veritabanında (manuel düzelttiğiniz) 'kullaniciId' alanını arar.
-                    if (!kovanData.kullaniciId || kovanData.kullaniciId !== mevcutKullanici.uid) { 
-                        console.error("Yetki Hatası: Belge sahibi (" + kovanData.kullaniciId + ") ile kullanıcı (" + mevcutKullanici.uid + ") eşleşmiyor."); 
+                    // --- KRİTİK DÜZELTME 2: 'kullaniciId' -> 'userId' olarak değiştirildi ---
+                    // Artık 'rules.txt' ve 'index.html' ile uyumlu.
+                    if (!kovanData.userId || kovanData.userId !== mevcutKullanici.uid) { 
+                        console.error("Yetki Hatası: Belge sahibi (" + kovanData.userId + ") ile kullanıcı (" + mevcutKullanici.uid + ") eşleşmiyor."); 
                         kovanBaslik.innerText = "Erişim Reddedildi"; 
-                        detayContainer.innerHTML = "<p>Bu kovanı görme yetkiniz yok. (Veritabanında 'kullaniciId' alanını kontrol edin)</p>"; 
+                        detayContainer.innerHTML = "<p>Bu kovanı görme yetkiniz yok. (Veritabanında 'userId' alanını kontrol edin)</p>"; 
                         kayitlarContainer.innerHTML=''; 
                         return; 
                     }
@@ -243,13 +249,9 @@
             } catch (error) { 
                 console.error("Yükleme Hatası:", error); 
                 kovanBaslik.innerText="Hata"; 
-                // Hata mesajını göster (örn: "permission-denied" -> "İzin reddedildi")
-                detayContainer.innerHTML = `<p>Veri yüklenirken hata: ${error.message} (Firestore kurallarınızı ve kovan belgesindeki 'kullaniciId' alanını kontrol edin.)</p>`; 
+                detayContainer.innerHTML = `<p>Veri yüklenirken hata: ${error.message} (Firestore kurallarınızı ve kovan belgesindeki 'userId' alanını kontrol edin.)</p>`; 
             }
         }
-
-        // --- GERİ KALAN TÜM JAVASCRIPT KODU DEĞİŞTİRİLMEDİ ---
-        // (Sadece 'addKayit' fonksiyonuna küçük bir güvenlik eklemesi yapıldı)
 
         function kurAnaButonListenerlari() {
             const setupListener = (buttonId, event, handler) => { const button = document.getElementById(buttonId); if (button) { const newButton = button.cloneNode(true); button.parentNode.replaceChild(newButton, button); newButton.addEventListener(event, handler); console.log(`Listener kuruldu: ${buttonId}`); } else { console.error(`Buton bulunamadı: ${buttonId}`); } };
@@ -300,7 +302,6 @@
             const setSelected=(v1,v2)=>v1===v2?'selected':''; const setChecked=(v)=>v?'checked':'';
             const editFormContainer = document.createElement('div');
             editFormContainer.className = 'edit-form-container';
-            // HIRÇINLIK BÖLÜMÜ GÜNCELLENDİ
             editFormContainer.innerHTML = `<h2><i class="fa-solid fa-pencil-alt"></i> Kovan Bilgilerini Düzenle</h2> <form id="kovanDuzenleFormu"><div class="grid-container"><div> <h3><img src="5.png" alt="Kovan" class="section-image"> Kovan</h3> <div class="form-grup"><label>Kovan No</label><input type="text" value="${kovan.kovanNo}" disabled></div> <div class="form-grup"><label>Barkod</label><input type="text" id="editBarkodNo" value="${kovan.barkodNo||''}"></div> <div class="form-grup"><label>Tip</label><select id="editKovanTipi"><option value="Langstroth" ${setSelected(kovan.kovanTipi,'Langstroth')}>L</option><option value="Dadant" ${setSelected(kovan.kovanTipi,'Dadant')}>D</option><option value="Karakovan" ${setSelected(kovan.kovanTipi,'Karakovan')}>K</option><option value="Diğer" ${setSelected(kovan.kovanTipi,'Diğer')}>Diğer</option></select></div> <div class="form-grup"><label>Irk</label><select id="editAriIrki"><option value="Kafkas" ${setSelected(kovan.ariIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.ariIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.ariIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.ariIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.ariIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.ariIrki,'Melez')}>Melez</option></select></div> <div class="form-grup"><label>Çer. Sayısı</label><input type="number" id="editCerceveSayisi" value="${kovan.cerceveSayisi||0}" min="1"></div> <div class="form-grup"><label>Köken</label><select id="editKovanKokeni"><option value="Kendi Üretimim" ${setSelected(kovan.kovanKokeni,'Kendi Üretimim')}>Kendi</option><option value="Satın Alma" ${setSelected(kovan.kovanKokeni,'Satın Alma')}>Satın</option><option value="Oğul" ${setSelected(kovan.kovanKokeni,'Oğul')}>Oğul</option></select></div> 
             
             <div class="form-grup"><label>Hırçınlık</label><select id="editHircinlik">
@@ -365,15 +366,40 @@
 
         if (tip === 'bakim') { 
             baslikGorsel = `<img src="3.png" alt="Bakım" class="section-image">`;
-            formHtml = `<h3>Yeni Bakım Kaydı</h3> <div class="form-grup"><label for="bakimTarihi">Tarih</label><input type="date" id="bakimTarihi" required></div> <div class="form-grup"><label for="yapilanIslem">Yapılan İşlem</label><input type="text" id="yapilanIslem" required></div> <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Bakım Kaydı</h3> 
+                <div class="form-grup"><label for="bakimTarihi">Tarih</label><input type="date" id="bakimTarihi" required></div> 
+                <div class="form-grup"><label for="yapilanIslem">Yapılan İşlem</label><input type="text" id="yapilanIslem" required></div> 
+                <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> 
+                <button type="button" class="buton btn-foto" onclick="document.getElementById('bakimFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
+                <input type="file" id="bakimFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'bakimPreview', 'bakimPhotoData')">
+                <div class="photo-area" id="bakimPreviewArea" style="display:none;">
+                    <img id="bakimPreview" src="#" alt="Önizleme">
+                </div>
+                <input type="hidden" id="bakimPhotoData">
+                <button type="submit" style="margin-top:10px;"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hastalik') { 
             baslikGorsel = `<img src="4.png" alt="Hastalık" class="section-image">`;
-            formHtml = `<h3>Yeni Hastalık Kaydı</h3> <div class="form-grup"><label for="hastalikAdi">Hastalık/Zararlı</label><input type="text" id="hastalikAdi" list="hastalik-listesi-datalist" required></div> <div class="form-grup"><label for="tedaviTarihi">Tarih</label><input type="date" id="tedaviTarihi" required></div> <div class="form-grup"><label for="kullanilanIlac">İlaç/Yöntem</label><input type="text" id="kullanilanIlac" list="ilac-yontem-listesi-datalist" required></div> <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Hastalık Kaydı</h3> 
+                <div class="form-grup"><label for="hastalikAdi">Hastalık/Zararlı</label><input type="text" id="hastalikAdi" list="hastalik-listesi-datalist" required></div> 
+                <div class="form-grup"><label for="tedaviTarihi">Tarih</label><input type="date" id="tedaviTarihi" required></div> 
+                <div class="form-grup"><label for="kullanilanIlac">İlaç/Yöntem</label><input type="text" id="kullanilanIlac" list="ilac-yontem-listesi-datalist" required></div> 
+                <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> 
+                <button type="button" class="buton btn-foto" onclick="document.getElementById('hastalikFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
+                <input type="file" id="hastalikFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'hastalikPreview', 'hastalikPhotoData')">
+                <div class="photo-area" id="hastalikPreviewArea" style="display:none;">
+                    <img id="hastalikPreview" src="#" alt="Önizleme">
+                </div>
+                <input type="hidden" id="hastalikPhotoData">
+                <button type="submit" style="margin-top:10px;"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hasat') { 
             baslikGorsel = `<img src="2.png" alt="Hasat" class="section-image">`;
-            formHtml = `<h3>Yeni Hasat Kaydı</h3> <div class="form-grup"><label for="hasatTarihi">Tarih</label><input type="date" id="hasatTarihi" required></div> <div class="form-grup"><label for="hasatMiktari">Miktar (kg)</label><input type="number" id="hasatMiktari" min="0" step="0.1" required></div> <div class="form-grup"><label for="hasatNotlari">Notlar</label><textarea id="hasatNotlari" rows="2"></textarea></div> <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
+            formHtml = `<h3>Yeni Hasat Kaydı</h3> 
+                <div class="form-grup"><label for="hasatTarihi">Tarih</label><input type="date" id="hasatTarihi" required></div> 
+                <div class="form-grup"><label for="hasatMiktari">Miktar (kg)</label><input type="number" id="hasatMiktari" min="0" step="0.1" required></div> 
+                <div class="form-grup"><label for="hasatNotlari">Notlar</label><textarea id="hasatNotlari" rows="2"></textarea></div> 
+                <button type="submit"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else { return; }
         
@@ -388,24 +414,102 @@
         console.log(`renderKayitBolumu TAMAMLANDI: ${tip}`);
     }
 
+    // --- YENİ EKLENEN FOTOĞRAF İŞLEME FONKSİYONU ---
+    function handlePhotoUpload(event, previewId, dataInputId) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Çözünürlüğü optimize et (sunucuya hızlı yükleme için)
+                const MAX_WIDTH = 800; 
+                const MAX_HEIGHT = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // JPEG formatında ve %70 kalite (0.7) ile sıkıştır
+                // Bu, dosya boyutunu ciddi oranda düşürür.
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                // Önizlemeyi göster
+                const previewElement = document.getElementById(previewId);
+                previewElement.src = dataUrl;
+                document.getElementById(previewElement.id + 'Area').style.display = 'block';
+
+                // Sıkıştırılmış Base64 verisini gizli input'a kaydet
+                document.getElementById(dataInputId).value = dataUrl;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    // --- BİTİŞ: FOTOĞRAF İŞLEME FONKSİYONU ---
+
+
     function gf(id, type = 'value') { const el=document.getElementById(id); if(!el) return null; return type==='number'?Number(el.value):(type==='checked'?el.checked:el.value); }
-    async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={bakimTarihi:gf('bakimTarihi'), yapilanIslem:gf('yapilanIslem'), notlar:gf('bakimNotlari')}; await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); }
-    async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hastalikAdi:gf('hastalikAdi'), tedaviTarihi:gf('tedaviTarihi'), kullanilanIlac:gf('kullanilanIlac'), notlar:gf('hastalikNotlari')}; await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); }
+    
+    // --- SUBMIT FONKSİYONLARI FOTOĞRAF İÇİN GÜNCELLENDİ ---
+    async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; 
+        const data={
+            bakimTarihi:gf('bakimTarihi'), 
+            yapilanIslem:gf('yapilanIslem'), 
+            notlar:gf('bakimNotlari'),
+            photoBase64: gf('bakimPhotoData') || null // Fotoğraf verisi eklendi
+        }; 
+        await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); 
+    }
+    async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; 
+        const data={
+            hastalikAdi:gf('hastalikAdi'), 
+            tedaviTarihi:gf('tedaviTarihi'), 
+            kullanilanIlac:gf('kullanilanIlac'), 
+            notlar:gf('hastalikNotlari'),
+            photoBase64: gf('hastalikPhotoData') || null // Fotoğraf verisi eklendi
+        }; 
+        await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); 
+    }
     async function handleHasatSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele); }
     
     async function addKayit(collName, data, formId, listeleFn) {
          console.log(`addKayit: ${collName}`, data); 
          data.eklenmeTarihi = new Date();
-         // --- 3. DÜZELTME: Alt koleksiyon kayıtlarına da kimlik eklendi ---
-         // Bu, gelecekte alt koleksiyonlara özel kurallar eklerseniz hayat kurtarır.
-         data.kullaniciId = mevcutKullanici.uid;
-         data.kullaniciEmail = mevcutKullanici.email;
+         
+         // --- KRİTİK DÜZELTME 3: 'userId' alt kayıtlara eklendi ---
+         // Bu, 'rules.txt' dosyanızdaki alt koleksiyon kuralıyla  uyum için ZORUNLUDUR.
+         data.userId = mevcutKullanici.uid;
          
          const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
          if(btn) btn.disabled = true;
          try {
              const docRef = await db.collection("kovanlar").doc(kovanId).collection(collName).add(data);
-             console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); alert("Eklendi!"); if(form) form.reset(); listeleFn(kovanId);
+             console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); alert("Eklendi!"); 
+             if(form) form.reset(); 
+             
+             // Fotoğraf önizlemesini temizle
+             if (formId === 'formBakimEkle') {
+                 document.getElementById('bakimPreviewArea').style.display = 'none';
+                 document.getElementById('bakimPhotoData').value = '';
+             }
+             if (formId === 'formHastalikEkle') {
+                 document.getElementById('hastalikPreviewArea').style.display = 'none';
+                 document.getElementById('hastalikPhotoData').value = '';
+             }
+             
+             listeleFn(kovanId);
          } catch (error) { console.error(`Ekleme hatası (${collName}):`, error); alert(`Hata: ${error.message}`); }
          finally { if(btn) btn.disabled = false; }
      }
@@ -416,10 +520,9 @@
 
     async function listeleKayitlar(kId, tip, collName, tarihAdi, renderFn) {
         const listElId = `${tip}-listesi`; const listEl = document.getElementById(listElId); 
-        // kId null ise (URL okunamadıysa) hata vermemesi için kontrol eklendi
         if (!listEl || !kId) {
             console.warn(`listeleKayitlar durduruldu: ${collName}, kId: ${kId}`);
-            if(listEl) listEl.innerHTML = ""; // Yükleniyor... yazısını temizle
+            if(listEl) listEl.innerHTML = ""; 
             return; 
         }
         listEl.innerHTML = "<p>Yükleniyor...</p>";
@@ -431,17 +534,20 @@
             else { listEl.innerHTML = ""; querySnapshot.forEach(doc => { try { renderFn(listEl, doc.id, doc.data()); } catch (e) { console.error(`Render hatası (${tip}, ${doc.id}):`, e); listEl.innerHTML += `<p style='color:red;'>Kayıt yüklenemedi (ID: ${doc.id})</p>`; } }); }
         } catch (error) { 
             console.error(`${collName} listeleme hatası:`, error); 
-            // Hata mesajını göster (örn: "permission-denied")
             listEl.innerHTML = `<p style='color:red;'>Hata: ${error.message}</p>`; 
         }
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
+    // --- RENDER FONKSİYONLARI FOTOĞRAF GÖSTERMEK İÇİN GÜNCELLENDİ ---
     function renderBakimKaydi(listEl, id, kayit) {
         const t = kayit.bakimTarihi ? new Date(kayit.bakimTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'bakim-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
+        // Fotoğraf gösterme HTML'i eklendi
+        const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Bakım Fotoğrafı" class="kayit-fotografi">` : '';
+        
         k.innerHTML = `
-            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.yapilanIslem||'?'}</strong> ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}</div>
+            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.yapilanIslem||'?'}</strong> ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''} ${photoHtml}</div>
             <div class="kayit-duzenleme-formu"> <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.bakimTarihi||''}"></div><div class="form-grup"><label>İşlem</label><input type="text" value="${kayit.yapilanIslem||''}"></div><div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div></div>
             <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','bakim',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('bakimKayitlari','${id}','bakim')" title="Kaydet"><i class="fa-solid fa-check"></i></button> <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','bakim',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('bakimKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
         listEl.appendChild(k);
@@ -449,8 +555,11 @@
     function renderHastalikKaydi(listEl, id, kayit) {
         const t = kayit.tedaviTarihi ? new Date(kayit.tedaviTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'hastalik-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
+        // Fotoğraf gösterme HTML'i eklendi
+        const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Hastalık Fotoğrafı" class="kayit-fotografi">` : '';
+
         k.innerHTML = `
-            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.hastalikAdi||'?'}</strong><p>Yöntem: ${kayit.kullanilanIlac||'?'}</p>${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}</div>
+            <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.hastalikAdi||'?'}</strong><p>Yöntem: ${kayit.kullanilanIlac||'?'}</p>${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''} ${photoHtml}</div>
             <div class="kayit-duzenleme-formu"> <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.tedaviTarihi||''}"></div><div class="form-grup"><label>Hastalık</label><input type="text" list="hastalik-listesi-datalist" value="${kayit.hastalikAdi||''}"></div><div class="form-grup"><label>İlaç/Yöntem</label><input type="text" list="ilac-yontem-listesi-datalist" value="${kayit.kullanilanIlac||''}"></div><div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div></div>
             <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','hastalik',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('hastalikKayitlari','${id}','hastalik')" title="Kaydet"><i class="fa-solid fa-check"></i></button> <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','hastalik',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('hastalikKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
         listEl.appendChild(k);
@@ -474,6 +583,8 @@
     }
 
     async function handleKayitGuncelle(collName, kayitId, tip) {
+        // Not: Bu fonksiyon fotoğraf GÜNCELLEMESİNİ (değiştirmeyi) içermez,
+        // sadece mevcut metin verilerini günceller.
         console.log(`handleKayitGuncelle: ${collName}, ${kayitId}, ${tip}`);
         if (!mevcutKullanici || !kovanId) return; 
         const kayitEl = document.getElementById(`kayit-${kayitId}`); if (!kayitEl) return;
