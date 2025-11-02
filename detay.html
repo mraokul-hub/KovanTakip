@@ -113,11 +113,12 @@
         .hastalik-listesi-item { border-left: 5px solid #dc3545; } .hastalik-listesi-item strong { color: #dc3545; }
         .hasat-listesi-item { border-left: 5px solid #28a745; } .hasat-listesi-item strong { color: #28a745; }
 
-        /* --- FOTOĞRAF STİLLERİ (Dosyanızda zaten vardı) --- */
+        /* --- YENİ FOTOĞRAF STİLLERİ EKLENDİ --- */
         .hidden { display: none; }
         .photo-area { margin-top: 10px; border: 1px dashed #ccc; padding: 10px; text-align: center; }
         .photo-area img { max-width: 100%; max-height: 200px; height: auto; display: block; margin: 10px auto; border: 1px solid #ddd; }
         
+        /* FOTOĞRAF BUTONUNUN GÖRÜNMESİ İÇİN CSS EKLENDİ */
         .btn-foto { 
             background-color: #4CAF50; /* Yeşil renk */
             color: white; 
@@ -149,7 +150,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -172,7 +172,7 @@
     <div id="kovan-kayitlar-container"> <p>Yükleniyor...</p> </div>
 
     <datalist id="hastalik-listesi-datalist"> <option value="Varroa"></option> <option value="Nosema"></option> <option value="Amerikan Yavru Çürüklüğü"></option> <option value="Avrupa Yavru Çürüklüğü"></option> <option value="Kireç Hastalığı"></option> <option value="Petek Güvesi"></option> <option value="Stres / Açlık"></option> <option value="Diğer"></option> </datalist>
-    <datalist id="ilac-yontem-listesi-datalist"> <option value="Formik Asit - Damlatma"></option> <option value="Formik Asit - Ped"></option> <option value="Oksalik Asit - Damlatma"></option> <option value="Oksalik Asit - Buharlaştırma"></option> <option value="Amitraz Şerit (Varroset vb.)"></option> <option value="Timol Jel/Ped (Apiguard vb.)"></option> <option value="Organik Asit Kombinasyonu"></option> <option value="Erkek Arı Gözü Kesimi"></option> <option value="Pudra Şekeri"></option> <option value="Antibiyotik (Veteriner Tavsiyesiyle)"></option> <option value="B401 (Petek Güvesi İçin)"></option> <option value="Çerçeve Değişimi"></option> <option value_grup="Besleme (Şurup/Kek)"></option> <option value="Diğer"></option> </datalist>
+    <datalist id="ilac-yontem-listesi-datalist"> <option value="Formik Asit - Damlatma"></option> <option value="Formik Asit - Ped"></option> <option value="Oksalik Asit - Damlatma"></option> <option value="Oksalik Asit - Buharlaştırma"></option> <option value="Amitraz Şerit (Varroset vb.)"></option> <option value="Timol Jel/Ped (Apiguard vb.)"></option> <option value="Organik Asit Kombinasyonu"></option> <option value="Erkek Arı Gözü Kesimi"></option> <option value="Pudra Şekeri"></option> <option value="Antibiyotik (Veteriner Tavsiyesiyle)"></option> <option value="B401 (Petek Güvesi İçin)"></option> <option value="Çerçeve Değişimi"></option> <option value="Besleme (Şurup/Kek)"></option> <option value="Diğer"></option> </datalist>
 
     <script>
         const firebaseConfig = {
@@ -185,10 +185,7 @@
         };
         try { firebase.initializeApp(firebaseConfig); console.log("Firebase başlatıldı."); }
         catch (e) { console.error("Firebase başlatılamadı:", e); document.body.innerHTML = '<h1>HATA</h1>'; throw e; }
-        const db = firebase.firestore(); 
-        const auth = firebase.auth();
-        // === YENİ STORAGE NESNESİ EKLENDİ ===
-        const storage = firebase.storage();
+        const db = firebase.firestore(); const auth = firebase.auth();
 
         const kovanBaslik = document.getElementById('kovan-baslik');
         const detayContainer = document.getElementById('kovan-detay-container');
@@ -198,7 +195,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         
-        // KRİTİK DÜZELTME 1: URL okuması 'id' parametresini okuyor (kovanlarim.html ile uyumlu)
+        // DÜZELTME 1: URL okuması 'id' parametresini okuyor (kovanlarim.html ile uyumlu)
         let kovanId = null; 
         try { kovanId = decodeURIComponent(urlParams.get('id')); } // Sadece 'id' okunuyor
         catch (e) { console.error("ID alınamadı:", e); }
@@ -206,11 +203,6 @@
         let mevcutKovanVerisi = null;
         let mevcutKullanici = null; 
         let anaDuzenlemeModu = false;
-
-        // === YENİ: YÜKLENECEK DOSYALARI TUTAN GLOBAL DEĞİŞKENLER ===
-        let bakimFileToUpload = null;
-        let hastalikFileToUpload = null;
-
 
         auth.onAuthStateChanged((user) => {
           if (user) {
@@ -388,11 +380,11 @@
                 <div class="form-grup"><label for="bakimNotlari">Notlar</label><textarea id="bakimNotlari" rows="2"></textarea></div> 
                 
                 <button type="button" class="buton btn-foto" onclick="document.getElementById('bakimFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
-                <input type="file" id="bakimFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'bakimPreview', 'bakim')">
+                <input type="file" id="bakimFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'bakimPreview', 'bakimPhotoData')">
                 <div class="photo-area" id="bakimPreviewArea" style="display:none;">
                     <img id="bakimPreview" src="#" alt="Önizleme">
                 </div>
-                
+                <input type="hidden" id="bakimPhotoData">
                 <button type="submit" style="margin-top:10px;"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hastalik') { 
@@ -404,11 +396,11 @@
                 <div class="form-grup"><label for="hastalikNotlari">Notlar</label><textarea id="hastalikNotlari" rows="2"></textarea></div> 
                 
                 <button type="button" class="buton btn-foto" onclick="document.getElementById('hastalikFileInput').click()"><i class="fa-solid fa-camera"></i> Fotoğraf Çek/Yükle</button>
-                <input type="file" id="hastalikFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'hastalikPreview', 'hastalik')">
+                <input type="file" id="hastalikFileInput" accept="image/*" capture="camera" class="hidden" onchange="handlePhotoUpload(event, 'hastalikPreview', 'hastalikPhotoData')">
                 <div class="photo-area" id="hastalikPreviewArea" style="display:none;">
                     <img id="hastalikPreview" src="#" alt="Önizleme">
                 </div>
-                
+                <input type="hidden" id="hastalikPhotoData">
                 <button type="submit" style="margin-top:10px;"><i class="fa-solid fa-plus"></i> Ekle</button>`; 
         }
         else if (tip === 'hasat') { 
@@ -433,23 +425,45 @@
     }
 
     // --- YENİ EKLENEN FOTOĞRAF İŞLEME FONKSİYONU ---
-    function handlePhotoUpload(event, previewId, tip) {
+    function handlePhotoUpload(event, previewId, dataInputId) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Dosyayı global değişkene ata
-        if (tip === 'bakim') {
-            bakimFileToUpload = file;
-        } else if (tip === 'hastalik') {
-            hastalikFileToUpload = file;
-        }
-
-        // Önizleme için FileReader kullan (Base64'e çevirmez, sadece lokalde gösterir)
         const reader = new FileReader();
         reader.onload = function(e) {
-            const previewElement = document.getElementById(previewId);
-            previewElement.src = e.target.result;
-            document.getElementById(previewElement.id + 'Area').style.display = 'block';
+            const img = new Image();
+            img.onload = function() {
+                // Çözünürlüğü optimize et (sunucuya hızlı yükleme için)
+                const MAX_WIDTH = 800; 
+                const MAX_HEIGHT = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // JPEG formatında ve %70 kalite (0.7) ile sıkıştır
+                // Bu, dosya boyutunu ciddi oranda düşürür.
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                // Önizlemeyi göster
+                const previewElement = document.getElementById(previewId);
+                previewElement.src = dataUrl;
+                document.getElementById(previewElement.id + 'Area').style.display = 'block';
+
+                // Sıkıştırılmış Base64 verisini gizli input'a kaydet
+                document.getElementById(dataInputId).value = dataUrl;
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -463,31 +477,24 @@
         const data={
             bakimTarihi:gf('bakimTarihi'), 
             yapilanIslem:gf('yapilanIslem'), 
-            notlar:gf('bakimNotlari')
-            // photoURL buraya eklenecek (addKayit içinde)
+            notlar:gf('bakimNotlari'),
+            photoBase64: gf('bakimPhotoData') || null // Fotoğraf verisi eklendi
         }; 
-        await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele, bakimFileToUpload, 'bakim'); 
-        bakimFileToUpload = null; // Dosyayı temizle
+        await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); 
     }
     async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; 
         const data={
             hastalikAdi:gf('hastalikAdi'), 
             tedaviTarihi:gf('tedaviTarihi'), 
             kullanilanIlac:gf('kullanilanIlac'), 
-            notlar:gf('hastalikNotlari')
-            // photoURL buraya eklenecek (addKayit içinde)
+            notlar:gf('hastalikNotlari'),
+            photoBase64: gf('hastalikPhotoData') || null // Fotoğraf verisi eklendi
         }; 
-        await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele, hastalikFileToUpload, 'hastalik'); 
-        hastalikFileToUpload = null; // Dosyayı temizle
+        await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); 
     }
-    async function handleHasatSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; 
-        const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; 
-        if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } 
-        await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele, null, 'hasat'); 
-    }
+    async function handleHasatSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele); }
     
-    // === YENİ: ADD KAYIT FONKSİYONU STORAGE İÇİN TAMAMEN GÜNCELLENDİ ===
-    async function addKayit(collName, data, formId, listeleFn, fileToUpload, tip) {
+    async function addKayit(collName, data, formId, listeleFn) {
          console.log(`addKayit: ${collName}`, data); 
          data.eklenmeTarihi = new Date();
          
@@ -495,96 +502,27 @@
          // Bu, 'rules.txt'  dosyanızdaki (satır 9) alt koleksiyon kuralıyla uyum için ZORUNLUDUR.
          data.userId = mevcutKullanici.uid;
          
-         const form = document.getElementById(formId); 
-         const btn = form ? form.querySelector('button[type="submit"]') : null;
+         const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
          if(btn) btn.disabled = true;
-         if(btn) btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Kaydediliyor...";
-
          try {
-            // 1. ADIM: FOTOĞRAF VARSA YÜKLE
-            if (fileToUpload) {
-                console.log("Fotoğraf yükleniyor...");
-                btn.innerHTML = "<i class='fa-solid fa-upload'></i> Foto Yükleniyor...";
-                
-                // Benzersiz dosya adı oluştur
-                const fileName = `${tip}_${new Date().getTime()}_${fileToUpload.name}`;
-                // Storage'da yolu belirle (Güvenlik kuralıyla eşleşmeli)
-                const storageRef = storage.ref(`images/${mevcutKullanici.uid}/${kovanId}/${fileName}`);
-
-                // Dosyayı sıkıştır ve yükle (handlePhotoUpload'daki mantık buraya taşındı)
-                const optimizedFile = await optimizeImage(fileToUpload);
-                const uploadTask = await storageRef.put(optimizedFile);
-                
-                // Yükleme bitince indirme linkini al
-                const downloadURL = await uploadTask.ref.getDownloadURL();
-                data.photoURL = downloadURL; // Veritabanına Base64 yerine URL'i kaydet
-                console.log("Fotoğraf yüklendi:", downloadURL);
-            } else {
-                data.photoURL = null; // Fotoğraf seçilmedi
-            }
-
-            // 2. ADIM: VERİLERİ (veya FOTOĞRAF LİNKİNİ) FIRESTORE'A KAYDET
-            btn.innerHTML = "<i class='fa-solid fa-save'></i> Kaydediliyor...";
-            const docRef = await db.collection("kovanlar").doc(kovanId).collection(collName).add(data);
-            console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); 
-            alert("Eklendi!"); 
-            if(form) form.reset(); 
+             const docRef = await db.collection("kovanlar").doc(kovanId).collection(collName).add(data);
+             console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); alert("Eklendi!"); 
+             if(form) form.reset(); 
              
-            // Fotoğraf önizlemesini temizle
-            if (tip === 'bakim') {
+             // Fotoğraf önizlemesini temizle
+             if (formId === 'formBakimEkle') {
                  document.getElementById('bakimPreviewArea').style.display = 'none';
-                 bakimFileToUpload = null;
-            }
-            if (tip === 'hastalik') {
+                 document.getElementById('bakimPhotoData').value = '';
+             }
+             if (formId === 'formHastalikEkle') {
                  document.getElementById('hastalikPreviewArea').style.display = 'none';
-                 hastalikFileToUpload = null;
-            }
+                 document.getElementById('hastalikPhotoData').value = '';
+             }
              
-            listeleFn(kovanId); // Listeyi yenile
-
-         } catch (error) { 
-            console.error(`Ekleme hatası (${collName}):`, error); 
-            alert(`Hata: ${error.message}`); 
-         } finally { 
-            if(btn) btn.disabled = false;
-            if(btn) btn.innerHTML = "<i class='fa-solid fa-plus'></i> Ekle";
-         }
+             listeleFn(kovanId);
+         } catch (error) { console.error(`Ekleme hatası (${collName}):`, error); alert(`Hata: ${error.message}`); }
+         finally { if(btn) btn.disabled = false; }
      }
-
-    // === YENİ: FOTOĞRAF OPTİMİZASYON FONKSİYONU ===
-    function optimizeImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const MAX_WIDTH = 800; 
-                    const MAX_HEIGHT = 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Sıkıştırılmış dosyayı (Blob) al
-                    canvas.toBlob((blob) => {
-                        resolve(blob);
-                    }, 'image/jpeg', 0.7); // %70 kalite
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
 
     async function bakimKayitlariniListele(kId) { await listeleKayitlar(kId, 'bakim', 'bakimKayitlari', 'bakimTarihi', renderBakimKaydi); }
     async function hastalikKayitlariniListele(kId) { await listeleKayitlar(kId, 'hastalik', 'hastalikKayitlari', 'tedaviTarihi', renderHastalikKaydi); }
@@ -611,13 +549,12 @@
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
-    // --- RENDER FONKSİYONLARI FOTOĞRAF LİNKİ (photoURL) İÇİN GÜNCELLENDİ ---
+    // --- RENDER FONKSİYONLARI FOTOĞRAF GÖSTERMEK İÇİN GÜNCELLENDİ ---
     function renderBakimKaydi(listEl, id, kayit) {
         const t = kayit.bakimTarihi ? new Date(kayit.bakimTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'bakim-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
-        
-        // Fotoğraf gösterme HTML'i 'photoURL' kullanacak şekilde güncellendi
-        const photoHtml = kayit.photoURL ? `<a href="${kayit.photoURL}" target="_blank"><img src="${kayit.photoURL}" alt="Bakım Fotoğrafı" class="kayit-fotografi"></a>` : '';
+        // Fotoğraf gösterme HTML'i eklendi
+        const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Bakım Fotoğrafı" class="kayit-fotografi">` : '';
         
         k.innerHTML = `
             <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.yapilanIslem||'?'}</strong> ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''} ${photoHtml}</div>
@@ -628,9 +565,8 @@
     function renderHastalikKaydi(listEl, id, kayit) {
         const t = kayit.tedaviTarihi ? new Date(kayit.tedaviTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'hastalik-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
-
-        // Fotoğraf gösterme HTML'i 'photoURL' kullanacak şekilde güncellendi
-        const photoHtml = kayit.photoURL ? `<a href="${kayit.photoURL}" target="_blank"><img src="${kayit.photoURL}" alt="Hastalık Fotoğrafı" class="kayit-fotografi"></a>` : '';
+        // Fotoğraf gösterme HTML'i eklendi
+        const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Hastalık Fotoğrafı" class="kayit-fotografi">` : '';
 
         k.innerHTML = `
             <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.hastalikAdi||'?'}</strong><p>Yöntem: ${kayit.kullanilanIlac||'?'}</p>${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''} ${photoHtml}</div>
@@ -690,23 +626,7 @@
              const silButonu = kayitEl ? kayitEl.querySelector('.kayit-sil-btn') : null;
              try {
                  if(silButonu) silButonu.disabled = true;
-                 
-                 // === YENİ: FOTOĞRAFI STORAGE'DAN SİLME ===
-                 const kayitRef = db.collection("kovanlar").doc(kovanId).collection(altCollName).doc(kayitId);
-                 const kayitDoc = await kayitRef.get();
-                 if (kayitDoc.exists && kayitDoc.data().photoURL) {
-                     try {
-                         const photoRef = storage.refFromURL(kayitDoc.data().photoURL);
-                         await photoRef.delete();
-                         console.log("Fotoğraf Storage'dan silindi.");
-                     } catch (storageError) {
-                         console.error("Storage'dan silme hatası (kayıt yine de silinecek):", storageError);
-                     }
-                 }
-                 // === BİTİŞ: FOTOĞRAFI SİLME ===
-
-                 await kayitRef.delete(); // Kaydı Firestore'dan sil
-                 
+                 await db.collection("kovanlar").doc(kovanId).collection(altCollName).doc(kayitId).delete();
                  console.log("Kayıt silindi."); alert("Kayıt silindi.");
                  if(kayitEl) kayitEl.remove(); 
              } catch (error) { console.error(`${altCollName} silme hatası:`, error); alert(`Hata: ${error.message}`); if(silButonu) silButonu.disabled = false; }
