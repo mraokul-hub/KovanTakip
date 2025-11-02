@@ -158,6 +158,7 @@
     <datalist id="ilac-yontem-listesi-datalist"> <option value="Formik Asit - Damlatma"></option> <option value="Formik Asit - Ped"></option> <option value="Oksalik Asit - Damlatma"></option> <option value="Oksalik Asit - Buharlaştırma"></option> <option value="Amitraz Şerit (Varroset vb.)"></option> <option value="Timol Jel/Ped (Apiguard vb.)"></option> <option value="Organik Asit Kombinasyonu"></option> <option value="Erkek Arı Gözü Kesimi"></option> <option value="Pudra Şekeri"></option> <option value="Antibiyotik (Veteriner Tavsiyesiyle)"></option> <option value="B401 (Petek Güvesi İçin)"></option> <option value="Çerçeve Değişimi"></option> <option value="Besleme (Şurup/Kek)"></option> <option value="Diğer"></option> </datalist>
 
     <script>
+        // SCRIPT İÇERİĞİ (HATALAR DÜZELTİLDİ)
         const firebaseConfig = {
           apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", 
           authDomain: "kovan-takip-4c054.firebaseapp.com",
@@ -177,7 +178,13 @@
         const userEmailElement = document.getElementById('userEmail');
 
         const urlParams = new URLSearchParams(window.location.search);
-        let kovanId = null; try { kovanId = decodeURIComponent(urlParams.get('id')); } catch (e) { console.error("ID alınamadı:", e); }
+        
+        // --- 1. DÜZELTME: 'kovanNo' parametresi okundu ('id' yerine) ---
+        // kovanlarim.html (File 5) 'kovanNo' gönderiyor, bu kod onu okuyor.
+        let kovanId = null; 
+        try { kovanId = decodeURIComponent(urlParams.get('kovanNo') || urlParams.get('id')); } // 'kovanNo' öncelikli
+        catch (e) { console.error("ID alınamadı:", e); }
+        
         let mevcutKovanVerisi = null;
         let mevcutKullanici = null; 
         let anaDuzenlemeModu = false;
@@ -195,13 +202,32 @@
         async function yukleKovanDetayi() {
             console.log("yukleKovanDetayi başladı.");
             ['duzenleBtn', 'kaydetBtn', 'iptalBtn', 'silKovanBtn'].forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = true; });
-            if (!mevcutKullanici || !kovanId) { console.warn("Kullanıcı/ID eksik."); return; }
+            
+            // kovanId'nin null olup olmadığını burada kontrol et (Daha iyi hata mesajı için güncellendi)
+            if (!mevcutKullanici || !kovanId) { 
+                console.warn("Kullanıcı/ID eksik. Kullanıcı:", !!mevcutKullanici, "KovanID:", kovanId); 
+                kovanBaslik.innerText = "Hata: Kovan ID Bulunamadı";
+                detayContainer.innerHTML = "<p>URL'den 'kovanNo' parametresi okunamadı. Lütfen kovanlarim sayfasından tekrar deneyin.</p>";
+                kayitlarContainer.innerHTML = "";
+                return; 
+            }
+            
             try {
                 const docRef = db.collection("kovanlar").doc(kovanId);
                 const docSnap = await docRef.get();
                 if (docSnap.exists) {
                     const kovanData = docSnap.data();
-                    if (!kovanData.userId || kovanData.userId !== mevcutKullanici.uid) { console.error("Yetki Hatası"); kovanBaslik.innerText = "Erişim Reddedildi"; detayContainer.innerHTML = "<p>Erişim izniniz yok.</p>"; kayitlarContainer.innerHTML=''; return; }
+                    
+                    // --- 2. DÜZELTME: 'userId' -> 'kullaniciId' olarak değiştirildi ---
+                    // Veritabanında (manuel düzelttiğiniz) 'kullaniciId' alanını arar.
+                    if (!kovanData.kullaniciId || kovanData.kullaniciId !== mevcutKullanici.uid) { 
+                        console.error("Yetki Hatası: Belge sahibi (" + kovanData.kullaniciId + ") ile kullanıcı (" + mevcutKullanici.uid + ") eşleşmiyor."); 
+                        kovanBaslik.innerText = "Erişim Reddedildi"; 
+                        detayContainer.innerHTML = "<p>Bu kovanı görme yetkiniz yok. (Veritabanında 'kullaniciId' alanını kontrol edin)</p>"; 
+                        kayitlarContainer.innerHTML=''; 
+                        return; 
+                    }
+                    
                     mevcutKovanVerisi = kovanData;
                     kovanBaslik.innerText = `Kovan No: ${mevcutKovanVerisi.kovanNo}`;
                     renderViewMode(); 
@@ -209,9 +235,20 @@
                     const duzenleBtn = document.getElementById('duzenleBtn'); const silBtn = document.getElementById('silKovanBtn');
                     if(duzenleBtn) duzenleBtn.disabled = false; if(silBtn) silBtn.disabled = false;
                     console.log("yukleKovanDetayi tamamlandı.");
-                } else { console.error("Kovan bulunamadı"); kovanBaslik.innerText="Hata"; detayContainer.innerHTML=`<p>Kovan bulunamadı.</p>`; }
-            } catch (error) { console.error("Yükleme Hatası:", error); kovanBaslik.innerText="Hata"; detayContainer.innerHTML = "<p>Veri yüklenirken hata.</p>"; }
+                } else { 
+                    console.error("Kovan bulunamadı"); 
+                    kovanBaslik.innerText="Hata"; 
+                    detayContainer.innerHTML=`<p>Kovan bulunamadı (ID: ${kovanId}).</p>`; 
+                }
+            } catch (error) { 
+                console.error("Yükleme Hatası:", error); 
+                kovanBaslik.innerText="Hata"; 
+                // Hata mesajını göster (örn: "permission-denied" -> "İzin reddedildi")
+                detayContainer.innerHTML = `<p>Veri yüklenirken hata: ${error.message} (Firestore kurallarınızı ve kovan belgesindeki 'kullaniciId' alanını kontrol edin.)</p>`; 
+            }
         }
+
+        // --- GERİ KALAN TÜM JAVASCRIPT KODU (Değiştirilmedi) ---
 
         function kurAnaButonListenerlari() {
             const setupListener = (buttonId, event, handler) => { const button = document.getElementById(buttonId); if (button) { const newButton = button.cloneNode(true); button.parentNode.replaceChild(newButton, button); newButton.addEventListener(event, handler); console.log(`Listener kuruldu: ${buttonId}`); } else { console.error(`Buton bulunamadı: ${buttonId}`); } };
@@ -354,8 +391,14 @@
     async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={bakimTarihi:gf('bakimTarihi'), yapilanIslem:gf('yapilanIslem'), notlar:gf('bakimNotlari')}; await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); }
     async function handleHastalikSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hastalikAdi:gf('hastalikAdi'), tedaviTarihi:gf('tedaviTarihi'), kullanilanIlac:gf('kullanilanIlac'), notlar:gf('hastalikNotlari')}; await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); }
     async function handleHasatSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; const data={hasatTarihi:gf('hasatTarihi'), hasatMiktari:gf('hasatMiktari', 'number'), notlar:gf('hasatNotlari')}; if(isNaN(data.hasatMiktari)||data.hasatMiktari<=0){ alert("Miktar > 0"); return; } await addKayit('hasatKayitlari', data, 'formHasatEkle', hasatKayitlariniListele); }
+    
     async function addKayit(collName, data, formId, listeleFn) {
-         console.log(`addKayit: ${collName}`, data); data.eklenmeTarihi = new Date();
+         console.log(`addKayit: ${collName}`, data); 
+         data.eklenmeTarihi = new Date();
+         // --- 3. DÜZELTME: Alt koleksiyon kayıtlarına da kimlik eklendi ---
+         data.kullaniciId = mevcutKullanici.uid;
+         data.kullaniciEmail = mevcutKullanici.email;
+         
          const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
          if(btn) btn.disabled = true;
          try {
@@ -370,14 +413,25 @@
     async function hasatKayitlariniListele(kId) { await listeleKayitlar(kId, 'hasat', 'hasatKayitlari', 'hasatTarihi', renderHasatKaydi); }
 
     async function listeleKayitlar(kId, tip, collName, tarihAdi, renderFn) {
-        const listElId = `${tip}-listesi`; const listEl = document.getElementById(listElId); if (!listEl) return; listEl.innerHTML = "<p>Yükleniyor...</p>";
+        const listElId = `${tip}-listesi`; const listEl = document.getElementById(listElId); 
+        // kId null ise (URL okunamadıysa) hata vermemesi için kontrol eklendi
+        if (!listEl || !kId) {
+            console.warn(`listeleKayitlar durduruldu: ${collName}, kId: ${kId}`);
+            if(listEl) listEl.innerHTML = ""; // Yükleniyor... yazısını temizle
+            return; 
+        }
+        listEl.innerHTML = "<p>Yükleniyor...</p>";
         console.log(`listeleKayitlar: ${collName} -> #${listElId}`);
         try {
             const querySnapshot = await db.collection("kovanlar").doc(kId).collection(collName).orderBy(tarihAdi, "desc").get();
             console.log(`${collName} sorgusu: ${querySnapshot.size} kayıt`);
             if (querySnapshot.empty) { listEl.innerHTML = "<p>Kayıt yok.</p>"; }
             else { listEl.innerHTML = ""; querySnapshot.forEach(doc => { try { renderFn(listEl, doc.id, doc.data()); } catch (e) { console.error(`Render hatası (${tip}, ${doc.id}):`, e); listEl.innerHTML += `<p style='color:red;'>Kayıt yüklenemedi (ID: ${doc.id})</p>`; } }); }
-        } catch (error) { console.error(`${collName} listeleme hatası:`, error); listEl.innerHTML = "<p style='color:red;'>Hata oluştu.</p>"; }
+        } catch (error) { 
+            console.error(`${collName} listeleme hatası:`, error); 
+            // Hata mesajını göster (örn: "permission-denied")
+            listEl.innerHTML = `<p style='color:red;'>Hata: ${error.message}</p>`; 
+        }
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
@@ -405,7 +459,7 @@
         k.innerHTML = `
             <div class="kayit-icerik"><span>Tarih: ${t}</span><strong>${kayit.hasatMiktari||'?'} kg Hasat</strong> ${kayit.notlar?`<p>Not: ${kayit.notlar}</p>`:''}</div>
             <div class="kayit-duzenleme-formu"> <div class="form-grup"><label>Tarih</label><input type="date" value="${kayit.hasatTarihi||''}"></div><div class="form-grup"><label>Miktar (kg)</label><input type="number" step="0.1" min="0" value="${kayit.hasatMiktari||0}"></div><div class="form-grup"><label>Notlar</label><textarea rows="2">${kayit.notlar||''}</textarea></div></div>
-            <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','hasat',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('hasatKayitlari','${id}','hasat')" title="Kaydet"><i class="fa-solid fa-check"></i></button> <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','hasat',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('hasatKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
+            <div class="buton-alan"> <button class="buton kayit-duzenle-btn" onclick="toggleKayitEditMode('${id}','hasat',true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button> <button class="buton kayit-kaydet-btn" onclick="handleKayitGuncelle('hasatKayitlari','${id}','hasat')" title="Kaydet"><i class="fa-solid fa-check"></i></button <button class="buton kayit-iptal-btn" onclick="toggleKayitEditMode('${id}','hasat',false)" title="İptal"><i class="fa-solid fa-times"></i></button> <button class="buton kayit-sil-btn" onclick="handleKayitSil('hasatKayitlari','${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button> </div>`;
         listEl.appendChild(k);
     }
 
