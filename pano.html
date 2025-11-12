@@ -16,7 +16,7 @@
             max-width: 900px; 
             margin: 0 auto 10px auto; 
             flex-wrap: wrap; 
-            gap: 15px; /* Başlık ve buton grubu arasına boşluk */
+            gap: 15px; 
         }
         .header h1 { color: #333; display: flex; align-items: center; font-size: 1.8em; margin: 0;}
         .header h1 i { margin-right: 12px; color: #007bff; }
@@ -26,19 +26,21 @@
         .buton i { margin-right: 8px; }
         .geri-btn { background-color: #6c757d; } .geri-btn:hover { background-color: #5a6268; }
         .logout-btn { background-color: #dc3545; } .logout-btn:hover { background-color: #c82333; }
-
-        /* --- YENİ EKLENEN ADMİN BUTON STİLİ --- */
-        .admin-btn {
-            background-color: #ffc107; /* Sarı/Altın rengi */
-            color: #333;
-        }
+        .admin-btn { background-color: #ffc107; color: #333; }
         .admin-btn:hover { background-color: #e0a800; }
-        /* --- BİTİŞ --- */
+        .login-btn { background-color: #28a745; } .login-btn:hover { background-color: #218838; }
 
-        .pano-container {
-            max-width: 900px;
-            margin: 20px auto;
+        .user-email {
+            font-weight: bold;
+            color: #333;
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border: 1px solid #ccc;
         }
+
+        .pano-container { max-width: 900px; margin: 20px auto; }
         
         .duyuru-item {
             background: #fff;
@@ -49,11 +51,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
-        .duyuru-item h3 {
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: #333;
-        }
+        .duyuru-item h3 { margin-top: 0; margin-bottom: 5px; color: #333; }
         .duyuru-item .tarih-saat {
             font-size: 0.9em;
             color: #777;
@@ -67,22 +65,19 @@
             font-size: 1.1em;
             line-height: 1.6;
             color: #444;
-            white-space: pre-wrap; /* Satır sonlarını korur */
+            white-space: pre-wrap; 
             margin-bottom: 0;
         }
 
         .loading { text-align: center; font-size: 1.2em; color: #777; }
 
-        /* --- MOBİL UYUMLULUK GÜNCELLENDİ (STABİL DÜZEN) --- */
         @media (max-width: 600px) {
             .header { 
                 flex-direction: column; 
                 align-items: stretch; 
                 text-align: center; 
             }
-            .header h1 {
-                margin-bottom: 15px;
-            }
+            .header h1 { margin-bottom: 15px; }
             .user-info { 
                 flex-direction: column; 
                 align-items: stretch; 
@@ -90,16 +85,21 @@
                 gap: 10px;
             }
             .buton { 
-                /* flex-grow: 1; <-- Kaldırıldı */
-                width: 100%; /* Tam genişlik */
+                width: 100%; 
                 text-align: center; 
                 padding: 12px 10px;
                 font-size: 1em;
             }
             .duyuru-item { padding: 15px; }
+            
+            .user-email {
+                text-align: center;
+                width: 100%;
+                order: -1; 
+                margin-bottom: 5px; 
+            }
         }
         
-        /* === YENİ EKLENEN İMZA STİLİ === */
         .imza-bolumu {
             text-align: center;
             padding: 15px 20px;
@@ -111,22 +111,13 @@
             color: #444;
             font-size: 0.85em;
             line-height: 1.5;
-            max-width: 900px; /* Pano ile hizalamak için eklendi */
+            max-width: 900px; 
             margin-left: auto;
             margin-right: auto;
         }
-        .imza-bolumu p {
-            margin: 6px 0;
-        }
-        .imza-bolumu a {
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .imza-bolumu a:hover {
-            text-decoration: underline;
-        }
-        /* === Bitiş === */
+        .imza-bolumu p { margin: 6px 0; }
+        .imza-bolumu a { color: #007bff; font-weight: bold; text-decoration: none; }
+        .imza-bolumu a:hover { text-decoration: underline; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -138,13 +129,17 @@
         <h1><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</h1>
         
         <div class="user-info">
+            <span id="userEmailDisplay" class="user-email" style="display:none;">...</span>
+            
             <a href="kovanlarim.html" class="buton geri-btn"><i class="fa-solid fa-arrow-left"></i> Kovan Listesi</a>
             
             <a href="admin_pano.html" id="adminPanoBtn" class="buton admin-btn" style="display:none;">
                 <i class="fa-solid fa-pencil"></i> Panoyu Düzenle
             </a>
             
-            <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+            <button id="logoutBtn" class="buton logout-btn" style="display:none;"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+            
+            <a href="login.html" id="loginBtn" class="buton login-btn" style="display:none;"><i class="fa-solid fa-right-to-bracket"></i> Admin Girişi</a>
         </div>
         </div>
 
@@ -171,39 +166,48 @@
 
     const logoutBtn = document.getElementById('logoutBtn');
     const panoContainer = document.getElementById('pano-container');
+    const userEmailDisplay = document.getElementById('userEmailDisplay'); 
+    const adminBtn = document.getElementById('adminPanoBtn');
+    const loginBtn = document.getElementById('loginBtn'); 
 
-    // 3. ADIM: GÜNCELLENEN onAuthStateChanged
+    // 3. ADIM: onAuthStateChanged (Hibrit mantık)
     auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("Kullanıcı giriş yapmış, duyurular yükleniyor.");
+        // KULLANICI GİRİŞ YAPMIŞSA
+        console.log("Kullanıcı giriş yapmış:", user.email);
         
-        // --- YENİ EKLENEN KOD: ADMİN BUTONUNU GÖSTERME ---
-        // Lütfen 'SİZİN_ADMİN_EMAILİNİZ@gmail.com' kısmını kendi e-postanızla değiştirin.
+        userEmailDisplay.textContent = user.email;
+        userEmailDisplay.style.display = 'inline-block';
+        logoutBtn.style.display = 'inline-block';
+        loginBtn.style.display = 'none'; 
+
         const adminEmail = "mremzi@gmail.com"; 
-        const adminBtn = document.getElementById('adminPanoBtn');
-        
         if (user.email === adminEmail && adminBtn) {
-            adminBtn.style.display = 'inline-block'; // Butonu görünür yap
+            adminBtn.style.display = 'inline-block'; 
         }
-        // --- YENİ KOD BİTTİ ---
-        
-        duyurulariYukle();
         
       } else {
-        console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
-        window.location.href = 'login.html';
+        // KULLANICI GİRİŞ YAPMAMIŞSA
+        console.log("Kullanıcı oturumu kapalı (veya anonim ziyaretçi).");
+        
+        userEmailDisplay.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        adminBtn.style.display = 'none';
+        loginBtn.style.display = 'inline-block'; 
       }
     });
 
+    // 4. ADIM: Çıkış butonu
     logoutBtn.addEventListener('click', () => {
         auth.signOut().catch((error) => console.error("Çıkış hatası:", error));
     });
 
+    // 5. ADIM: Duyuru yükleme fonksiyonu
     async function duyurulariYukle() {
         panoContainer.innerHTML = '<p class="loading">Duyurular yükleniyor...</p>';
         try {
             const querySnapshot = await db.collection("pano")
-                                          .orderBy("eklenmeTarihi", "desc") // En yeni duyuru en üstte
+                                          .orderBy("eklenmeTarihi", "desc") 
                                           .get();
 
             if (querySnapshot.empty) {
@@ -211,12 +215,11 @@
                 return;
             }
 
-            panoContainer.innerHTML = ""; // Yüklemeyi temizle
+            panoContainer.innerHTML = ""; 
             
             querySnapshot.forEach(doc => {
                 const data = doc.data();
                 
-                // Tarih ve saati formatla
                 let tarihStr = "Tarih bilgisi yok";
                 if (data.eklenmeTarihi && data.eklenmeTarihi.toDate) {
                     const tarih = data.eklenmeTarihi.toDate();
@@ -242,6 +245,9 @@
             panoContainer.innerHTML = `<p style="color:red;">Duyurular yüklenemedi. Hata: ${error.message}</p>`;
         }
     }
+    
+    document.addEventListener('DOMContentLoaded', duyurulariYukle);
+
 </script>
 
 <footer class="imza-bolumu">

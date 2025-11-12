@@ -23,10 +23,8 @@
         .kaydet-btn { background-color: #28a745; } .kaydet-btn:hover { background-color: #218838; } .kaydet-btn:disabled { background-color: #aaa; cursor: not-allowed; }
         .logout-btn { background-color: #ffc107; color: #333; } .logout-btn:hover { background-color: #e0a800; }
         
-        /* --- YENİ EKLENEN PANO BUTON STİLİ --- */
         .pano-btn { background-color: #007bff; }
         .pano-btn:hover { background-color: #0056b3; }
-        /* --- BİTİŞ --- */
 
         .buton i, .kayit-ekleme-formu button i { margin-right: 6px; }
 
@@ -122,7 +120,7 @@
         .photo-area img { max-width: 100%; max-height: 200px; height: auto; display: block; margin: 10px auto; border: 1px solid #ddd; }
         
         .btn-foto { 
-            background-color: #4CAF50; /* Yeşil renk */
+            background-color: #4CAF50; 
             color: white; 
             margin-top: 5px; 
             margin-bottom: 10px;
@@ -130,7 +128,6 @@
         
         .kayit-fotografi { max-width: 100%; max-height: 300px; height: auto; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
         
-        /* === YENİ EKLENEN İMZA STİLİ === */
         .imza-bolumu {
             text-align: center;
             padding: 15px 20px;
@@ -154,7 +151,6 @@
         .imza-bolumu a:hover {
             text-decoration: underline;
         }
-        /* === BİTİŞ === */
 
         @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
@@ -184,7 +180,7 @@
         
         <div class="user-info">
              <span id="userEmail" class="user-email"></span>
-             <a href="pano.html" class="buton pano-btn"><i class="fa-solid fa-bullhorn"></i> Pano</a>
+             <a href="pano.html" class="buton pano-btn"><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</a>
              <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
         </div>
         <div class="ana-buton-grup">
@@ -345,7 +341,7 @@
             <option value="5 - Çok Hırçın" ${setSelected(kovan.hircinlik,'5 - Çok Hırçın')}>5 - Çok Hırçın</option>
             </select></div> 
             
-            <div class="checkbox-grup"><input type="checkbox" id="editTabanDelikliMi" ${setChecked(kovan.tabanDelikliMi)}><label>Delikli T.</label></div> <div class="checkbox-grup"><input type="checkbox" id="editPolenTuzagi" ${setChecked(kovan.polenTuzagi)}><label>Polen T.</label></div> </div> <div> <h3><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı</h3><div class="form-grup"><label>Doğum T.</label><input type="date" id="editAnaDogumTarihi" value="${kovan.anaAri.dogumTarihi||''}"></div><div class="form-grup"><label>Ana Irkı</label><select id="editAnaIrki"><option value="Kafkas" ${setSelected(kovan.anaAri.anaIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.anaAri.anaIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.anaAri.anaIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.anaAri.anaIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.anaAri.anaIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.anaAri.anaIrki,'Melez')}>Melez</option></select></div><div class="form-grup"><label>Ana Türü</label><select id="editAnaTuru"><option value="Damızlık (F0)" ${setSelected(kovan.anaAri.anaTuru,'Damızlık (F0)')}>F0</option><option value="Çiftleşmiş (F1)" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmiş (F1)')}>F1</option><option value="Çiftleşmemiş" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmemiş')}>Çiftleşmemiş</option><option value="Kendi Ürettiğim" ${setSelected(kovan.anaAri.anaTuru,'Kendi Ürettiğim')}>Kendi</option></select></div><div class="form-grup"><label>Ana Rengi</label><select id="editAnaRengi"><option value="Boyasız" ${setSelected(kovan.anaAri.anaRengi,'Boyasız')}>Boyasız</option><option value="Beyaz" ${setSelected(kovan.anaAri.anaRengi,'Beyaz')}>Beyaz</option><option value="Sarı" ${setSelected(kovan.anaAri.anaRengi,'Sarı')}>Sarı</option><option value="Kırmızı" ${setSelected(kovan.anaAri.anaRengi,'Kırmızı')}>Kırmızı</option><option value="Yeşil" ${setSelected(kovan.anaAri.anaRengi,'Yeşil')}>Yeşil</option><option value="Mavi" ${setSelected(kovan.anaAri.anaRengi,'Mavi')}>Mavi</option></select></div><div class="form-grup"><label>Performansı</label><select id="editAnaPerformans"><option value="Çok İyi" ${setSelected(kovan.anaAri.performans,'Çok İyi')}>Çok İyi</option><option value="İyi" ${setSelected(kovan.anaAri.performans,'İyi')}>İyi</option><option value="Orta" ${setSelected(kovan.anaAri.performans,'Orta')}>Orta</option><option value="Zayıf" ${setSelected(kovan.anaAri.performans,'Zayıf')}>Zayıf</option></select></div><div class="form-grup"><label>Plan. Değ. T.</label><input type="date" id="editAnaDegisimTarihi" value="${kovan.anaAri.degisimTarihi||''}"></div></div></div></form>`;
+            <div class="checkbox-grup"><input type="checkbox" id="editTabanDelikliMi" ${setChecked(kovan.tabanDelikliMi)}><label>Delikli T.</label></div> <div class="checkbox-grup"><input type="checkbox" id="editPolenTuzagi" ${setChecked(kovan.polenTuzagi)}><label>Polen T.</label></div> </div> <div> <h3><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı</h3><div class="form-grup"><label>Doğum T.</label><input type="date" id="editAnaDogumTarihi" value="${kovan.anaAri.dogumTarihi||''}"></div><div class="form-grup"><label>Ana Irkı</label><select id="editAnaIrki"><option value="Kafkas" ${setSelected(kovan.anaAri.anaIrki,'Kafkas')}>Kafkas</option><option value="Anadolu" ${setSelected(kovan.anaAri.anaIrki,'Anadolu')}>Anadolu</option><option value="Karniyol" ${setSelected(kovan.anaAri.anaIrki,'Karniyol')}>Karniyol</option><option value="İtalyan" ${setSelected(kovan.anaAri.anaIrki,'İtalyan')}>İtalyan</option><option value="Belfast" ${setSelected(kovan.anaAri.anaIrki,'Belfast')}>Belfast</option><option value="Melez" ${setSelected(kovan.anaAri.anaIrki,'Melez')}>Melez</option></select></div><div class="form-grup"><label>Ana Türü</label><select id="editAnaTuru"><option value="Damızlık (F0)" ${setSelected(kovan.anaAri.anaTuru,'Damızlık (F0)')}>F0</option><option value="Çiftleşmiş (F1)" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmiş (F1)')}>F1</option><option value="Çiftleşmemiş" ${setSelected(kovan.anaAri.anaTuru,'Çiftleşmemiş')}>Çiftleşmemiş</option><option value="Kendi Ürettiğim" ${setSelected(kovan.anaAri.anaTuru,'Kendi Ürettiğim')}>Kendi</option></select></div><div class="form-grup"><label>Ana Rengi</label><select id="editAnaRengi"><option value="Boyasız" ${setSelected(kovan.anaAri.anaRengi,'Boyasız')}>Boyasız</option><option value="Beyaz" ${setSelected(kovan.anaAri.anaRengi,'Beyaz')}>Beyaz</option><option value="Sarı" ${setSelected(kovan.anaAri.anaRengi,'Sarı')}>Sarı</option><option value="Kırmızı" ${setSelected(kovan.anaAri.anaRengi,'Kırmızı')}>Kırmızı</option><option value="Yeşil" ${setSelected(kovan.anaAri.anaRengi,'Yeşil')}>Yeşil</option><option value="Mavi" ${setSelected(kovan.anaAri.anaRengi,'Mavi')}>Mavi</option></select></div><div class="form-grup"><label>Performansı</label><select id="editAnaPerformans"><option value="Çok İyi" ${setSelected(kovan.anaAri.performans,'Çok İyi')}>Çok İyi</option><option value="İyi" ${setSelected(kovan.anaAri.performans,'İyi')}>İyi</option><option value="Orta" ${setSelected(kovan.anaAri.anaRengi,'Orta')}>Orta</option><option value="Zayıf" ${setSelected(kovan.anaAri.anaRengi,'Zayıf')}>Zayıf</option></select></div><div class="form-grup"><label>Plan. Değ. T.</label><input type="date" id="editAnaDegisimTarihi" value="${kovan.anaAri.degisimTarihi||''}"></div></div></div></form>`;
             detayContainer.appendChild(editFormContainer);
         }
 
@@ -652,3 +648,6 @@
 
 </body>
 </html>
+}
+Tüm dosyalarda  "Pano" butonunu;
+"Duyuru Panosu" haline getir.

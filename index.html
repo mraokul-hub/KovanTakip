@@ -32,7 +32,6 @@
             border-radius: 4px;
         }
 
-        /* GÜNCELLENDİ: .pano-btn i eklendi */
         h1 i, .nav-link i, button[type="submit"] i, .logout-btn i, .pano-btn i { margin-right: 8px; }
 
         .form-grup { margin-bottom: 10px; }
@@ -78,22 +77,19 @@
         .logout-btn:hover { background-color: #c82333; }
         .user-email { font-weight: bold; color: #555; }
         
-        /* --- YENİ EKLENEN PANO BUTON STİLİ --- */
         .pano-btn {
             background-color: #007bff;
             color: white;
-            padding: 8px 12px; /* logout-btn ile eşleşti */
+            padding: 8px 12px; 
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
-            display: inline-flex; /* İkonu hizalamak için */
-            align-items: center; /* İkonu hizalamak için */
+            display: inline-flex; 
+            align-items: center; 
             border: none;
         }
         .pano-btn:hover { background-color: #0056b3; }
-        /* --- BİTİŞ --- */
 
-        /* MOBİL UYUMLULUK (HEADER İÇİN) */
         @media (max-width: 600px) {
             .header {
                 flex-direction: column;
@@ -110,19 +106,17 @@
                 margin-top: 10px;
             }
             
-            /* GÜNCELLENDİ: .pano-btn eklendi */
             .logout-btn, .pano-btn {
-                flex-grow: 1; /* Butonun büyümesini sağlar */
+                flex-grow: 1; 
                 text-align: center;
-                padding-top: 10px; /* Diğer butonlarla uyum */
-                padding-bottom: 10px; /* Diğer butonlarla uyum */
+                padding-top: 10px; 
+                padding-bottom: 10px; 
             }
             .user-email {
                 font-size: 0.9em;
             }
         }
         
-        /* === YENİ EKLENEN İMZA STİLİ === */
         .imza-bolumu {
             text-align: center;
             padding: 15px 20px;
@@ -134,7 +128,7 @@
             color: #444;
             font-size: 0.85em;
             line-height: 1.5;
-            max-width: 740px; /* Form ile hizalamak için eklendi */
+            max-width: 740px; 
             margin-left: auto;
             margin-right: auto;
         }
@@ -149,7 +143,6 @@
         .imza-bolumu a:hover {
             text-decoration: underline;
         }
-        /* === Bitiş === */
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -163,7 +156,7 @@
         
         <div class="user-info">
             <span id="userEmail" class="user-email"></span>
-            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Pano</a>
+            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</a>
             <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
         </div>
         </div>

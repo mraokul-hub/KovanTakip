@@ -26,6 +26,16 @@
         .geri-btn { background-color: #6c757d; } .geri-btn:hover { background-color: #5a6268; }
         .logout-btn { background-color: #dc3545; } .logout-btn:hover { background-color: #c82333; }
 
+        .user-email {
+            font-weight: bold;
+            color: #333;
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border: 1px solid #ccc;
+        }
+
         .admin-container {
             max-width: 900px;
             margin: 20px auto;
@@ -63,7 +73,6 @@
         .kaydet-btn:hover { background-color: #218838; }
         .kaydet-btn:disabled { background-color: #aaa; cursor: not-allowed; }
 
-        /* MEVCUT KAYIT KARTI STİLLERİ (detay.html'den uyarlandı) */
         .duyuru-karti { 
             position: relative; border: 1px solid #eee; background: #fafafa; 
             padding: 15px; margin-top: 10px; border-radius: 4px; padding-right: 100px; 
@@ -96,7 +105,6 @@
         .duyuru-karti.duzenleniyor .kayit-kaydet-btn, .duyuru-karti.duzenleniyor .kayit-iptal-btn { display: inline-block; }
         .duyuru-karti.duzenleniyor .kayit-sil-btn { display: none; } 
         
-        /* === YENİ EKLENEN İMZA STİLİ === */
         .imza-bolumu {
             text-align: center;
             padding: 15px 20px;
@@ -108,22 +116,18 @@
             color: #444;
             font-size: 0.85em;
             line-height: 1.5;
-            max-width: 900px; /* Diğer containerlara uyum için eklendi */
+            max-width: 900px; 
             margin-left: auto;
             margin-right: auto;
         }
-        .imza-bolumu p {
-            margin: 6px 0;
+        .imza-bolumu p { margin: 6px 0; }
+        .imza-bolumu a { color: #007bff; font-weight: bold; text-decoration: none; }
+        .imza-bolumu a:hover { text-decoration: underline; }
+         .imza-bolumu a[href*="banabicoffee"] {
+            font-size: 0.9em; 
+            font-weight: 600;
+            word-break: break-all;
         }
-        .imza-bolumu a {
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .imza-bolumu a:hover {
-            text-decoration: underline;
-        }
-        /* === BİTİŞ === */
 
         @media (max-width: 600px) {
             .header { flex-direction: column; align-items: stretch; text-align: center; }
@@ -133,6 +137,12 @@
             .duyuru-karti { padding-right: 45px; }
              .duyuru-karti .buton-alan {
                  flex-direction: column; top: 10px; right: 5px; gap: 4px;
+            }
+            .user-email {
+                text-align: center;
+                width: 100%;
+                order: -1; 
+                margin-bottom: 5px;
             }
         }
     </style>
@@ -145,10 +155,13 @@
     <div class="header">
         <h1><i class="fa-solid fa-user-shield"></i> Pano Yönetimi</h1>
         <div class="user-info">
-            <a href="kovanlarim.html" class="buton geri-btn"><i class="fa-solid fa-arrow-left"></i> Kovan Listesi</a>
+            <span id="userEmailDisplay" class="user-email">...</span>
+            
+            <a href="pano.html" class="buton geri-btn"><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</a>
+            
             <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
         </div>
-    </div>
+        </div>
 
     <div class="admin-container">
         <h2><i class="fa-solid fa-plus-circle"></i> Yeni Duyuru Ekle</h2>
@@ -196,22 +209,30 @@
     const yeniIcerikInput = document.getElementById('yeniIcerikInput');
     const yeniKaydetBtn = document.getElementById('yeniKaydetBtn');
     const mevcutListesi = document.getElementById('mevcut-duyurular-listesi');
+    const userEmailDisplay = document.getElementById('userEmailDisplay'); 
 
     // 3. ADIM: Güvenlik Kontrolü ve Başlatma
     auth.onAuthStateChanged((user) => {
       if (user) {
-        // Lütfen 'SİZİN_ADMİN_EMAILİNİZ@gmail.com' kısmını kendi e-postanızla değiştirin.
         const adminEmail = "mremzi@gmail.com";
         
         if (user.email !== adminEmail) {
             alert("Bu sayfaya erişim yetkiniz yok.");
-            window.location.href = 'kovanlarim.html';
+            window.location.href = 'index.html'; 
         } else {
             console.log("Admin giriş yaptı, yönetim paneli yükleniyor.");
-            duyurulariListele(); // Mevcut duyuruları listele
+            
+            if (userEmailDisplay) {
+                userEmailDisplay.textContent = user.email;
+            }
+            
+            duyurulariListele(); 
         }
       } else {
         console.log("Kullanıcı oturumu kapalı.");
+         if (userEmailDisplay) {
+            userEmailDisplay.textContent = "Giriş yapılmadı";
+        }
         window.location.href = 'login.html';
       }
     });
@@ -238,14 +259,14 @@
         const yeniDuyuru = {
             baslik: baslik,
             icerik: icerik,
-            eklenmeTarihi: new Date() // Sunucuya tarih bilgisi ekle
+            eklenmeTarihi: new Date() 
         };
 
         try {
             await db.collection("pano").add(yeniDuyuru);
             alert("Duyuru başarıyla yayınlandı!");
             formYeniDuyuru.reset();
-            duyurulariListele(); // Listeyi anında güncelle
+            duyurulariListele(); 
         } catch (error) {
             console.error("Duyuru eklenirken hata: ", error);
             alert("Hata: " + error.message);
@@ -268,7 +289,7 @@
                 return;
             }
             
-            mevcutListesi.innerHTML = ""; // Listeyi temizle
+            mevcutListesi.innerHTML = ""; 
             querySnapshot.forEach(doc => {
                 renderDuyuruKarti(mevcutListesi, doc.id, doc.data());
             });
@@ -349,7 +370,7 @@
             await db.collection("pano").doc(kayitId).update(guncelVeri);
             alert("Duyuru güncellendi!");
             toggleDuyuruEditMode(kayitId, false);
-            duyurulariListele(); // Listeyi yenile
+            duyurulariListele(); 
         } catch (error) {
             console.error("Güncelleme hatası: ", error);
             alert("Hata: " + error.message);
@@ -367,7 +388,7 @@
                 silButonu.disabled = true;
                 await db.collection("pano").doc(kayitId).delete();
                 alert("Duyuru silindi.");
-                kayitEl.remove(); // Listeden anında kaldır
+                kayitEl.remove(); 
             } catch (error) {
                 console.error("Silme hatası: ", error);
                 alert("Hata: " + error.message);
