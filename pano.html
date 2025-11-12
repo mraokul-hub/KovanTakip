@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyuru Panosu - Kovan Takip</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 900px; 
+            margin: 0 auto 10px auto; 
+            flex-wrap: wrap; 
+            gap: 15px; /* Başlık ve buton grubu arasına boşluk */
+        }
+        .header h1 { color: #333; display: flex; align-items: center; font-size: 1.8em; margin: 0;}
+        .header h1 i { margin-right: 12px; color: #007bff; }
+        
+        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .buton { color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; }
+        .buton i { margin-right: 8px; }
+        .geri-btn { background-color: #6c757d; } .geri-btn:hover { background-color: #5a6268; }
+        .logout-btn { background-color: #dc3545; } .logout-btn:hover { background-color: #c82333; }
+
+        /* --- YENİ EKLENEN ADMİN BUTON STİLİ --- */
+        .admin-btn {
+            background-color: #ffc107; /* Sarı/Altın rengi */
+            color: #333;
+        }
+        .admin-btn:hover { background-color: #e0a800; }
+        /* --- BİTİŞ --- */
+
+        .pano-container {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        
+        .duyuru-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-left: 5px solid #007bff;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .duyuru-item h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .duyuru-item .tarih-saat {
+            font-size: 0.9em;
+            color: #777;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+        .duyuru-item p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #444;
+            white-space: pre-wrap; /* Satır sonlarını korur */
+            margin-bottom: 0;
+        }
+
+        .loading { text-align: center; font-size: 1.2em; color: #777; }
+
+        /* --- MOBİL UYUMLULUK GÜNCELLENDİ (STABİL DÜZEN) --- */
+        @media (max-width: 600px) {
+            .header { 
+                flex-direction: column; 
+                align-items: stretch; 
+                text-align: center; 
+            }
+            .header h1 {
+                margin-bottom: 15px;
+            }
+            .user-info { 
+                flex-direction: column; 
+                align-items: stretch; 
+                width: 100%;
+                gap: 10px;
+            }
+            .buton { 
+                /* flex-grow: 1; <-- Kaldırıldı */
+                width: 100%; /* Tam genişlik */
+                text-align: center; 
+                padding: 12px 10px;
+                font-size: 1em;
+            }
+            .duyuru-item { padding: 15px; }
+        }
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+            max-width: 900px; /* Pano ile hizalamak için eklendi */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === Bitiş === */
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</h1>
+        
+        <div class="user-info">
+            <a href="kovanlarim.html" class="buton geri-btn"><i class="fa-solid fa-arrow-left"></i> Kovan Listesi</a>
+            
+            <a href="admin_pano.html" id="adminPanoBtn" class="buton admin-btn" style="display:none;">
+                <i class="fa-solid fa-pencil"></i> Panoyu Düzenle
+            </a>
+            
+            <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+        </div>
+        </div>
+
+    <div id="pano-container" class="pano-container">
+        <p class="loading">Duyurular yükleniyor, lütfen bekleyin...</p>
+    </div>
+
+<script>
+    // 1. ADIM: Firebase Proje Bilgileri
+    const firebaseConfig = {
+      apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // SİZİN BİLGİLERİNİZ
+      authDomain: "kovan-takip-4c054.firebaseapp.com",
+      projectId: "kovan-takip-4c054",
+      storageBucket: "kovan-takip-4c054.appspot.com",
+      messagingSenderId: "783431210365",
+      appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814"
+    };
+
+    // 2. ADIM: Firebase'i Başlatma
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth(); 
+    console.log("Firebase bağlanıldı.");
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    const panoContainer = document.getElementById('pano-container');
+
+    // 3. ADIM: GÜNCELLENEN onAuthStateChanged
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("Kullanıcı giriş yapmış, duyurular yükleniyor.");
+        
+        // --- YENİ EKLENEN KOD: ADMİN BUTONUNU GÖSTERME ---
+        // Lütfen 'SİZİN_ADMİN_EMAILİNİZ@gmail.com' kısmını kendi e-postanızla değiştirin.
+        const adminEmail = "mremzi@gmail.com"; 
+        const adminBtn = document.getElementById('adminPanoBtn');
+        
+        if (user.email === adminEmail && adminBtn) {
+            adminBtn.style.display = 'inline-block'; // Butonu görünür yap
+        }
+        // --- YENİ KOD BİTTİ ---
+        
+        duyurulariYukle();
+        
+      } else {
+        console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
+        window.location.href = 'login.html';
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut().catch((error) => console.error("Çıkış hatası:", error));
+    });
+
+    async function duyurulariYukle() {
+        panoContainer.innerHTML = '<p class="loading">Duyurular yükleniyor...</p>';
+        try {
+            const querySnapshot = await db.collection("pano")
+                                          .orderBy("eklenmeTarihi", "desc") // En yeni duyuru en üstte
+                                          .get();
+
+            if (querySnapshot.empty) {
+                panoContainer.innerHTML = "<p>Yayınlanmış bir duyuru bulunmuyor.</p>";
+                return;
+            }
+
+            panoContainer.innerHTML = ""; // Yüklemeyi temizle
+            
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // Tarih ve saati formatla
+                let tarihStr = "Tarih bilgisi yok";
+                if (data.eklenmeTarihi && data.eklenmeTarihi.toDate) {
+                    const tarih = data.eklenmeTarihi.toDate();
+                    tarihStr = tarih.toLocaleString('tr-TR', { 
+                        dateStyle: 'long', 
+                        timeStyle: 'short',
+                        hour12: false
+                    }) + ' tarihinde eklendi';
+                }
+
+                const duyuruKarti = document.createElement('div');
+                duyuruKarti.className = 'duyuru-item';
+                duyuruKarti.innerHTML = `
+                    <h3>${data.baslik || 'Başlıksız Duyuru'}</h3>
+                    <span class="tarih-saat">${tarihStr}</span>
+                    <p>${data.icerik || ''}</p>
+                `;
+                panoContainer.appendChild(duyuruKarti);
+            });
+
+        } catch (error) {
+            console.error("Duyuru yüklenirken hata oluştu: ", error);
+            panoContainer.innerHTML = `<p style="color:red;">Duyurular yüklenemedi. Hata: ${error.message}</p>`;
+        }
+    }
+</script>
+
+<footer class="imza-bolumu">
+    <p>
+        © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
+        <br>
+        Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+    </p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin: Pano Yönetimi - Kovan Takip</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 900px; 
+            margin: 0 auto 10px auto; 
+            flex-wrap: wrap; 
+        }
+        .header h1 { color: #d39e00; display: flex; align-items: center; font-size: 1.8em; }
+        .header h1 i { margin-right: 12px; }
+        
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .buton { color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; }
+        .buton i { margin-right: 8px; }
+        .geri-btn { background-color: #6c757d; } .geri-btn:hover { background-color: #5a6268; }
+        .logout-btn { background-color: #dc3545; } .logout-btn:hover { background-color: #c82333; }
+
+        .admin-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .admin-container h2 { margin-top: 0; color: #28a745; }
+        .admin-container h2 i { margin-right: 8px; }
+
+        .mevcut-duyurular {
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+        .mevcut-duyurular h2 { color: #007bff; }
+        
+        .form-grup { margin-bottom: 20px; }
+        .form-grup label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 1.1em; color: #333; }
+        .form-grup input, .form-grup textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .form-grup textarea { min-height: 150px; resize: vertical; }
+        
+        .kaydet-btn {
+            background-color: #28a745; font-size: 1.2em;
+            padding: 12px 25px; width: 100%;
+        }
+        .kaydet-btn:hover { background-color: #218838; }
+        .kaydet-btn:disabled { background-color: #aaa; cursor: not-allowed; }
+
+        /* MEVCUT KAYIT KARTI STİLLERİ (detay.html'den uyarlandı) */
+        .duyuru-karti { 
+            position: relative; border: 1px solid #eee; background: #fafafa; 
+            padding: 15px; margin-top: 10px; border-radius: 4px; padding-right: 100px; 
+            border-left: 5px solid #ffc107;
+        }
+        .duyuru-karti p { margin: 4px 0; font-size: 0.95em; line-height: 1.4; white-space: pre-wrap; }
+        .duyuru-karti strong { font-weight: bold; color: #333; font-size: 1.1em; }
+        .duyuru-karti span { font-size: 0.85em; color: #666; display: block; margin-bottom: 5px; }
+        .duyuru-karti .buton-alan { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+        
+        .kayit-duzenle-btn, .kayit-sil-btn, .kayit-kaydet-btn, .kayit-iptal-btn { 
+            padding: 3px 8px; font-size: 0.8em; 
+            width: 30px; height: 24px; font-size: 0.9em; 
+            padding: 3px; text-align: center;
+        }
+        .kayit-duzenle-btn i, .kayit-sil-btn i, .kayit-kaydet-btn i, .kayit-iptal-btn i { margin: 0; }
+        
+        .kayit-duzenle-btn { background-color: #ffc107; color: #333; } .kayit-duzenle-btn:hover { background-color: #e0a800; }
+        .kayit-kaydet-btn { background-color: #28a745; } .kayit-kaydet-btn:disabled { background-color: #aaa; }
+        .kayit-iptal-btn { background-color: #6c757d; }
+        .kayit-sil-btn { background-color: #dc3545 !important; color: white !important; }
+        .kayit-sil-btn:hover { background-color: #c82333 !important; }
+
+        .duyuru-duzenleme-formu { display: none; margin-top: 5px; }
+        .duyuru-duzenleme-formu .form-grup { margin-bottom: 8px; }
+        .duyuru-karti.duzenleniyor .duyuru-icerik { display: none; }
+        .duyuru-karti.duzenleniyor .duyuru-duzenleme-formu { display: block; }
+        .duyuru-karti.duzenleniyor .kayit-duzenle-btn { display: none; }
+        .duyuru-karti .kayit-kaydet-btn, .duyuru-karti .kayit-iptal-btn { display: none; }
+        .duyuru-karti.duzenleniyor .kayit-kaydet-btn, .duyuru-karti.duzenleniyor .kayit-iptal-btn { display: inline-block; }
+        .duyuru-karti.duzenleniyor .kayit-sil-btn { display: none; } 
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+            max-width: 900px; /* Diğer containerlara uyum için eklendi */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === BİTİŞ === */
+
+        @media (max-width: 600px) {
+            .header { flex-direction: column; align-items: stretch; text-align: center; }
+            .user-info { justify-content: space-between; margin-top: 15px; }
+            .buton { flex-grow: 1; text-align: center; }
+            .admin-container { padding: 20px; }
+            .duyuru-karti { padding-right: 45px; }
+             .duyuru-karti .buton-alan {
+                 flex-direction: column; top: 10px; right: 5px; gap: 4px;
+            }
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-user-shield"></i> Pano Yönetimi</h1>
+        <div class="user-info">
+            <a href="kovanlarim.html" class="buton geri-btn"><i class="fa-solid fa-arrow-left"></i> Kovan Listesi</a>
+            <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <h2><i class="fa-solid fa-plus-circle"></i> Yeni Duyuru Ekle</h2>
+        <form id="formYeniDuyuru">
+            <div class="form-grup">
+                <label for="yeniBaslikInput">Duyuru Başlığı</label>
+                <input type="text" id="yeniBaslikInput" required>
+            </div>
+            <div class="form-grup">
+                <label for="yeniIcerikInput">Duyuru İçeriği</label>
+                <textarea id="yeniIcerikInput" required></textarea>
+            </div>
+            <button id="yeniKaydetBtn" class="buton kaydet-btn"><i class="fa-solid fa-save"></i> Duyuruyu Yayınla</button>
+        </form>
+    </div>
+    
+    <div class="admin-container mevcut-duyurular">
+        <h2><i class="fa-solid fa-list-check"></i> Mevcut Duyurular</h2>
+        <div id="mevcut-duyurular-listesi">
+            <p>Mevcut duyurular yükleniyor...</p>
+        </div>
+    </div>
+
+<script>
+    // 1. ADIM: Firebase Proje Bilgileri
+    const firebaseConfig = {
+      apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // SİZİN BİLGİLERİNİZ
+      authDomain: "kovan-takip-4c054.firebaseapp.com",
+      projectId: "kovan-takip-4c054",
+      storageBucket: "kovan-takip-4c054.appspot.com",
+      messagingSenderId: "783431210365",
+      appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814"
+    };
+
+    // 2. ADIM: Firebase'i Başlatma
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth(); 
+    console.log("Firebase bağlanıldı.");
+
+    // DOM Elementleri
+    const logoutBtn = document.getElementById('logoutBtn');
+    const formYeniDuyuru = document.getElementById('formYeniDuyuru');
+    const yeniBaslikInput = document.getElementById('yeniBaslikInput');
+    const yeniIcerikInput = document.getElementById('yeniIcerikInput');
+    const yeniKaydetBtn = document.getElementById('yeniKaydetBtn');
+    const mevcutListesi = document.getElementById('mevcut-duyurular-listesi');
+
+    // 3. ADIM: Güvenlik Kontrolü ve Başlatma
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Lütfen 'SİZİN_ADMİN_EMAILİNİZ@gmail.com' kısmını kendi e-postanızla değiştirin.
+        const adminEmail = "mremzi@gmail.com";
+        
+        if (user.email !== adminEmail) {
+            alert("Bu sayfaya erişim yetkiniz yok.");
+            window.location.href = 'kovanlarim.html';
+        } else {
+            console.log("Admin giriş yaptı, yönetim paneli yükleniyor.");
+            duyurulariListele(); // Mevcut duyuruları listele
+        }
+      } else {
+        console.log("Kullanıcı oturumu kapalı.");
+        window.location.href = 'login.html';
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut().catch((error) => console.error("Çıkış hatası:", error));
+    });
+
+    // 4. ADIM: YENİ DUYURU EKLEME
+    formYeniDuyuru.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const baslik = yeniBaslikInput.value;
+        const icerik = yeniIcerikInput.value;
+        
+        if (!baslik || !icerik) {
+            alert("Başlık ve içerik boş olamaz.");
+            return;
+        }
+
+        yeniKaydetBtn.disabled = true;
+        yeniKaydetBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yayınlanıyor...';
+
+        const yeniDuyuru = {
+            baslik: baslik,
+            icerik: icerik,
+            eklenmeTarihi: new Date() // Sunucuya tarih bilgisi ekle
+        };
+
+        try {
+            await db.collection("pano").add(yeniDuyuru);
+            alert("Duyuru başarıyla yayınlandı!");
+            formYeniDuyuru.reset();
+            duyurulariListele(); // Listeyi anında güncelle
+        } catch (error) {
+            console.error("Duyuru eklenirken hata: ", error);
+            alert("Hata: " + error.message);
+        } finally {
+            yeniKaydetBtn.disabled = false;
+            yeniKaydetBtn.innerHTML = '<i class="fa-solid fa-save"></i> Duyuruyu Yayınla';
+        }
+    });
+
+    // 5. ADIM: MEVCUT DUYURULARI LİSTELEME
+    async function duyurulariListele() {
+        mevcutListesi.innerHTML = "<p>Mevcut duyurular yükleniyor...</p>";
+        try {
+            const querySnapshot = await db.collection("pano")
+                                          .orderBy("eklenmeTarihi", "desc")
+                                          .get();
+            
+            if (querySnapshot.empty) {
+                mevcutListesi.innerHTML = "<p>Mevcut duyuru kaydı yok.</p>";
+                return;
+            }
+            
+            mevcutListesi.innerHTML = ""; // Listeyi temizle
+            querySnapshot.forEach(doc => {
+                renderDuyuruKarti(mevcutListesi, doc.id, doc.data());
+            });
+
+        } catch (error) {
+            console.error("Mevcut duyurular yüklenemedi: ", error);
+            mevcutListesi.innerHTML = "<p style='color:red;'>Hata: " + error.message + "</p>";
+        }
+    }
+
+    // 6. ADIM: TEK BİR KARTI RENDER ETME
+    function renderDuyuruKarti(listEl, id, kayit) {
+        let tarihStr = "Tarih bilgisi yok";
+        if (kayit.eklenmeTarihi && kayit.eklenmeTarihi.toDate) {
+            tarihStr = kayit.eklenmeTarihi.toDate().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+        }
+
+        const k = document.createElement('div');
+        k.className = 'duyuru-karti';
+        k.id = `duyuru-${id}`;
+        
+        k.innerHTML = `
+            <div class="duyuru-icerik">
+                <span>Eklenme: ${tarihStr}</span>
+                <strong>${kayit.baslik}</strong>
+                <p>${kayit.icerik}</p>
+            </div>
+            
+            <div class="duyuru-duzenleme-formu">
+                <div class="form-grup">
+                    <label>Başlık</label>
+                    <input type="text" value="${kayit.baslik}">
+                </div>
+                <div class="form-grup">
+                    <label>İçerik</label>
+                    <textarea rows="4">${kayit.icerik}</textarea>
+                </div>
+            </div>
+            
+            <div class="buton-alan">
+                <button class="buton kayit-duzenle-btn" onclick="toggleDuyuruEditMode('${id}', true)" title="Düzenle"><i class="fa-solid fa-pencil"></i></button>
+                <button class="buton kayit-kaydet-btn" onclick="handleDuyuruGuncelle('${id}')" title="Kaydet"><i class="fa-solid fa-check"></i></button>
+                <button class="buton kayit-iptal-btn" onclick="toggleDuyuruEditMode('${id}', false)" title="İptal"><i class="fa-solid fa-times"></i></button>
+                <button class="buton kayit-sil-btn" onclick="handleDuyuruSil('${id}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+        `;
+        listEl.appendChild(k);
+    }
+    
+    // 7. ADIM: DÜZENLEME MODUNU AÇ/KAPAT
+    function toggleDuyuruEditMode(kayitId, duzenlemeyeGec) {
+        const kayitElementi = document.getElementById(`duyuru-${kayitId}`);
+        if (!kayitElementi) return;
+        
+        if (duzenlemeyeGec) {
+            kayitElementi.classList.add('duzenleniyor');
+        } else {
+            kayitElementi.classList.remove('duzenleniyor');
+        }
+    }
+
+    // 8. ADIM: KAYDI GÜNCELLE
+    async function handleDuyuruGuncelle(kayitId) {
+        const kayitEl = document.getElementById(`duyuru-${kayitId}`);
+        const formEl = kayitEl.querySelector('.duyuru-duzenleme-formu');
+        const kaydetButonu = kayitEl.querySelector('.kayit-kaydet-btn');
+        
+        const guncelBaslik = formEl.querySelector('input').value;
+        const guncelIcerik = formEl.querySelector('textarea').value;
+        
+        const guncelVeri = {
+            baslik: guncelBaslik,
+            icerik: guncelIcerik
+        };
+
+        try {
+            kaydetButonu.disabled = true;
+            await db.collection("pano").doc(kayitId).update(guncelVeri);
+            alert("Duyuru güncellendi!");
+            toggleDuyuruEditMode(kayitId, false);
+            duyurulariListele(); // Listeyi yenile
+        } catch (error) {
+            console.error("Güncelleme hatası: ", error);
+            alert("Hata: " + error.message);
+            kaydetButonu.disabled = false;
+        }
+    }
+
+    // 9. ADIM: KAYDI SİL
+    async function handleDuyuruSil(kayitId) {
+        if (confirm("Bu duyuruyu kalıcı olarak silmek istediğinizden emin misiniz?")) {
+            const kayitEl = document.getElementById(`duyuru-${kayitId}`);
+            const silButonu = kayitEl.querySelector('.kayit-sil-btn');
+            
+            try {
+                silButonu.disabled = true;
+                await db.collection("pano").doc(kayitId).delete();
+                alert("Duyuru silindi.");
+                kayitEl.remove(); // Listeden anında kaldır
+            } catch (error) {
+                console.error("Silme hatası: ", error);
+                alert("Hata: " + error.message);
+                silButonu.disabled = false;
+            }
+        }
+    }
+
+</script>
+
+<footer class="imza-bolumu">
+    <p>
+        <span>© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</span>
+        <br>
+        <span>Fikir ve önerileriniz için:</span> <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+    </p>
+</footer>
+
+</body>
+</html>

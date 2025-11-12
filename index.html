@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Kovan Ekle - Kovan Takip</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
@@ -15,16 +16,14 @@
         form { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 700px; margin: auto; }
         .form-bolumu { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
         
-        /* GÖRSEL GÜNCELLENDİ: h2 başlıkları için flex eklendi */
         .form-bolumu h2 { 
-            color: #333; /* Renk ana temaya uysun */
+            color: #333; 
             margin-top: 0; 
             display: flex;
             align-items: center;
             font-size: 1.5em;
         }
         
-        /* GÖRSEL GÜNCELLENDİ: Bölüm resimleri için stil */
         .section-image {
             width: 40px;
             height: auto;
@@ -33,8 +32,8 @@
             border-radius: 4px;
         }
 
-        /* İKONLAR İÇİN HİZALAMA EKLENDİ */
-        h1 i, .nav-link i, button[type="submit"] i, .logout-btn i { margin-right: 8px; }
+        /* GÜNCELLENDİ: .pano-btn i eklendi */
+        h1 i, .nav-link i, button[type="submit"] i, .logout-btn i, .pano-btn i { margin-right: 8px; }
 
         .form-grup { margin-bottom: 10px; }
         .form-grup label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
@@ -57,7 +56,6 @@
         }
         .nav-link:hover { background-color: #0056b3; }
         
-        /* BAŞLIK (HEADER) STİLLERİ GÜNCELLENDİ */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -71,7 +69,6 @@
             font-size: 1.8em;
             margin-bottom: 10px; /* Mobil için eklendi */
         }
-        /* Orijinal 'div' -> 'div.user-info' olarak güncellendi */
         .user-info {
             display: flex;
             align-items: center;
@@ -80,6 +77,21 @@
         .logout-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .logout-btn:hover { background-color: #c82333; }
         .user-email { font-weight: bold; color: #555; }
+        
+        /* --- YENİ EKLENEN PANO BUTON STİLİ --- */
+        .pano-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px; /* logout-btn ile eşleşti */
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-flex; /* İkonu hizalamak için */
+            align-items: center; /* İkonu hizalamak için */
+            border: none;
+        }
+        .pano-btn:hover { background-color: #0056b3; }
+        /* --- BİTİŞ --- */
 
         /* MOBİL UYUMLULUK (HEADER İÇİN) */
         @media (max-width: 600px) {
@@ -97,14 +109,47 @@
                 width: 100%;
                 margin-top: 10px;
             }
-            .logout-btn {
+            
+            /* GÜNCELLENDİ: .pano-btn eklendi */
+            .logout-btn, .pano-btn {
                 flex-grow: 1; /* Butonun büyümesini sağlar */
                 text-align: center;
+                padding-top: 10px; /* Diğer butonlarla uyum */
+                padding-bottom: 10px; /* Diğer butonlarla uyum */
             }
             .user-email {
                 font-size: 0.9em;
             }
         }
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+            max-width: 740px; /* Form ile hizalamak için eklendi */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === Bitiş === */
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -115,11 +160,13 @@
 
     <div class="header">
         <h1><i class="fa-solid fa-plus"></i> Yeni Kovan Kayıt Formu</h1>
+        
         <div class="user-info">
             <span id="userEmail" class="user-email"></span>
+            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Pano</a>
             <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
         </div>
-    </div>
+        </div>
 
     <a href="kovanlarim.html" class="nav-link"><i class="fa-solid fa-list-ul"></i> Mevcut Kovanları Görüntüle</a>
 
@@ -340,5 +387,13 @@
             });
     });
 </script>
+
+<footer class="imza-bolumu">
+    <p>
+        © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
+        <br>
+        Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+    </p>
+</footer>
 </body>
 </html>

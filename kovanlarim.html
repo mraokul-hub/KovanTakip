@@ -4,43 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kovanlarım - Kovan Takip</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* MOBİL UYUM İÇİN EKLENDİ */
         * { box-sizing: border-box; }
-
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
         
-        /* BAŞLIK (HEADER) STİLLERİ GÜNCELLENDİ */
         .header { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             border-bottom: 2px solid #ddd; 
             padding-bottom: 10px;
-            flex-wrap: wrap; /* Mobil için eklendi */
+            flex-wrap: wrap; 
+            gap: 15px; 
         }
         
-        h1 { color: #333; }
-        
-        /* İKONLAR İÇİN HİZALAMA EKLENDİ */
+        h1 { color: #333; margin: 0; }
         h1 i, .yeni-kovan-btn i, .logout-btn i { margin-right: 8px; }
 
         .yeni-kovan-btn { background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
         .yeni-kovan-btn:hover { background-color: #218838; }
         
+        .pano-btn {
+            background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;
+        }
+        .pano-btn:hover { background-color: #0056b3; }
+        .pano-btn i { margin-right: 8px; }
+        
         #kovan-listesi-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
         .kovan-karti { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 15px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .kovan-karti:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         
-        /* GÖRSEL GÜNCELLENDİ: Kart başlığı (h3) için flex eklendi */
         .kovan-karti h3 { 
             margin-top: 0; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; 
             display: flex;
             align-items: center;
         }
-        /* GÖRSEL GÜNCELLENDİ: Kart içi resim için stil */
         .card-image {
             width: 30px;
             height: auto;
@@ -53,49 +53,72 @@
         .kovan-karti strong { color: #555; min-width: 120px; display: inline-block; }
         .ana-ari-bolumu { border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 8px; }
         
-        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .logout-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .logout-btn:hover { background-color: #c82333; }
         .user-email { font-weight: bold; color: #555; }
         
-        /* MOBİL UYUMLULUK (HEADER İÇİN) */
+        /* --- STABİL MOBİL UYUM (ALTIN STANDART) --- */
         @media (max-width: 700px) {
             .header {
-                flex-direction: column;
-                align-items: stretch;
+                flex-direction: column; 
+                align-items: stretch; 
             }
             .header h1 {
-                text-align: center;
+                text-align: center; 
                 font-size: 1.8em;
                 margin-bottom: 15px;
             }
+            
             .user-info {
-                justify-content: space-between;
+                flex-direction: column; 
+                align-items: stretch; 
                 width: 100%;
+                gap: 10px; 
             }
-            .yeni-kovan-btn, .logout-btn {
-                flex-grow: 1; /* Butonların eşit büyümesini sağlar */
+            
+            .yeni-kovan-btn, .logout-btn, .pano-btn {
+                width: 100%; 
                 text-align: center;
                 padding: 12px 10px;
-                font-size: 0.9em;
+                font-size: 1em; 
+                margin: 0; 
             }
+            
             .user-email {
-                display: none; /* Mobilde e-postayı gizle, yer kazandır */
-            }
-        }
-        @media (max-width: 400px) {
-             .user-email {
-                font-size: 0.8em;
-                display: block; /* Çok küçük ekranlarda e-postayı tekrar göster ama butonların altında */
-                text-align: center;
+                display: block; 
+                text-align: center; 
                 width: 100%;
-                margin-top: 10px;
-                order: 3; /* En alta atar */
-            }
-            .user-info {
-                 flex-wrap: wrap; /* E-posta alta düşünce wrap yapsın */
+                margin-bottom: 5px; 
+                order: -1; 
             }
         }
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === Bitiş === */
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -106,8 +129,12 @@
 
     <div class="header">
         <h1><i class="fa-solid fa-layer-group"></i> Kovanlarım</h1>
+        
         <div class="user-info">
             <span id="userEmail" class="user-email"></span>
+            
+            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Pano</a>
+            
             <a href="index.html" class="yeni-kovan-btn"><i class="fa-solid fa-plus"></i> Yeni Kovan Ekle</a>
             <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
         </div>
@@ -144,6 +171,7 @@
         mevcutKullanici = user;
         console.log("Giriş yapan kullanıcı:", mevcutKullanici.uid);
         userEmailElement.textContent = mevcutKullanici.email; 
+        
         kovanlariYukle(mevcutKullanici.uid); 
       } else {
         console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
@@ -180,7 +208,6 @@
                 kart.className = 'kovan-karti';
                 kart.addEventListener('click', () => detayGor(kovanId));
 
-                // GÖRSEL GÜNCELLENDİ: 5.png
                  kart.innerHTML = `
                     <h3><img src="5.png" alt="Kovan" class="card-image"> Kovan No: ${kovan.kovanNo}</h3>
                     <p><strong>Arı Irkı:</strong> ${kovan.ariIrki || 'Bilinmiyor'}</p>
@@ -213,5 +240,13 @@
         window.location.href = `detay.html?id=${encodeURIComponent(kovanId)}`;
     }
 </script>
+
+<footer class="imza-bolumu">
+    <p>
+        © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
+        <br>
+        Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+    </p>
+</footer>
 </body>
 </html>

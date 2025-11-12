@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kovan Detayı - Kovan Takip</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         * { box-sizing: border-box; }
@@ -23,6 +23,11 @@
         .kaydet-btn { background-color: #28a745; } .kaydet-btn:hover { background-color: #218838; } .kaydet-btn:disabled { background-color: #aaa; cursor: not-allowed; }
         .logout-btn { background-color: #ffc107; color: #333; } .logout-btn:hover { background-color: #e0a800; }
         
+        /* --- YENİ EKLENEN PANO BUTON STİLİ --- */
+        .pano-btn { background-color: #007bff; }
+        .pano-btn:hover { background-color: #0056b3; }
+        /* --- BİTİŞ --- */
+
         .buton i, .kayit-ekleme-formu button i { margin-right: 6px; }
 
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -96,8 +101,7 @@
         .kayit-duzenle-btn { background-color: #ffc107; color: #333; } .kayit-duzenle-btn:hover { background-color: #e0a800; }
         .kayit-kaydet-btn { background-color: #28a745; } .kayit-kaydet-btn:disabled { background-color: #aaa; }
         .kayit-iptal-btn { background-color: #6c757d; }
-        .kayit-sil-btn { background-color: #dc3545 !important; color: white !important; }
-        .kayit-sil-btn:hover { background-color: #c82333 !important; }
+        .kayit-sil-btn { background-color: #dc3545 !important; color: white !important; } .kayit-sil-btn:hover { background-color: #c82333 !important; }
         .kayit-sil-btn:disabled { background-color: #aaa !important; cursor: not-allowed; }
 
         .kayit-duzenleme-formu { display: none; margin-top: 5px; }
@@ -113,22 +117,44 @@
         .hastalik-listesi-item { border-left: 5px solid #dc3545; } .hastalik-listesi-item strong { color: #dc3545; }
         .hasat-listesi-item { border-left: 5px solid #28a745; } .hasat-listesi-item strong { color: #28a745; }
 
-        /* --- YENİ FOTOĞRAF STİLLERİ EKLENDİ --- */
         .hidden { display: none; }
         .photo-area { margin-top: 10px; border: 1px dashed #ccc; padding: 10px; text-align: center; }
         .photo-area img { max-width: 100%; max-height: 200px; height: auto; display: block; margin: 10px auto; border: 1px solid #ddd; }
         
-        /* FOTOĞRAF BUTONUNUN GÖRÜNMESİ İÇİN CSS EKLENDİ */
         .btn-foto { 
             background-color: #4CAF50; /* Yeşil renk */
             color: white; 
             margin-top: 5px; 
-            margin-bottom: 10px; /* Altındaki boşluk için eklendi */
+            margin-bottom: 10px;
         }
         
         .kayit-fotografi { max-width: 100%; max-height: 300px; height: auto; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; }
-        /* --- BİTİŞ: FOTOĞRAF STİLLERİ --- */
-
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === BİTİŞ === */
 
         @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
@@ -155,8 +181,10 @@
 
     <div class="header">
         <h1 id="kovan-baslik">Kovan Detayı Yükleniyor...</h1>
+        
         <div class="user-info">
              <span id="userEmail" class="user-email"></span>
+             <a href="pano.html" class="buton pano-btn"><i class="fa-solid fa-bullhorn"></i> Pano</a>
              <button id="logoutBtn" class="buton logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
         </div>
         <div class="ana-buton-grup">
@@ -195,9 +223,8 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         
-        // DÜZELTME 1: URL okuması 'id' parametresini okuyor (kovanlarim.html ile uyumlu)
         let kovanId = null; 
-        try { kovanId = decodeURIComponent(urlParams.get('id')); } // Sadece 'id' okunuyor
+        try { kovanId = decodeURIComponent(urlParams.get('id')); } 
         catch (e) { console.error("ID alınamadı:", e); }
         
         let mevcutKovanVerisi = null;
@@ -232,8 +259,6 @@
                 if (docSnap.exists) {
                     const kovanData = docSnap.data();
                     
-                    // --- KRİTİK DÜZELTME 2: 'kullaniciId' -> 'userId' olarak değiştirildi ---
-                    // Artık 'rules.txt'  ve 'index.html'  ile uyumlu.
                     if (!kovanData.userId || kovanData.userId !== mevcutKullanici.uid) { 
                         console.error("Yetki Hatası: Belge sahibi (" + kovanData.userId + ") ile kullanıcı (" + mevcutKullanici.uid + ") eşleşmiyor."); 
                         kovanBaslik.innerText = "Erişim Reddedildi"; 
@@ -424,7 +449,6 @@
         console.log(`renderKayitBolumu TAMAMLANDI: ${tip}`);
     }
 
-    // --- YENİ EKLENEN FOTOĞRAF İŞLEME FONKSİYONU ---
     function handlePhotoUpload(event, previewId, dataInputId) {
         const file = event.target.files[0];
         if (!file) return;
@@ -433,7 +457,6 @@
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                // Çözünürlüğü optimize et (sunucuya hızlı yükleme için)
                 const MAX_WIDTH = 800; 
                 const MAX_HEIGHT = 800;
                 let width = img.width;
@@ -451,34 +474,27 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // JPEG formatında ve %70 kalite (0.7) ile sıkıştır
-                // Bu, dosya boyutunu ciddi oranda düşürür.
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
-                // Önizlemeyi göster
                 const previewElement = document.getElementById(previewId);
                 previewElement.src = dataUrl;
                 document.getElementById(previewElement.id + 'Area').style.display = 'block';
 
-                // Sıkıştırılmış Base64 verisini gizli input'a kaydet
                 document.getElementById(dataInputId).value = dataUrl;
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
-    // --- BİTİŞ: FOTOĞRAF İŞLEME FONKSİYONU ---
-
 
     function gf(id, type = 'value') { const el=document.getElementById(id); if(!el) return null; return type==='number'?Number(el.value):(type==='checked'?el.checked:el.value); }
     
-    // --- SUBMIT FONKSİYONLARI FOTOĞRAF İÇİN GÜNCELLENDİ ---
     async function handleBakimSubmit(e) { e.preventDefault(); if(!mevcutKullanici) return; 
         const data={
             bakimTarihi:gf('bakimTarihi'), 
             yapilanIslem:gf('yapilanIslem'), 
             notlar:gf('bakimNotlari'),
-            photoBase64: gf('bakimPhotoData') || null // Fotoğraf verisi eklendi
+            photoBase64: gf('bakimPhotoData') || null
         }; 
         await addKayit('bakimKayitlari', data, 'formBakimEkle', bakimKayitlariniListele); 
     }
@@ -488,7 +504,7 @@
             tedaviTarihi:gf('tedaviTarihi'), 
             kullanilanIlac:gf('kullanilanIlac'), 
             notlar:gf('hastalikNotlari'),
-            photoBase64: gf('hastalikPhotoData') || null // Fotoğraf verisi eklendi
+            photoBase64: gf('hastalikPhotoData') || null
         }; 
         await addKayit('hastalikKayitlari', data, 'formHastalikEkle', hastalikKayitlariniListele); 
     }
@@ -497,9 +513,6 @@
     async function addKayit(collName, data, formId, listeleFn) {
          console.log(`addKayit: ${collName}`, data); 
          data.eklenmeTarihi = new Date();
-         
-         // --- KRİTİK DÜZELTME 3: 'userId' alt kayıtlara eklendi ---
-         // Bu, 'rules.txt'  dosyanızdaki (satır 9) alt koleksiyon kuralıyla uyum için ZORUNLUDUR.
          data.userId = mevcutKullanici.uid;
          
          const form = document.getElementById(formId); const btn = form ? form.querySelector('button[type="submit"]') : null;
@@ -509,7 +522,6 @@
              console.log(`Kayıt eklendi (${collName}), ID: ${docRef.id}`); alert("Eklendi!"); 
              if(form) form.reset(); 
              
-             // Fotoğraf önizlemesini temizle
              if (formId === 'formBakimEkle') {
                  document.getElementById('bakimPreviewArea').style.display = 'none';
                  document.getElementById('bakimPhotoData').value = '';
@@ -549,11 +561,9 @@
         console.log(`listeleKayitlar TAMAMLANDI: ${collName}`);
     }
 
-    // --- RENDER FONKSİYONLARI FOTOĞRAF GÖSTERMEK İÇİN GÜNCELLENDİ ---
     function renderBakimKaydi(listEl, id, kayit) {
         const t = kayit.bakimTarihi ? new Date(kayit.bakimTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'bakim-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
-        // Fotoğraf gösterme HTML'i eklendi
         const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Bakım Fotoğrafı" class="kayit-fotografi">` : '';
         
         k.innerHTML = `
@@ -565,7 +575,6 @@
     function renderHastalikKaydi(listEl, id, kayit) {
         const t = kayit.tedaviTarihi ? new Date(kayit.tedaviTarihi).toLocaleDateString('tr-TR', { timeZone: 'UTC' }) : '?';
         const k = document.createElement('div'); k.className = 'hastalik-listesi-item kayit-listesi-item'; k.id = `kayit-${id}`;
-        // Fotoğraf gösterme HTML'i eklendi
         const photoHtml = kayit.photoBase64 ? `<img src="${kayit.photoBase64}" alt="Hastalık Fotoğrafı" class="kayit-fotografi">` : '';
 
         k.innerHTML = `
@@ -593,8 +602,6 @@
     }
 
     async function handleKayitGuncelle(collName, kayitId, tip) {
-        // Not: Bu fonksiyon fotoğraf GÜNCELLEMESİNİ (değiştirmeyi) içermez,
-        // sadece mevcut metin verilerini günceller.
         console.log(`handleKayitGuncelle: ${collName}, ${kayitId}, ${tip}`);
         if (!mevcutKullanici || !kovanId) return; 
         const kayitEl = document.getElementById(`kayit-${kayitId}`); if (!kayitEl) return;
@@ -634,5 +641,14 @@
     }
 
 </script>
+
+<footer class="imza-bolumu" style="max-width: 740px; margin-left: auto; margin-right: auto;">
+    <p>
+        <span>© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</span>
+        <br>
+        <span>Fikir ve önerileriniz için:</span> <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+    </p>
+</footer>
+
 </body>
 </html>

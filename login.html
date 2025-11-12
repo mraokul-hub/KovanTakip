@@ -4,13 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş Yap / Kaydol - Kovan Takip</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         /* MOBİL UYUM İÇİN EKLENDİ */
         * { box-sizing: border-box; }
 
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
-        .login-container { background: #fff; border: 1px solid #ddd; padding: 30px; border-radius: 8px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f9f9f9; 
+            display: flex; 
+            /* GÜNCELLENDİ: Dikey hizalama için eklendi */
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 90vh; 
+        }
+        .login-container { 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            padding: 30px; 
+            border-radius: 8px; 
+            max-width: 400px; 
+            width: 100%; 
+            text-align: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
         
         /* GÖRSEL GÜNCELLENDİ: Logo stili */
         .login-logo {
@@ -38,6 +57,35 @@
         .buton-secondary { background-color: #6c757d; }
         .buton-secondary:hover { background-color: #5a6268; }
         .hata-mesaji { color: red; margin-top: 15px; font-weight: bold; }
+        
+        /* === YENİ EKLENEN İMZA STİLİ === */
+        .imza-bolumu {
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-top: 3px solid #007bff;
+            background-color: #fcfcfc;
+            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
+            border-radius: 8px 8px 0 0;
+            color: #444;
+            font-size: 0.85em;
+            line-height: 1.5;
+            /* GÜNCELLENDİ: Login formuyla hizalamak için */
+            max-width: 400px; 
+            width: 100%;
+        }
+        .imza-bolumu p {
+            margin: 6px 0;
+        }
+        .imza-bolumu a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .imza-bolumu a:hover {
+            text-decoration: underline;
+        }
+        /* === Bitiş === */
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -63,7 +111,14 @@
         </div>
         <p id="hataMesaji" class="hata-mesaji" style="display: none;"></p>
     </div>
-
+    
+    <footer class="imza-bolumu">
+        <p>
+            © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
+            <br>
+            Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
+        </p>
+    </footer>
     <script>
         // 1. ADIM: Firebase Proje Bilgilerinizi Buraya Yapıştırın
         const firebaseConfig = {
