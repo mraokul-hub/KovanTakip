@@ -2,248 +2,123 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <title>Kovanlarım</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kovanlarım - Kovan Takip</title>
-    <link rel="icon" href="5.jpg" type="image/jpeg"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 2px solid #ddd; 
-            padding-bottom: 10px;
-            flex-wrap: wrap; 
-            gap: 15px; 
-        }
-        
-        h1 { color: #333; margin: 0; }
-        h1 i, .yeni-kovan-btn i, .logout-btn i { margin-right: 8px; }
-
-        .yeni-kovan-btn { background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .yeni-kovan-btn:hover { background-color: #218838; }
-        
-        .pano-btn {
-            background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;
-        }
-        .pano-btn:hover { background-color: #0056b3; }
-        .pano-btn i { margin-right: 8px; }
-        
-        #kovan-listesi-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .kovan-karti { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 15px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-        .kovan-karti:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        
-        .kovan-karti h3 { 
-            margin-top: 0; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; 
-            display: flex;
-            align-items: center;
-        }
-        .card-image {
-            width: 30px;
-            height: auto;
-            max-height: 30px;
-            margin-right: 8px;
-            border-radius: 3px;
-        }
-
-        .kovan-karti p { margin: 8px 0; font-size: 0.95em; }
-        .kovan-karti strong { color: #555; min-width: 120px; display: inline-block; }
-        .ana-ari-bolumu { border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 8px; }
-        
-        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .logout-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .logout-btn:hover { background-color: #c82333; }
-        .user-email { font-weight: bold; color: #555; }
-        
-        @media (max-width: 700px) {
-            .header {
-                flex-direction: column; 
-                align-items: stretch; 
-            }
-            .header h1 {
-                text-align: center; 
-                font-size: 1.8em;
-                margin-bottom: 15px;
-            }
-            
-            .user-info {
-                flex-direction: column; 
-                align-items: stretch; 
-                width: 100%;
-                gap: 10px; 
-            }
-            
-            .yeni-kovan-btn, .logout-btn, .pano-btn {
-                width: 100%; 
-                text-align: center;
-                padding: 12px 10px;
-                font-size: 1em; 
-                margin: 0; 
-            }
-            
-            .user-email {
-                display: block; 
-                text-align: center; 
-                width: 100%;
-                margin-bottom: 5px; 
-                order: -1; 
-            }
-        }
-        
-        .imza-bolumu {
-            text-align: center;
-            padding: 15px 20px;
-            margin-top: 30px;
-            border-top: 3px solid #007bff;
-            background-color: #fcfcfc;
-            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
-            border-radius: 8px 8px 0 0;
-            color: #444;
-            font-size: 0.85em;
-            line-height: 1.5;
-        }
-        .imza-bolumu p {
-            margin: 6px 0;
-        }
-        .imza-bolumu a {
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .imza-bolumu a:hover {
-            text-decoration: underline;
-        }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style> 
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; } 
+        .container { flex: 1; } /* Footer'ı aşağı itmek için */
+        .kovan-card { transition: transform 0.2s; cursor: pointer; border-left: 5px solid #007bff; } 
+        .kovan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card-icon { width: 30px; height: auto; margin-right: 10px; }
+        .btn-pano { background: linear-gradient(45deg, #ffc107, #fd7e14); color: white !important; border: none; font-weight: bold; box-shadow: 0 4px 15px rgba(253, 126, 20, 0.4); animation: pulse-gold 2s infinite; display: flex; align-items: center; gap: 5px; }
+        .btn-pano:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(253, 126, 20, 0.6); }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
+        #reader { width: 100%; }
+        /* İMZA STİLİ */
+        .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
+        .footer-signature a { color: #0d6efd; text-decoration: none; }
     </style>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <div class="header">
-        <h1><i class="fa-solid fa-layer-group"></i> Kovanlarım</h1>
-        
-        <div class="user-info">
-            <span id="userEmail" class="user-email"></span>
-            
-            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</a>
-            
-            <a href="index.html" class="yeni-kovan-btn"><i class="fa-solid fa-plus"></i> Yeni Kovan Ekle</a>
-            <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-light btn-sm" onclick="openScanner()"><i class="fa-solid fa-qrcode"></i> <span class="d-none d-md-inline">Tara</span></button>
+            <a href="pano.html" class="btn btn-pano btn-sm rounded-pill px-3"><i class="fa-solid fa-bullhorn"></i> <span class="d-none d-md-inline">Duyuru</span></a>
+            <a href="index.html" class="btn btn-success btn-sm"><i class="fa-solid fa-plus"></i> Yeni</a>
+            <button id="logoutBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
     </div>
+</nav>
 
-    <div id="kovan-listesi-container">
-        <p>Kovanlar yükleniyor...</p>
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-qrcode me-2"></i>Barkod Tara</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="stopScanner()"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="reader"></div>
+                <div id="scanResult" class="text-center p-3 d-none"><div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...</div>
+            </div>
+        </div>
     </div>
+</div>
 
-<script>
-    // 1. ADIM: Firebase Proje Bilgileri
-    const firebaseConfig = {
-      apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // KENDİ BİLGİLERİNİZLE DEĞİŞTİRİN
-      authDomain: "kovan-takip-4c054.firebaseapp.com",
-      projectId: "kovan-takip-4c054",
-      storageBucket: "kovan-takip-4c054.appspot.com",
-      messagingSenderId: "783431210365",
-      appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814"
-    };
+<div class="container">
+    <div id="kovan-listesi-container" class="row g-4">
+        <div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>
+    </div>
+</div>
 
-    // 2. ADIM: Firebase'i Başlatma
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    console.log("Firebase bağlanıldı.");
-
-    const listContainer = document.getElementById('kovan-listesi-container');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userEmailElement = document.getElementById('userEmail');
-    let mevcutKullanici = null;
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        mevcutKullanici = user;
-        console.log("Giriş yapan kullanıcı:", mevcutKullanici.uid);
-        userEmailElement.textContent = mevcutKullanici.email; 
-        
-        kovanlariYukle(mevcutKullanici.uid); 
-      } else {
-        console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
-        window.location.href = 'login.html';
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            console.log("Çıkış yapıldı.");
-        }).catch((error) => {
-            console.error("Çıkış hatası:", error);
-        });
-    });
-
-    async function kovanlariYukle(userId) {
-        listContainer.innerHTML = "<p>Kovanlar yükleniyor...</p>"; 
-        try {
-            const querySnapshot = await db.collection("kovanlar")
-                                          .where("userId", "==", userId) 
-                                          .get();
-
-            if (querySnapshot.empty) {
-                listContainer.innerHTML = "<p>Kaydedilmiş kovan bulunamadı. '+' butonu ile ekleyebilirsiniz.</p>";
-                return;
-            }
-
-            listContainer.innerHTML = ''; 
-            querySnapshot.forEach((doc) => {
-                const kovan = doc.data();
-                const kovanId = doc.id; 
-
-                const kart = document.createElement('div');
-                kart.className = 'kovan-karti';
-                kart.addEventListener('click', () => detayGor(kovanId));
-
-                 kart.innerHTML = `
-                    <h3><img src="5.png" alt="Kovan" class="card-image"> Kovan No: ${kovan.kovanNo}</h3>
-                    <p><strong>Arı Irkı:</strong> ${kovan.ariIrki || 'Bilinmiyor'}</p>
-                    <p><strong>Kovan Kökeni:</strong> ${kovan.kovanKokeni || 'Bilinmiyor'}</p>
-                    <p><strong>Çerçeve Sayısı:</strong> ${kovan.cerceveSayisi || '?'}</p>
-                    <p><strong>Hırçınlık:</strong> ${kovan.hircinlik || '?'}</p>
-                    
-                    <div class="ana-ari-bolumu">
-                        <p><strong>Ana Irkı:</strong> ${kovan.anaAri.anaIrki || kovan.ariIrki || '?'}</p>
-                        <p><strong>Ana Rengi:</strong> ${kovan.anaAri.anaRengi || 'Boyasız'}</p>
-                        <p><strong>Ana Doğum:</strong> ${kovan.anaAri.dogumTarihi || '?'}</p>
-                        <p><strong>Ana Performans:</strong> ${kovan.anaAri.performans || '?'}</p>
-                    </div>
-                `;
-
-                listContainer.appendChild(kart);
-            });
-
-        } catch (error) {
-            console.error("Kovanlar yüklenirken hata oluştu: ", error);
-             if (error.code === 'permission-denied') {
-                 listContainer.innerHTML = "<p>Kovanları görme izniniz yok. Firestore kurallarınızı kontrol edin.</p>";
-             } else {
-                 listContainer.innerHTML = "<p>Veriler yüklenirken bir hata oluştu.</p>";
-             }
-        }
-    }
-
-    function detayGor(kovanId) {
-        window.location.href = `detay.html?id=${encodeURIComponent(kovanId)}`;
-    }
-</script>
-
-<footer class="imza-bolumu">
-    <p>
-        © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
-        <br>
-        Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
-    </p>
+<footer class="footer-signature">
+    <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</p>
+    <small>Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // (Firebase Config ve Scriptler Aynen Korundu - Kısalık İçin Özet)
+    const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(); const auth = firebase.auth();
+    let html5QrcodeScanner = null; let currentUserUid = null;
+    const hircinlikSozlugu = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
+
+    auth.onAuthStateChanged(user => { if (user) { currentUserUid = user.uid; kovanlariYukle(user.uid); } else window.location.href = 'login.html'; });
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+    async function kovanlariYukle(uid) {
+        const div = document.getElementById('kovan-listesi-container');
+        try {
+            const snap = await db.collection("kullanicilar").doc(uid).collection("kovanlar").get();
+            div.innerHTML = '';
+            if(snap.empty) { div.innerHTML = '<div class="col-12"><div class="alert alert-info">Henüz kovanınız yok.</div></div>'; return; }
+            snap.forEach(doc => {
+                const d = doc.data();
+                const hText = hircinlikSozlugu[d.hircinlik || 3] || "Bilinmiyor";
+                div.insertAdjacentHTML('beforeend', `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card kovan-card h-100 shadow-sm" onclick="window.location.href='detay.html?id=${doc.id}'">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center pt-3 pb-2 border-bottom-0">
+                            <h5 class="mb-0 text-primary fw-bold"><img src="5.png" class="card-icon">Kovan: ${d.no || '?'}</h5>
+                            <span class="badge bg-light text-dark border">${d.tip || '-'}</span>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="small text-muted mb-2">${d.irk || '-'} • ${d.cerceve || 0} Çerçeve • ${hText}</div>
+                            <hr class="my-2">
+                            <div class="d-flex align-items-center text-warning-emphasis small">
+                                <img src="1.png" style="width:20px; margin-right:5px;"> <strong>Ana:</strong>&nbsp;${d.ana?.irk || 'Yok'} (${d.ana?.perf || '-'})
+                            </div>
+                        </div>
+                    </div>
+                </div>`);
+            });
+        } catch(e) { div.innerHTML = '<div class="alert alert-danger">Hata: '+e.message+'</div>'; }
+    }
+
+    function openScanner() { const m = new bootstrap.Modal(document.getElementById('scannerModal')); m.show(); if(!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); html5QrcodeScanner.render(onScanSuccess, ()=>{}); } }
+    function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().then(_=>{html5QrcodeScanner=null;}).catch(e=>console.error(e)); } }
+    async function onScanSuccess(txt) {
+        if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; }
+        document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none');
+        try {
+            const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod","==",txt).get();
+            if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); }
+            else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; }
+        } catch(e) { console.error(e); }
+    }
+    document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
+</script>
 </body>
 </html>

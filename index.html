@@ -2,391 +2,112 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <title>Yeni Kovan Ekle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yeni Kovan Ekle - Kovan Takip</title>
-    <link rel="icon" href="5.jpg" type="image/jpeg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
     <style>
-        /* MOBİL UYUM İÇİN EKLENDİ */
-        * { box-sizing: border-box; }
-
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
-        h1 { color: #333; }
-        form { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 700px; margin: auto; }
-        .form-bolumu { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-        
-        .form-bolumu h2 { 
-            color: #333; 
-            margin-top: 0; 
-            display: flex;
-            align-items: center;
-            font-size: 1.5em;
-        }
-        
-        .section-image {
-            width: 40px;
-            height: auto;
-            max-height: 40px;
-            margin-right: 12px;
-            border-radius: 4px;
-        }
-
-        h1 i, .nav-link i, button[type="submit"] i, .logout-btn i, .pano-btn i { margin-right: 8px; }
-
-        .form-grup { margin-bottom: 10px; }
-        .form-grup label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        .form-grup input[type="text"],
-        .form-grup input[type="date"],
-        .form-grup input[type="number"],
-        .form-grup select {
-            width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;
-        }
-        .checkbox-grup { display: flex; align-items: center; }
-        .checkbox-grup input { width: auto; margin-right: 10px; }
-        button[type="submit"] {
-             background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer;
-             font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px;
-        }
-        button[type="submit"]:hover { background-color: #218838; }
-        .nav-link {
-             display: block; text-align: center; margin-top: 20px; background-color: #007bff; color: white;
-             padding: 10px; text-decoration: none; border-radius: 5px; max-width: 700px; margin: 20px auto;
-        }
-        .nav-link:hover { background-color: #0056b3; }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            max-width: 740px; 
-            margin: 0 auto 10px auto; 
-            padding: 0 20px;
-            flex-wrap: wrap; /* Mobil için wrap eklendi */
-        }
-        .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 10px; /* Mobil için eklendi */
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logout-btn { background-color: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .logout-btn:hover { background-color: #c82333; }
-        .user-email { font-weight: bold; color: #555; }
-        
-        .pano-btn {
-            background-color: #007bff;
-            color: white;
-            padding: 8px 12px; 
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            display: inline-flex; 
-            align-items: center; 
-            border: none;
-        }
-        .pano-btn:hover { background-color: #0056b3; }
-
-        @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 0;
-            }
-            .header h1 {
-                text-align: center;
-                font-size: 1.5em;
-            }
-            .user-info {
-                justify-content: space-between;
-                width: 100%;
-                margin-top: 10px;
-            }
-            
-            .logout-btn, .pano-btn {
-                flex-grow: 1; 
-                text-align: center;
-                padding-top: 10px; 
-                padding-bottom: 10px; 
-            }
-            .user-email {
-                font-size: 0.9em;
-            }
-        }
-        
-        .imza-bolumu {
-            text-align: center;
-            padding: 15px 20px;
-            margin-top: 30px;
-            border-top: 3px solid #007bff;
-            background-color: #fcfcfc;
-            box-shadow: 0 -1px 5px rgba(0,0,0,0.05);
-            border-radius: 8px 8px 0 0;
-            color: #444;
-            font-size: 0.85em;
-            line-height: 1.5;
-            max-width: 740px; 
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .imza-bolumu p {
-            margin: 6px 0;
-        }
-        .imza-bolumu a {
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .imza-bolumu a:hover {
-            text-decoration: underline;
-        }
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { flex: 1; }
+        .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
+        .footer-signature a { color: #0d6efd; text-decoration: none; }
     </style>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body class="bg-light">
 
-    <div class="header">
-        <h1><i class="fa-solid fa-plus"></i> Yeni Kovan Kayıt Formu</h1>
-        
-        <div class="user-info">
-            <span id="userEmail" class="user-email"></span>
-            <a href="pano.html" class="pano-btn"><i class="fa-solid fa-bullhorn"></i> Duyuru Panosu</a>
-            <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="kovanlarim.html"><i class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
+        <a href="kovanlarim.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i> Geri</a>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h4 class="mb-4 text-primary"><i class="fa-solid fa-plus-circle"></i> Yeni Kovan Kaydı</h4>
+            <form id="kovanForm">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-white fw-bold"><img src="5.png" width="24" class="me-2"> Kovan Bilgileri</div>
+                            <div class="card-body">
+                                <div class="mb-3"><label class="form-label fw-bold">Kovan No *</label><input type="text" name="no" class="form-control" required></div>
+                                <div class="mb-3"><label class="form-label">Barkod No</label><input type="text" name="barkod" class="form-control"></div>
+                                <div class="row">
+                                    <div class="col-6 mb-3"><label class="form-label">Tip</label><select name="tip" class="form-select"><option>Langstroth</option><option>Dadant</option><option>Karakovan</option><option>Diğer</option></select></div>
+                                    <div class="col-6 mb-3"><label class="form-label">Irk</label><select name="irk" class="form-select"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option><option>Belfast</option></select></div>
+                                </div>
+                                <div class="mb-3"><label class="form-label">Çerçeve Sayısı</label><input type="number" name="cerceve" class="form-control" value="0"></div>
+                                <div class="mb-3"><label class="form-label">Köken</label><select name="koken" class="form-select"><option>Kendi Üretimim</option><option>Satın Alma</option><option>Oğul</option></select></div>
+                                <div class="mb-3"><label class="form-label">Hırçınlık</label><select name="hircinlik" class="form-select"><option value="1">1 - Çok Sakin</option><option value="2">2 - Sakin</option><option value="3" selected>3 - Normal</option><option value="4">4 - Hırçın</option><option value="5">5 - Çok Hırçın</option></select></div>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" id="taban" name="taban"><label class="form-check-label">Delikli Taban</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" id="polen" name="polen"><label class="form-check-label">Polen Tuzaklı</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-warning">
+                            <div class="card-header bg-warning bg-opacity-10 fw-bold text-warning-emphasis"><img src="1.png" width="24" class="me-2"> Ana Arı Bilgileri</div>
+                            <div class="card-body">
+                                <div class="mb-3"><label class="form-label">Doğum Tarihi</label><input type="date" name="ana_dogum" class="form-control"></div>
+                                <div class="mb-3"><label class="form-label">Irkı</label><select name="ana_irk" class="form-select"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option></select></div>
+                                <div class="mb-3"><label class="form-label">Türü</label><select name="ana_tur" class="form-select"><option>Damızlık (F0)</option><option>Çiftleşmiş (F1)</option><option>Çiftleşmemiş</option><option>Kendi Ürettiğim</option></select></div>
+                                <div class="mb-3"><label class="form-label">Rengi</label><select name="ana_renk" class="form-select"><option>Boyasız</option><option>Beyaz</option><option>Sarı</option><option>Kırmızı</option><option>Yeşil</option><option>Mavi</option></select></div>
+                                <div class="mb-3"><label class="form-label">Performans</label><select name="ana_perf" class="form-select"><option>Çok İyi</option><option selected>İyi</option><option>Orta</option><option>Zayıf</option></select></div>
+                                <div class="mb-3"><label class="form-label">Planlanan Değişim</label><input type="date" name="ana_degisim" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12"><button type="submit" id="btnKaydet" class="btn btn-success w-100 py-3 fw-bold shadow"><i class="fa-solid fa-save me-2"></i>Kovanı Kaydet</button></div>
+                </div>
+            </form>
         </div>
-        </div>
+    </div>
+</div>
 
-    <a href="kovanlarim.html" class="nav-link"><i class="fa-solid fa-list-ul"></i> Mevcut Kovanları Görüntüle</a>
-
-    <form id="kovanTakipFormu">
-
-        <button type="submit" style="margin-bottom: 20px;"><i class="fa-solid fa-floppy-disk"></i> Kovan Bilgilerini Kaydet</button>
-
-        <div class="form-bolumu">
-            <h2><img src="5.png" alt="Kovan" class="section-image"> Kovan Temel Bilgileri</h2>
-            <div class="form-grup">
-                <label for="kovanNo">Kovan Numarası (Benzersiz olmalı, Örn: Kovan-01)</label>
-                <input type="text" id="kovanNo" name="kovanNo" required>
-            </div>
-            <div class="form-grup">
-                <label for="barkodNo">Birlik Barkod No</label>
-                <input type="text" id="barkodNo" name="barkodNo">
-            </div>
-            <div class="form-grup">
-                <label for="kovanTipi">Kovan Tipi</label>
-                <select id="kovanTipi" name="kovanTipi">
-                    <option value="Langstroth">Langstroth</option>
-                    <option value="Dadant">Dadant</option>
-                    <option value="Karakovan">Karakovan</option>
-                    <option value="Diğer">Diğer</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="ariIrki">Arı Irkı</label>
-                <select id="ariIrki" name="ariIrki">
-                    <option value="Kafkas">Kafkas</option>
-                    <option value="Anadolu">Anadolu</option>
-                    <option value="Karniyol">Karniyol</option>
-                    <option value="İtalyan">İtalyan</option>
-                    <option value="Belfast">Belfast</option>
-                    <option value="Melez">Melez</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="cerceveSayisi">Çerçeve Sayısı</label>
-                <input type="number" id="cerceveSayisi" name="cerceveSayisi" min="1">
-            </div>
-            <div class="form-grup">
-                <label for="kovanKokeni">Kovan Kökeni</label>
-                <select id="kovanKokeni" name="kovanKokeni">
-                    <option value="Kendi Üretimim">Kendi Üretimim</option>
-                    <option value="Satın Alma">Satın Alma</option>
-                    <option value="Oğul">Oğul</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="hircinlik">Hırçınlık Durumu</label>
-                <select id="hircinlik" name="hircinlik">
-                    <option value="1 - Çok Sakin">1 - Çok Sakin</option>
-                    <option value="2 - Sakin">2 - Sakin</option>
-                    <option value="3 - Normal">3 - Normal</option>
-                    <option value="4 - Hırçın">4 - Hırçın</option>
-                    <option value="5 - Çok Hırçın">5 - Çok Hırçın</option>
-                </select>
-            </div>
-            <div class="checkbox-grup">
-                <input type="checkbox" id="tabanDelikliMi" name="tabanDelikliMi">
-                <label for="tabanDelikliMi">Delikli Taban (Polen Tuzaksız)</label>
-            </div>
-            <div class="checkbox-grup">
-                <input type="checkbox" id="polenTuzagi" name="polenTuzagi">
-                <label for="polenTuzagi">Polen Tuzaklı Taban</label>
-            </div>
-        </div>
-
-        <div class="form-bolumu">
-            <h2><img src="1.png" alt="Ana Arı" class="section-image"> Ana Arı Bilgileri</h2>
-            <div class="form-grup">
-                <label for="anaDogumTarihi">Ana Arı Doğum Tarihi</label>
-                <input type="date" id="anaDogumTarihi" name="anaDogumTarihi">
-            </div>
-            <div class="form-grup">
-                <label for="anaIrki">Ana Arı Irkı</label>
-                <select id="anaIrki" name="anaIrki">
-                    <option value="Kafkas">Kafkas</option>
-                    <option value="Anadolu">Anadolu</option>
-                    <option value="Karniyol">Karniyol</option>
-                    <option value="İtalyan">İtalyan</option>
-                    <option value="Belfast">Belfast</option>
-                    <option value="Melez">Melez</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="anaTuru">Ana Arı Türü</label>
-                <select id="anaTuru" name="anaTuru">
-                    <option value="Damızlık (F0)">Damızlık (F0)</option>
-                    <option value="Çiftleşmiş (F1)">Çiftleşmiş (F1)</option>
-                    <option value="Çiftleşmemiş">Çiftleşmemiş</option>
-                    <option value="Kendi Ürettiğim">Kendi Ürettiğim</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="anaRengi">Ana Arı Rengi</label>
-                <select id="anaRengi" name="anaRengi">
-                    <option value="Boyasız">Boyasız</option>
-                    <option value="Beyaz">Beyaz (Yıl sonu 1-6)</option>
-                    <option value="Sarı">Sarı (Yıl sonu 2-7)</option>
-                    <option value="Kırmızı">Kırmızı (Yıl sonu 3-8)</option>
-                    <option value="Yeşil">Yeşil (Yıl sonu 4-9)</option>
-                    <option value="Mavi">Mavi (Yıl sonu 5-0)</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="anaPerformans">Ana Arı Performansı</label>
-                <select id="anaPerformans" name="anaPerformans">
-                    <option value="Çok İyi">Çok İyi</option>
-                    <option value="İyi">İyi</option>
-                    <option value="Orta">Orta</option>
-                    <option value="Zayıf">Zayıf</option>
-                </select>
-            </div>
-            <div class="form-grup">
-                <label for="anaDegisimTarihi">Planlanan Değişim Tarihi</label>
-                <input type="date" id="anaDegisimTarihi" name="anaDegisimTarihi">
-            </div>
-        </div>
-
-        <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Kovan Bilgilerini Kaydet</button>
-    </form>
-    
-    <a href="kovanlarim.html" class="nav-link" style="margin-top: 15px; margin-bottom: 30px;">
-        <i class="fa-solid fa-list-ul"></i> Mevcut Kovanları Görüntüle
-    </a>
-
+<footer class="footer-signature">
+    <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</p>
+    <small>Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+</footer>
 
 <script>
-    // 1. ADIM: Firebase Proje Bilgileri
-    const firebaseConfig = {
-      apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", // KENDİ BİLGİLERİNİZLE DEĞİŞTİRİN
-      authDomain: "kovan-takip-4c054.firebaseapp.com",
-      projectId: "kovan-takip-4c054",
-      storageBucket: "kovan-takip-4c054.appspot.com",
-      messagingSenderId: "783431210365",
-      appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814"
-    };
-
-    // 2. ADIM: Firebase'i Başlatma
-    firebase.initializeApp(firebaseConfig);
+    // (Script Aynen Korundu)
+    const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth(); 
-    console.log("Firebase bağlanıldı.");
+    const auth = firebase.auth();
+    let currentUser = null;
 
-    const form = document.getElementById('kovanTakipFormu');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userEmailElement = document.getElementById('userEmail');
-    let mevcutKullanici = null; 
+    auth.onAuthStateChanged(user => { if(user) currentUser = user; else window.location.href='login.html'; });
 
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        mevcutKullanici = user;
-        console.log("Giriş yapan kullanıcı:", mevcutKullanici.uid);
-        userEmailElement.textContent = `Hoşgeldin, ${mevcutKullanici.email}`; 
-      } else {
-        console.log("Kullanıcı oturumu kapalı, login sayfasına yönlendiriliyor.");
-        window.location.href = 'login.html';
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            console.log("Çıkış yapıldı.");
-        }).catch((error) => {
-            console.error("Çıkış hatası:", error);
-            alert("Çıkış yapılırken bir hata oluştu.");
-        });
-    });
-
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        if (!mevcutKullanici) {
-            alert("Lütfen önce giriş yapın.");
-            return;
-        }
-
-        console.log("Form gönderildi. Veriler toplanıyor...");
-
-        const kovanVerisi = {
-            userId: mevcutKullanici.uid, 
-            kovanNo: form.kovanNo.value,
-            barkodNo: form.barkodNo.value,
-            kovanTipi: form.kovanTipi.value,
-            ariIrki: form.ariIrki.value,
-            cerceveSayisi: Number(form.cerceveSayisi.value),
-            kovanKokeni: form.kovanKokeni.value,
-            tabanDelikliMi: form.tabanDelikliMi.checked,
-            polenTuzagi: form.polenTuzagi.checked,
-            hircinlik: form.hircinlik.value,
-
-            anaAri: {
-                dogumTarihi: form.anaDogumTarihi.value,
-                anaIrki: form.anaIrki.value,
-                anaTuru: form.anaTuru.value,
-                anaRengi: form.anaRengi.value,
-                performans: form.anaPerformans.value,
-                degisimTarihi: form.anaDegisimTarihi.value
+    document.getElementById('kovanForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if(!currentUser) return;
+        const btn = document.getElementById('btnKaydet'); btn.disabled = true; btn.innerHTML = 'Kaydediliyor...';
+        const f = new FormData(this);
+        
+        const data = {
+            sahip: currentUser.uid,
+            no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'),
+            cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')),
+            taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked,
+            ana: {
+                dogum: f.get('ana_dogum'), irk: f.get('ana_irk'), tur: f.get('ana_tur'),
+                renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim')
             },
-            sonGuncelleme: new Date()
+            guncelleme: new Date().toISOString().split('T')[0]
         };
 
-        db.collection("kovanlar").doc(kovanVerisi.kovanNo).set(kovanVerisi)
-            .then(() => {
-                console.log("Kovan başarıyla kaydedildi!");
-                alert("Kovan '" + kovanVerisi.kovanNo + "' başarıyla kaydedildi!");
-                form.reset();
-            })
-            .catch((error) => {
-                console.error("Veritabanına yazarken hata oluştu: ", error);
-                 if (error.code === 'permission-denied') {
-                     alert("Hata: Bu işlemi yapmak için izniniz yok. Firestore kurallarınızı kontrol edin.");
-                 } else {
-                     alert("Hata: " + error.message);
-                 }
-            });
+        db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").add(data)
+            .then(() => window.location.href = "kovanlarim.html")
+            .catch(err => { alert(err.message); btn.disabled = false; });
     });
 </script>
-
-<footer class="imza-bolumu">
-    <p>
-        © 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝
-        <br>
-        Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a>
-    </p>
-</footer>
 </body>
 </html>

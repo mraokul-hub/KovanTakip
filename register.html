@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Yap - Kovan Takip</title>
+    <title>Kaydol - Kovan Takip</title>
     <link rel="icon" href="5.jpg" type="image/jpeg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
             height: 100vh;
             display: flex;
             align-items: center;
@@ -26,12 +26,12 @@
             background: white;
             width: 100%;
             max-width: 400px;
-            overflow: visible;
+            overflow: visible; /* Logo dışarı taşsın diye */
             margin-top: 60px;
             position: relative;
         }
         
-        /* --- LOGO AYARI (TAM OTURMA) --- */
+        /* --- LOGO AYARI (YEŞİL TEMA & TAM OTURMA) --- */
         .logo-container {
             width: 130px;
             height: 130px;
@@ -42,11 +42,11 @@
             left: 50%;
             transform: translateX(-50%);
             
-            /* ÖNEMLİ DEĞİŞİKLİKLER BURADA: */
-            padding: 0; /* Boşluk silindi */
-            overflow: hidden; /* Yuvarlağın dışına taşanı kes */
-            border: 5px solid white; /* Beyaz kalın çerçeve */
-            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4); /* Bal rengi gölge */
+            /* KUSURSUZ GÖRÜNÜM İÇİN: */
+            padding: 0; /* Boşluk yok */
+            overflow: hidden; /* Dışarı taşanı kes */
+            border: 5px solid white; /* Kalın beyaz çerçeve */
+            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.4); /* Yeşil gölge */
             
             display: flex;
             justify-content: center;
@@ -58,10 +58,10 @@
         .logo-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Resmi yuvarlağa tam yayar/doldurur */
+            object-fit: cover; /* Resmi alana tam yayar */
             display: block;
         }
-        /* ------------------------------- */
+        /* ----------------------------------------- */
 
         @keyframes popIn {
             0% { transform: translateX(-50%) scale(0); opacity: 0; }
@@ -69,18 +69,18 @@
         }
 
         .card-body {
-            padding-top: 80px;
+            padding-top: 80px; /* Logo altı boşluk */
             padding-bottom: 30px;
             padding-left: 30px;
             padding-right: 30px;
             text-align: center;
         }
 
-        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25); border-color: #ffc107; }
-        .btn-login { background-color: #0d6efd; border: none; padding: 12px; font-size: 1.1rem; transition: 0.3s; width: 100%; border-radius: 10px; }
-        .btn-login:hover { background-color: #0b5ed7; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3); }
+        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); border-color: #198754; }
+        .btn-register { background-color: #198754; border: none; padding: 12px; font-size: 1.1rem; transition: 0.3s; width: 100%; border-radius: 10px; }
+        .btn-register:hover { background-color: #157347; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3); }
         
-        .footer-link a { color: #0d6efd; text-decoration: none; font-weight: 600; }
+        .footer-link a { color: #198754; text-decoration: none; font-weight: 600; }
         .footer-link a:hover { text-decoration: underline; }
     </style>
 </head>
@@ -93,12 +93,12 @@
         </div>
 
         <div class="card-body">
-            <h3 class="fw-bold text-dark mb-1">Hoş Geldiniz</h3>
-            <p class="text-muted small mb-4">Kovan Takip Sistemi</p>
+            <h3 class="fw-bold text-dark mb-1">Aramıza Katılın</h3>
+            <p class="text-muted small mb-4">Yeni bir Kovan Takip hesabı oluşturun</p>
             
             <div id="alertBox" class="alert alert-danger d-none text-center p-2 small"></div>
 
-            <form id="loginForm" class="text-start">
+            <form id="registerForm" class="text-start">
                 <div class="mb-3">
                     <label class="form-label fw-bold small text-secondary">E-posta</label>
                     <div class="input-group">
@@ -107,21 +107,21 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label fw-bold small text-secondary">Şifre</label>
+                    <label class="form-label fw-bold small text-secondary">Şifre Oluştur</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                        <input type="password" id="password" class="form-control bg-light border-start-0" placeholder="******" required>
+                        <input type="password" id="password" class="form-control bg-light border-start-0" placeholder="En az 6 karakter" required minlength="6">
                     </div>
                 </div>
                 <div class="d-grid">
-                    <button type="submit" id="loginBtn" class="btn btn-primary btn-login fw-bold text-white">
-                        Giriş Yap
+                    <button type="submit" id="registerBtn" class="btn btn-primary btn-register fw-bold text-white">
+                        Kaydı Tamamla
                     </button>
                 </div>
             </form>
             
             <div class="footer-link mt-4 small">
-                Hesabınız yok mu? <a href="register.html">Hemen Kaydolun</a>
+                Zaten üye misiniz? <a href="login.html">Giriş Yapın</a>
             </div>
             
             <div class="text-center mt-4 small text-muted border-top pt-3">
@@ -136,7 +136,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const alertBox = document.getElementById('alertBox');
-    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
 
     auth.onAuthStateChanged(user => { if (user) window.location.href = 'kovanlarim.html'; });
 
@@ -146,20 +146,26 @@
         alertBox.classList.remove('d-none');
     }
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Giriş Yapılıyor...';
+        if(password.length < 6) { showAlert("Şifre en az 6 karakter olmalıdır."); return; }
 
-        auth.signInWithEmailAndPassword(email, password)
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(() => {
+                showAlert("Kayıt Başarılı! Yönlendiriliyorsunuz...", "success");
+                setTimeout(() => window.location.href = 'kovanlarim.html', 1500);
+            })
             .catch((error) => {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Giriş Yap';
-                let msg = "Giriş hatası: " + error.message;
-                if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "E-posta veya şifre hatalı.";
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'Kaydı Tamamla';
+                let msg = "Kayıt hatası: " + error.message;
+                if(error.code === 'auth/email-already-in-use') msg = "Bu e-posta zaten kullanımda.";
                 showAlert(msg);
             });
     });
