@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script> <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
@@ -20,20 +20,10 @@
         .nav-btn-group { width: 100%; display: flex; justify-content: space-between; margin-bottom: 15px; }
         .nav-btn { font-weight: bold; min-width: 120px; }
         .chart-card { max-width: 600px; margin: 0 auto 20px auto; border-radius: 12px; }
-        
         .edit-row { background-color: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px dashed #0d6efd; margin-top: 5px; }
-
-        /* İMZA STİLİ (FOOTER) */
-        .footer-signature {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.85rem;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            margin-top: 40px;
-            background: #fff;
-        }
+        .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
         .footer-signature a { color: #0d6efd; text-decoration: none; }
+        #reader { width: 100%; }
     </style>
 </head>
 <body class="bg-light">
@@ -41,9 +31,29 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
     <div class="container">
         <a class="navbar-brand fw-bold" href="kovanlarim.html"><i class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
-        <a href="kovanlarim.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i> Listeye Dön</a>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-light btn-sm" onclick="openScanner()">
+                <img src="Designer.jpg" style="height: 20px; vertical-align: text-bottom;" alt="Tara"> <span class="d-none d-md-inline">Tara</span>
+            </button>
+            <a href="kovanlarim.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i> Listeye Dön</a>
+        </div>
     </div>
 </nav>
+
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><img src="Designer.jpg" class="me-2" style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="stopScanner()"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="reader"></div>
+                <div id="scanResult" class="text-center p-3 d-none"><div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container pb-5">
     <div class="nav-btn-group">
@@ -117,7 +127,7 @@
                 <div class="tab-pane fade show active" id="bakimTab">
                     <form class="mb-4 p-3 bg-white rounded border" onsubmit="kayitEkle(event, 'bakimKayitlari')">
                         <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" required></div>
+                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="bakimTarih"></div>
                             <div class="col-md-4"><input type="text" name="islem" class="form-control" placeholder="İşlem" required></div>
                             <div class="col-md-5"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
                             <div class="col-12 d-flex align-items-center gap-2">
@@ -133,7 +143,7 @@
                 <div class="tab-pane fade" id="hastalikTab">
                     <form class="mb-4 p-3 bg-white rounded border border-danger" onsubmit="kayitEkle(event, 'hastalikKayitlari')">
                         <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" required></div>
+                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hastalikTarih"></div>
                             <div class="col-md-3"><input type="text" name="hastalik" class="form-control" placeholder="Hastalık" required></div>
                             <div class="col-md-3"><input type="text" name="ilac" class="form-control" placeholder="İlaç"></div>
                             <div class="col-md-3"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
@@ -150,7 +160,7 @@
                 <div class="tab-pane fade" id="hasatTab">
                     <form class="mb-4 p-3 bg-white rounded border border-success" onsubmit="kayitEkle(event, 'hasatKayitlari')">
                         <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" required></div>
+                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hasatTarih"></div>
                             <div class="col-md-3"><input type="number" step="0.1" name="miktar" class="form-control" placeholder="KG" required></div>
                             <div class="col-md-4"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
                             <div class="col-md-2"><button class="btn btn-success w-100" type="submit">Kaydet</button></div>
@@ -179,17 +189,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // (Javascript kodları aynen korundu - Özet)
     const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore(); const auth = firebase.auth();
     const kovanId = new URLSearchParams(window.location.search).get('id');
-    let currentUser = null; let hasatChart = null;
+    let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null;
     const hircinlikMap = { 1:"Çok Sakin", 2:"Sakin", 3:"Normal", 4:"Hırçın", 5:"Çok Hırçın" };
+
+    // SAYFA YÜKLENDİĞİNDE TARİH ALANLARINA BUGÜNÜ ATA
+    document.addEventListener('DOMContentLoaded', () => {
+        const bugun = new Date().toISOString().split('T')[0];
+        document.getElementById('bakimTarih').value = bugun;
+        document.getElementById('hastalikTarih').value = bugun;
+        document.getElementById('hasatTarih').value = bugun;
+    });
+
     if (!kovanId) window.location.href = "kovanlarim.html";
     auth.onAuthStateChanged(user => { if (user) { currentUser = user; yukle(); navigasyonuKur(); } else window.location.href = 'login.html'; });
     
-    // (Fonksiyonlar aynen devam ediyor...)
     async function navigasyonuKur() { try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get(); if(snap.empty) return; let kovanlar = []; snap.forEach(doc => kovanlar.push({id: doc.id, no: doc.data().no || ""})); kovanlar.sort((a,b)=>a.no.localeCompare(b.no, undefined, {numeric:true, sensitivity:'base'})); const idx = kovanlar.findIndex(k=>k.id===kovanId); if(idx>0) { document.getElementById('btnPrev').classList.remove('disabled'); document.getElementById('btnPrev').onclick=()=>window.location.href=`detay.html?id=${kovanlar[idx-1].id}`; document.getElementById('btnPrev').innerHTML=`<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx-1].no})`; } if(idx<kovanlar.length-1) { document.getElementById('btnNext').classList.remove('disabled'); document.getElementById('btnNext').onclick=()=>window.location.href=`detay.html?id=${kovanlar[idx+1].id}`; document.getElementById('btnNext').innerHTML=`Sonraki (${kovanlar[idx+1].no}) <i class="fa-solid fa-chevron-right"></i>`; } } catch(e) { console.error("Nav hata:", e); } }
     function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
     function formatDate(iso) { if(!iso) return '-'; const p=iso.split('-'); return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:iso; }
@@ -197,13 +214,37 @@
     function toggleEdit(show) { document.getElementById('viewMode').classList.toggle('d-none', show); document.getElementById('editMode').classList.toggle('d-none', !show); document.getElementById('topActionButtons').classList.toggle('hidden-mode', show); }
     document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); const ud = { barkod: document.getElementById('e_barkod').value, tip: document.getElementById('e_tip').value, irk: document.getElementById('e_irk').value, cerceve: Number(document.getElementById('e_cerceve').value), koken: document.getElementById('e_koken').value, hircinlik: Number(document.getElementById('e_hircinlik').value), taban: document.getElementById('e_taban').checked, polen: document.getElementById('e_polen').checked, ana: { dogum: document.getElementById('e_anaDogum').value, irk: document.getElementById('e_anaIrk').value, tur: document.getElementById('e_anaTur').value, renk: document.getElementById('e_anaRenk').value, perf: document.getElementById('e_anaPerf').value, degisim: document.getElementById('e_anaDegisim').value }, guncelleme: new Date().toISOString().split('T')[0] }; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(()=>toggleEdit(false)); });
     function handlePhoto(input, imgId, hiddenId) { if(input.files[0]) { const r = new FileReader(); r.onload = function(e) { const img = new Image(); img.onload = function() { const c = document.createElement('canvas'); const ctx=c.getContext('2d'); let w=img.width; let h=img.height; if(w>800){h*=800/w;w=800;} c.width=w;c.height=h; ctx.drawImage(img,0,0,w,h); document.getElementById(imgId).src = c.toDataURL('image/jpeg',0.7); document.getElementById(imgId).style.display='block'; document.getElementById(hiddenId).value=c.toDataURL('image/jpeg',0.7); }; img.src=e.target.result; }; r.readAsDataURL(input.files[0]); } }
-    function kayitEkle(e, col) { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); if(!d.tarih) d.tarih = new Date().toISOString().split('T')[0]; if(col === 'hasatKayitlari') d.miktar = Number(d.miktar); if(col === 'bakimKayitlari') d.foto = document.getElementById('bakimBase64').value; if(col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(()=>{ e.target.reset(); document.querySelectorAll('.img-preview').forEach(i=>i.style.display='none'); document.querySelectorAll('input[type=hidden]').forEach(i=>i.value=''); }); }
+    
+    function kayitEkle(e, col) { 
+        e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); 
+        // OTOMATİK TARİH ATAMA (Boşsa bugünü ata)
+        if(!d.tarih) d.tarih = new Date().toISOString().split('T')[0];
+        if(col === 'hasatKayitlari') d.miktar = Number(d.miktar); 
+        if(col === 'bakimKayitlari') d.foto = document.getElementById('bakimBase64').value; 
+        if(col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value; 
+        db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(()=>{ e.target.reset(); document.querySelectorAll('.img-preview').forEach(i=>i.style.display='none'); document.querySelectorAll('input[type=hidden]').forEach(i=>i.value=''); document.getElementById('bakimTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hastalikTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hasatTarih').value=new Date().toISOString().split('T')[0]; }); 
+    }
+    
     function altYukle(col, divId) { const el = document.getElementById(divId); db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => { el.innerHTML = ''; let docs = []; snap.forEach(d => { let dt=d.data(); dt.id=d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); }); docs.sort((a,b) => b._tarih.localeCompare(a._tarih)); if(col==='hasatKayitlari') guncelleGrafik(docs); docs.forEach(data => { const rowId = `row-${data.id}`; let border = col.includes('hastalik')?'danger':(col.includes('hasat')?'success':'primary'); let imgHtml = data.foto ? `<br><img src="${data.foto}" class="record-img">` : ''; let mainInfo = data._baslik || (data._miktar ? data._miktar+' KG' : 'Kayıt'); if(data.ilac) mainInfo += ` (${data.ilac})`; el.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="card mb-2 shadow-sm border-start border-4 border-${border}"><div class="card-body p-2"><div class="view-div d-flex justify-content-between"><div><span class="badge bg-secondary">${formatDate(data._tarih)}</span> <strong>${mainInfo}</strong></div><div class="btn-group btn-group-sm"><button onclick="toggleRowEdit('${rowId}', true)" class="btn btn-outline-primary"><i class="fa-solid fa-pencil"></i></button><button onclick="sil('${col}','${data.id}')" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button></div></div><div class="view-div text-muted small mt-1">${data.not||''}</div><div class="view-div">${imgHtml}</div><div class="edit-row d-none"><div class="input-group input-group-sm mb-1"><span class="input-group-text">Tarih</span><input type="date" class="form-control edit-date" value="${data.tarih}"></div>${col==='hasatKayitlari' ? `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Miktar</span><input type="number" class="form-control edit-val" value="${data.miktar}"></div>` : `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Başlık</span><input type="text" class="form-control edit-val" value="${mainInfo.split(' (')[0]}"></div>`}<div class="input-group input-group-sm mb-1"><span class="input-group-text">Not</span><input type="text" class="form-control edit-not" value="${data.not||''}"></div><div class="text-end mt-2"><button onclick="toggleRowEdit('${rowId}', false)" class="btn btn-sm btn-secondary">İptal</button><button onclick="saveRow('${col}', '${data.id}', '${rowId}')" class="btn btn-sm btn-success">Kaydet</button></div></div></div></div>`); }); }); }
     function toggleRowEdit(rowId, show) { const row = document.getElementById(rowId); row.querySelectorAll('.view-div').forEach(e => e.classList.toggle('d-none', show)); row.querySelector('.edit-row').classList.toggle('d-none', !show); }
     function saveRow(col, id, rowId) { const row = document.getElementById(rowId); const tarih = row.querySelector('.edit-date').value; const val = row.querySelector('.edit-val').value; const not = row.querySelector('.edit-not').value; const updateData = { tarih: tarih, not: not }; if(col === 'hasatKayitlari') updateData.miktar = Number(val); else if(col === 'hastalikKayitlari') updateData.hastalik = val; else updateData.islem = val; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData).then(() => toggleRowEdit(rowId, false)); }
     function guncelleGrafik(docs) { const chartCard = document.getElementById('grafikKarti'); if(!docs.length) { chartCard.style.display='none'; return; } chartCard.style.display='block'; const curY = new Date().getFullYear(); const past = {}; const curr = {}; docs.forEach(d => { if(!d._miktar) return; const y = parseInt(d._tarih.substring(0,4)); const val = Number(d._miktar); if(y < curY) { past[y] = (past[y]||0) + val; } else { curr[d._tarih] = (curr[d._tarih]||0) + val; } }); const lbl=[], dat=[], bg=[], bd=[]; Object.keys(past).sort().forEach(y=>{ lbl.push(`${y} (Top.)`); dat.push(past[y]); bg.push('rgba(108,117,125,0.6)'); bd.push('grey'); }); Object.keys(curr).sort().forEach(t=>{ const p=t.split('-'); lbl.push(`${p[2]}.${p[1]}`); dat.push(curr[t]); bg.push('rgba(255, 159, 64, 0.7)'); bd.push('rgba(255, 159, 64, 1)'); }); if(hasatChart) hasatChart.destroy(); const ctx = document.getElementById('balGrafigi').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)'); gradient.addColorStop(1, 'rgba(255, 205, 86, 0.2)'); hasatChart = new Chart(ctx, { type: 'bar', data: { labels: lbl, datasets: [{ label: 'Bal (KG)', data: dat, backgroundColor: gradient, borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, borderRadius: 4, barThickness: 'flex', maxBarThickness: 40 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: {display:false} }, x: {grid:{display:false}} }, plugins: { legend: {display: false} } } }); }
     function sil(col, id) { if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).delete(); }
     function silKovan() { if(confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).delete().then(()=>window.location.href="kovanlarim.html"); }
+    
+    // BARKOD TARAYICI FONKSİYONLARI
+    function openScanner() { const m = new bootstrap.Modal(document.getElementById('scannerModal')); m.show(); if(!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); html5QrcodeScanner.render(onScanSuccess, ()=>{}); } }
+    function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().then(_=>{html5QrcodeScanner=null;}).catch(e=>console.error(e)); } }
+    async function onScanSuccess(txt) {
+        if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; }
+        document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none');
+        try {
+            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod","==",txt).get();
+            if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); }
+            else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; }
+        } catch(e) { console.error(e); }
+    }
+    document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
 </script>
 </body>
 </html>
