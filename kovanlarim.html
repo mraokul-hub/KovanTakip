@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style> 
         body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; } 
-        .container { flex: 1; } /* Footer'ı aşağı itmek için */
+        .container { flex: 1; }
         .kovan-card { transition: transform 0.2s; cursor: pointer; border-left: 5px solid #007bff; } 
         .kovan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-icon { width: 30px; height: auto; margin-right: 10px; }
@@ -18,9 +18,10 @@
         .btn-pano:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(253, 126, 20, 0.6); }
         @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
         #reader { width: 100%; }
+        
         /* İMZA STİLİ */
         .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
-        .footer-signature a { color: #0d6efd; text-decoration: none; }
+        .footer-signature a { text-decoration: none; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -63,12 +64,19 @@
 
 <footer class="footer-signature">
     <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</p>
-    <small>Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    <small class="d-block mb-3">Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    
+    <div class="mt-3">
+        <small class="d-block text-secondary">Uygulamayı faydalı bulduysanız, bir kahve ısmarlayarak destek olabilirsiniz.</small>
+        <small class="d-block text-secondary mb-2">(Şimdiden teşekkürler!)</small>
+        <a href="https://banabicoffee.com/@hakanyabgu" target="_blank" class="btn btn-warning btn-sm rounded-pill fw-bold text-dark shadow-sm">
+            <i class="fa-solid fa-mug-hot me-1"></i> Kahve Ismarla
+        </a>
+    </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // (Firebase Config ve Scriptler Aynen Korundu - Kısalık İçin Özet)
     const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore(); const auth = firebase.auth();
@@ -109,15 +117,7 @@
 
     function openScanner() { const m = new bootstrap.Modal(document.getElementById('scannerModal')); m.show(); if(!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); html5QrcodeScanner.render(onScanSuccess, ()=>{}); } }
     function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().then(_=>{html5QrcodeScanner=null;}).catch(e=>console.error(e)); } }
-    async function onScanSuccess(txt) {
-        if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; }
-        document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none');
-        try {
-            const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod","==",txt).get();
-            if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); }
-            else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; }
-        } catch(e) { console.error(e); }
-    }
+    async function onScanSuccess(txt) { if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; } document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none'); try { const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod","==",txt).get(); if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); } else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; } } catch(e) { console.error(e); } }
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
 </script>
 </body>

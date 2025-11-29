@@ -9,8 +9,9 @@
     <style>
         body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
         .container { flex: 1; }
+        /* İMZA STİLİ */
         .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
-        .footer-signature a { color: #0d6efd; text-decoration: none; }
+        .footer-signature a { text-decoration: none; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -73,11 +74,18 @@
 
 <footer class="footer-signature">
     <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</p>
-    <small>Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    <small class="d-block mb-3">Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    
+    <div class="mt-3">
+        <small class="d-block text-secondary">Uygulamayı faydalı bulduysanız, bir kahve ısmarlayarak destek olabilirsiniz.</small>
+        <small class="d-block text-secondary mb-2">(Şimdiden teşekkürler!)</small>
+        <a href="https://banabicoffee.com/@hakanyabgu" target="_blank" class="btn btn-warning btn-sm rounded-pill fw-bold text-dark shadow-sm">
+            <i class="fa-solid fa-mug-hot me-1"></i> Kahve Ismarla
+        </a>
+    </div>
 </footer>
 
 <script>
-    // (Script Aynen Korundu)
     const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -91,22 +99,8 @@
         if(!currentUser) return;
         const btn = document.getElementById('btnKaydet'); btn.disabled = true; btn.innerHTML = 'Kaydediliyor...';
         const f = new FormData(this);
-        
-        const data = {
-            sahip: currentUser.uid,
-            no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'),
-            cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')),
-            taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked,
-            ana: {
-                dogum: f.get('ana_dogum'), irk: f.get('ana_irk'), tur: f.get('ana_tur'),
-                renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim')
-            },
-            guncelleme: new Date().toISOString().split('T')[0]
-        };
-
-        db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").add(data)
-            .then(() => window.location.href = "kovanlarim.html")
-            .catch(err => { alert(err.message); btn.disabled = false; });
+        const data = { sahip: currentUser.uid, no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'), cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')), taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked, ana: { dogum: f.get('ana_dogum'), irk: f.get('ana_irk'), tur: f.get('ana_tur'), renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim') }, guncelleme: new Date().toISOString().split('T')[0] };
+        db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").add(data).then(() => window.location.href = "kovanlarim.html").catch(err => { alert(err.message); btn.disabled = false; });
     });
 </script>
 </body>

@@ -21,8 +21,10 @@
         .nav-btn { font-weight: bold; min-width: 120px; }
         .chart-card { max-width: 600px; margin: 0 auto 20px auto; border-radius: 12px; }
         .edit-row { background-color: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px dashed #0d6efd; margin-top: 5px; }
+        
+        /* İMZA STİLİ */
         .footer-signature { text-align: center; padding: 20px; font-size: 0.85rem; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 40px; background: #fff; }
-        .footer-signature a { color: #0d6efd; text-decoration: none; }
+        .footer-signature a { text-decoration: none; }
         #reader { width: 100%; }
     </style>
 </head>
@@ -68,50 +70,11 @@
             <button id="btnSil" class="btn btn-danger" onclick="silKovan()"><i class="fa-solid fa-trash"></i> Sil</button>
         </div>
     </div>
-
-    <div id="viewMode" class="row mb-4"></div>
     
+    <div id="viewMode" class="row mb-4"></div>
     <div id="editMode" class="card shadow-sm mb-4 d-none border-primary">
-        <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-            <span><i class="fa-solid fa-pen-to-square"></i> Kovanı Düzenle</span>
-            <button type="button" class="btn btn-sm btn-light text-primary fw-bold" onclick="toggleEdit(false)">X</button>
-        </div>
-        <div class="card-body">
-            <form id="editForm">
-                <div class="row g-3">
-                    <div class="col-md-6 border-end">
-                        <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan Özellikleri</h6>
-                        <div class="mb-2"><label class="small fw-bold">Barkod No</label><input type="text" id="e_barkod" class="form-control form-control-sm"></div>
-                        <div class="row">
-                            <div class="col-6 mb-2"><label class="small fw-bold">Tip</label><select id="e_tip" class="form-select form-select-sm"><option>Langstroth</option><option>Dadant</option><option>Karakovan</option><option>Diğer</option></select></div>
-                            <div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select id="e_irk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option><option>Belfast</option></select></div>
-                        </div>
-                        <div class="mb-2"><label class="small fw-bold">Çerçeve</label><input type="number" id="e_cerceve" class="form-control form-control-sm"></div>
-                        <div class="mb-2"><label class="small fw-bold">Köken</label><select id="e_koken" class="form-select form-select-sm"><option>Kendi Üretimim</option><option>Satın Alma</option><option>Oğul</option></select></div>
-                        <div class="mb-2"><label class="small fw-bold">Hırçınlık</label><select id="e_hircinlik" class="form-select form-select-sm"><option value="1">1 - Çok Sakin</option><option value="2">2 - Sakin</option><option value="3">3 - Normal</option><option value="4">4 - Hırçın</option><option value="5">5 - Çok Hırçın</option></select></div>
-                        <div class="d-flex gap-3 mt-2">
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="e_taban"><label class="form-check-label small">Delikli Taban</label></div>
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="e_polen"><label class="form-check-label small">Polen Tuzaklı</label></div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png" width="20"> Ana Arı Bilgileri</h6>
-                        <div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input type="date" id="e_anaDogum" class="form-control form-control-sm"></div>
-                        <div class="row">
-                            <div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select id="e_anaIrk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option></select></div>
-                            <div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select id="e_anaTur" class="form-select form-select-sm"><option>Damızlık (F0)</option><option>Çiftleşmiş (F1)</option><option>Çiftleşmemiş</option><option>Kendi Ürettiğim</option></select></div>
-                        </div>
-                        <div class="mb-2"><label class="small fw-bold">Rengi</label><select id="e_anaRenk" class="form-select form-select-sm"><option>Boyasız</option><option>Beyaz</option><option>Sarı</option><option>Kırmızı</option><option>Yeşil</option><option>Mavi</option></select></div>
-                        <div class="mb-2"><label class="small fw-bold">Performans</label><select id="e_anaPerf" class="form-select form-select-sm"><option>Çok İyi</option><option>İyi</option><option>Orta</option><option>Zayıf</option></select></div>
-                        <div class="mb-2"><label class="small fw-bold">Planlanan Değişim</label><input type="date" id="e_anaDegisim" class="form-control form-control-sm"></div>
-                    </div>
-                    <div class="col-12 text-end border-top pt-3 mt-2">
-                        <button type="button" class="btn btn-secondary me-2" onclick="toggleEdit(false)">İptal</button>
-                        <button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-check"></i> Kaydet</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+        <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"><span><i class="fa-solid fa-pen-to-square"></i> Kovanı Düzenle</span><button type="button" class="btn btn-sm btn-light text-primary fw-bold" onclick="toggleEdit(false)">X</button></div>
+        <div class="card-body"><form id="editForm"><div class="row g-3"><div class="col-md-6 border-end"><h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan Özellikleri</h6><div class="mb-2"><label class="small fw-bold">Barkod No</label><input type="text" id="e_barkod" class="form-control form-control-sm"></div><div class="row"><div class="col-6 mb-2"><label class="small fw-bold">Tip</label><select id="e_tip" class="form-select form-select-sm"><option>Langstroth</option><option>Dadant</option><option>Karakovan</option><option>Diğer</option></select></div><div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select id="e_irk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option><option>Belfast</option></select></div></div><div class="mb-2"><label class="small fw-bold">Çerçeve</label><input type="number" id="e_cerceve" class="form-control form-control-sm"></div><div class="mb-2"><label class="small fw-bold">Köken</label><select id="e_koken" class="form-select form-select-sm"><option>Kendi Üretimim</option><option>Satın Alma</option><option>Oğul</option></select></div><div class="mb-2"><label class="small fw-bold">Hırçınlık</label><select id="e_hircinlik" class="form-select form-select-sm"><option value="1">1 - Çok Sakin</option><option value="2">2 - Sakin</option><option value="3">3 - Normal</option><option value="4">4 - Hırçın</option><option value="5">5 - Çok Hırçın</option></select></div><div class="d-flex gap-3 mt-2"><div class="form-check"><input class="form-check-input" type="checkbox" id="e_taban"><label class="form-check-label small">Delikli Taban</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="e_polen"><label class="form-check-label small">Polen Tuzaklı</label></div></div></div><div class="col-md-6"><h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png" width="20"> Ana Arı Bilgileri</h6><div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input type="date" id="e_anaDogum" class="form-control form-control-sm"></div><div class="row"><div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select id="e_anaIrk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option></select></div><div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select id="e_anaTur" class="form-select form-select-sm"><option>Damızlık (F0)</option><option>Çiftleşmiş (F1)</option><option>Çiftleşmemiş</option><option>Kendi Ürettiğim</option></select></div></div><div class="mb-2"><label class="small fw-bold">Rengi</label><select id="e_anaRenk" class="form-select form-select-sm"><option>Boyasız</option><option>Beyaz</option><option>Sarı</option><option>Kırmızı</option><option>Yeşil</option><option>Mavi</option></select></div><div class="mb-2"><label class="small fw-bold">Performans</label><select id="e_anaPerf" class="form-select form-select-sm"><option>Çok İyi</option><option>İyi</option><option>Orta</option><option>Zayıf</option></select></div><div class="mb-2"><label class="small fw-bold">Planlanan Değişim</label><input type="date" id="e_anaDegisim" class="form-control form-control-sm"></div></div><div class="col-12 text-end border-top pt-3 mt-2"><button type="button" class="btn btn-secondary me-2" onclick="toggleEdit(false)">İptal</button><button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-check"></i> Kaydet</button></div></div></form></div>
     </div>
 
     <div class="card shadow-sm">
@@ -126,52 +89,21 @@
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="bakimTab">
                     <form class="mb-4 p-3 bg-white rounded border" onsubmit="kayitEkle(event, 'bakimKayitlari')">
-                        <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="bakimTarih"></div>
-                            <div class="col-md-4"><input type="text" name="islem" class="form-control" placeholder="İşlem" required></div>
-                            <div class="col-md-5"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
-                            <div class="col-12 d-flex align-items-center gap-2">
-                                <label class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto <input type="file" accept="image/*" hidden onchange="handlePhoto(this, 'bakimPreview', 'bakimBase64')"></label>
-                                <img id="bakimPreview" class="img-preview">
-                                <input type="hidden" name="foto" id="bakimBase64">
-                                <button class="btn btn-primary btn-sm ms-auto px-4" type="submit">Kaydet</button>
-                            </div>
-                        </div>
+                        <div class="row g-2"><div class="col-md-3"><input type="date" name="tarih" class="form-control" id="bakimTarih"></div><div class="col-md-4"><input type="text" name="islem" class="form-control" placeholder="İşlem" required></div><div class="col-md-5"><input type="text" name="not" class="form-control" placeholder="Notlar"></div><div class="col-12 d-flex align-items-center gap-2"><label class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto <input type="file" accept="image/*" hidden onchange="handlePhoto(this, 'bakimPreview', 'bakimBase64')"></label><img id="bakimPreview" class="img-preview"><input type="hidden" name="foto" id="bakimBase64"><button class="btn btn-primary btn-sm ms-auto px-4" type="submit">Kaydet</button></div></div>
                     </form>
                     <div id="bakimListesi"></div>
                 </div>
                 <div class="tab-pane fade" id="hastalikTab">
                     <form class="mb-4 p-3 bg-white rounded border border-danger" onsubmit="kayitEkle(event, 'hastalikKayitlari')">
-                        <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hastalikTarih"></div>
-                            <div class="col-md-3"><input type="text" name="hastalik" class="form-control" placeholder="Hastalık" required></div>
-                            <div class="col-md-3"><input type="text" name="ilac" class="form-control" placeholder="İlaç"></div>
-                            <div class="col-md-3"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
-                            <div class="col-12 d-flex align-items-center gap-2 mt-2">
-                                <label class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto <input type="file" accept="image/*" hidden onchange="handlePhoto(this, 'hastalikPreview', 'hastalikBase64')"></label>
-                                <img id="hastalikPreview" class="img-preview">
-                                <input type="hidden" name="foto" id="hastalikBase64">
-                                <button class="btn btn-danger btn-sm ms-auto px-4" type="submit">Kaydet</button>
-                            </div>
-                        </div>
+                        <div class="row g-2"><div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hastalikTarih"></div><div class="col-md-3"><input type="text" name="hastalik" class="form-control" placeholder="Hastalık" required></div><div class="col-md-3"><input type="text" name="ilac" class="form-control" placeholder="İlaç"></div><div class="col-md-3"><input type="text" name="not" class="form-control" placeholder="Notlar"></div><div class="col-12 d-flex align-items-center gap-2 mt-2"><label class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto <input type="file" accept="image/*" hidden onchange="handlePhoto(this, 'hastalikPreview', 'hastalikBase64')"></label><img id="hastalikPreview" class="img-preview"><input type="hidden" name="foto" id="hastalikBase64"><button class="btn btn-danger btn-sm ms-auto px-4" type="submit">Kaydet</button></div></div>
                     </form>
                     <div id="hastalikListesi"></div>
                 </div>
                 <div class="tab-pane fade" id="hasatTab">
                     <form class="mb-4 p-3 bg-white rounded border border-success" onsubmit="kayitEkle(event, 'hasatKayitlari')">
-                        <div class="row g-2">
-                            <div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hasatTarih"></div>
-                            <div class="col-md-3"><input type="number" step="0.1" name="miktar" class="form-control" placeholder="KG" required></div>
-                            <div class="col-md-4"><input type="text" name="not" class="form-control" placeholder="Notlar"></div>
-                            <div class="col-md-2"><button class="btn btn-success w-100" type="submit">Kaydet</button></div>
-                        </div>
+                        <div class="row g-2"><div class="col-md-3"><input type="date" name="tarih" class="form-control" id="hasatTarih"></div><div class="col-md-3"><input type="number" step="0.1" name="miktar" class="form-control" placeholder="KG" required></div><div class="col-md-4"><input type="text" name="not" class="form-control" placeholder="Notlar"></div><div class="col-md-2"><button class="btn btn-success w-100" type="submit">Kaydet</button></div></div>
                     </form>
-                    <div id="grafikKarti" class="card mb-4 shadow-sm border-success chart-card" style="display:none;">
-                        <div class="card-body p-3">
-                            <h6 class="text-center text-success fw-bold mb-3"><i class="fa-solid fa-chart-column"></i> Bal Verim Analizi</h6>
-                            <div style="height: 200px;"><canvas id="balGrafigi"></canvas></div>
-                        </div>
-                    </div>
+                    <div id="grafikKarti" class="card mb-4 shadow-sm border-success chart-card" style="display:none;"><div class="card-body p-3"><h6 class="text-center text-success fw-bold mb-3"><i class="fa-solid fa-chart-column"></i> Bal Verim Analizi</h6><div style="height: 200px;"><canvas id="balGrafigi"></canvas></div></div></div>
                     <div id="hasatListesi"></div>
                 </div>
             </div>
@@ -181,7 +113,15 @@
 
 <footer class="footer-signature">
     <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için geliştirildi 🐝</p>
-    <small>Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    <small class="d-block mb-3">Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">yabguhakan2025@gmail.com</a></small>
+    
+    <div class="mt-3">
+        <small class="d-block text-secondary">Uygulamayı faydalı bulduysanız, bir kahve ısmarlayarak destek olabilirsiniz.</small>
+        <small class="d-block text-secondary mb-2">(Şimdiden teşekkürler!)</small>
+        <a href="https://banabicoffee.com/@hakanyabgu" target="_blank" class="btn btn-warning btn-sm rounded-pill fw-bold text-dark shadow-sm">
+            <i class="fa-solid fa-mug-hot me-1"></i> Kahve Ismarla
+        </a>
+    </div>
 </footer>
 
 <datalist id="hastalikList"><option value="Varroa"><option value="Nosema"><option value="Yavru Çürüklüğü"><option value="Kireç"></datalist>
@@ -196,7 +136,6 @@
     let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null;
     const hircinlikMap = { 1:"Çok Sakin", 2:"Sakin", 3:"Normal", 4:"Hırçın", 5:"Çok Hırçın" };
 
-    // SAYFA YÜKLENDİĞİNDE TARİH ALANLARINA BUGÜNÜ ATA
     document.addEventListener('DOMContentLoaded', () => {
         const bugun = new Date().toISOString().split('T')[0];
         document.getElementById('bakimTarih').value = bugun;
@@ -214,17 +153,7 @@
     function toggleEdit(show) { document.getElementById('viewMode').classList.toggle('d-none', show); document.getElementById('editMode').classList.toggle('d-none', !show); document.getElementById('topActionButtons').classList.toggle('hidden-mode', show); }
     document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); const ud = { barkod: document.getElementById('e_barkod').value, tip: document.getElementById('e_tip').value, irk: document.getElementById('e_irk').value, cerceve: Number(document.getElementById('e_cerceve').value), koken: document.getElementById('e_koken').value, hircinlik: Number(document.getElementById('e_hircinlik').value), taban: document.getElementById('e_taban').checked, polen: document.getElementById('e_polen').checked, ana: { dogum: document.getElementById('e_anaDogum').value, irk: document.getElementById('e_anaIrk').value, tur: document.getElementById('e_anaTur').value, renk: document.getElementById('e_anaRenk').value, perf: document.getElementById('e_anaPerf').value, degisim: document.getElementById('e_anaDegisim').value }, guncelleme: new Date().toISOString().split('T')[0] }; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(()=>toggleEdit(false)); });
     function handlePhoto(input, imgId, hiddenId) { if(input.files[0]) { const r = new FileReader(); r.onload = function(e) { const img = new Image(); img.onload = function() { const c = document.createElement('canvas'); const ctx=c.getContext('2d'); let w=img.width; let h=img.height; if(w>800){h*=800/w;w=800;} c.width=w;c.height=h; ctx.drawImage(img,0,0,w,h); document.getElementById(imgId).src = c.toDataURL('image/jpeg',0.7); document.getElementById(imgId).style.display='block'; document.getElementById(hiddenId).value=c.toDataURL('image/jpeg',0.7); }; img.src=e.target.result; }; r.readAsDataURL(input.files[0]); } }
-    
-    function kayitEkle(e, col) { 
-        e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); 
-        // OTOMATİK TARİH ATAMA (Boşsa bugünü ata)
-        if(!d.tarih) d.tarih = new Date().toISOString().split('T')[0];
-        if(col === 'hasatKayitlari') d.miktar = Number(d.miktar); 
-        if(col === 'bakimKayitlari') d.foto = document.getElementById('bakimBase64').value; 
-        if(col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value; 
-        db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(()=>{ e.target.reset(); document.querySelectorAll('.img-preview').forEach(i=>i.style.display='none'); document.querySelectorAll('input[type=hidden]').forEach(i=>i.value=''); document.getElementById('bakimTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hastalikTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hasatTarih').value=new Date().toISOString().split('T')[0]; }); 
-    }
-    
+    function kayitEkle(e, col) { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); if(!d.tarih) d.tarih = new Date().toISOString().split('T')[0]; if(col === 'hasatKayitlari') d.miktar = Number(d.miktar); if(col === 'bakimKayitlari') d.foto = document.getElementById('bakimBase64').value; if(col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(()=>{ e.target.reset(); document.querySelectorAll('.img-preview').forEach(i=>i.style.display='none'); document.querySelectorAll('input[type=hidden]').forEach(i=>i.value=''); document.getElementById('bakimTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hastalikTarih').value=new Date().toISOString().split('T')[0]; document.getElementById('hasatTarih').value=new Date().toISOString().split('T')[0]; }); }
     function altYukle(col, divId) { const el = document.getElementById(divId); db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => { el.innerHTML = ''; let docs = []; snap.forEach(d => { let dt=d.data(); dt.id=d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); }); docs.sort((a,b) => b._tarih.localeCompare(a._tarih)); if(col==='hasatKayitlari') guncelleGrafik(docs); docs.forEach(data => { const rowId = `row-${data.id}`; let border = col.includes('hastalik')?'danger':(col.includes('hasat')?'success':'primary'); let imgHtml = data.foto ? `<br><img src="${data.foto}" class="record-img">` : ''; let mainInfo = data._baslik || (data._miktar ? data._miktar+' KG' : 'Kayıt'); if(data.ilac) mainInfo += ` (${data.ilac})`; el.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="card mb-2 shadow-sm border-start border-4 border-${border}"><div class="card-body p-2"><div class="view-div d-flex justify-content-between"><div><span class="badge bg-secondary">${formatDate(data._tarih)}</span> <strong>${mainInfo}</strong></div><div class="btn-group btn-group-sm"><button onclick="toggleRowEdit('${rowId}', true)" class="btn btn-outline-primary"><i class="fa-solid fa-pencil"></i></button><button onclick="sil('${col}','${data.id}')" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button></div></div><div class="view-div text-muted small mt-1">${data.not||''}</div><div class="view-div">${imgHtml}</div><div class="edit-row d-none"><div class="input-group input-group-sm mb-1"><span class="input-group-text">Tarih</span><input type="date" class="form-control edit-date" value="${data.tarih}"></div>${col==='hasatKayitlari' ? `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Miktar</span><input type="number" class="form-control edit-val" value="${data.miktar}"></div>` : `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Başlık</span><input type="text" class="form-control edit-val" value="${mainInfo.split(' (')[0]}"></div>`}<div class="input-group input-group-sm mb-1"><span class="input-group-text">Not</span><input type="text" class="form-control edit-not" value="${data.not||''}"></div><div class="text-end mt-2"><button onclick="toggleRowEdit('${rowId}', false)" class="btn btn-sm btn-secondary">İptal</button><button onclick="saveRow('${col}', '${data.id}', '${rowId}')" class="btn btn-sm btn-success">Kaydet</button></div></div></div></div>`); }); }); }
     function toggleRowEdit(rowId, show) { const row = document.getElementById(rowId); row.querySelectorAll('.view-div').forEach(e => e.classList.toggle('d-none', show)); row.querySelector('.edit-row').classList.toggle('d-none', !show); }
     function saveRow(col, id, rowId) { const row = document.getElementById(rowId); const tarih = row.querySelector('.edit-date').value; const val = row.querySelector('.edit-val').value; const not = row.querySelector('.edit-not').value; const updateData = { tarih: tarih, not: not }; if(col === 'hasatKayitlari') updateData.miktar = Number(val); else if(col === 'hastalikKayitlari') updateData.hastalik = val; else updateData.islem = val; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData).then(() => toggleRowEdit(rowId, false)); }
@@ -232,18 +161,9 @@
     function sil(col, id) { if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).delete(); }
     function silKovan() { if(confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).delete().then(()=>window.location.href="kovanlarim.html"); }
     
-    // BARKOD TARAYICI FONKSİYONLARI
     function openScanner() { const m = new bootstrap.Modal(document.getElementById('scannerModal')); m.show(); if(!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); html5QrcodeScanner.render(onScanSuccess, ()=>{}); } }
     function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().then(_=>{html5QrcodeScanner=null;}).catch(e=>console.error(e)); } }
-    async function onScanSuccess(txt) {
-        if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; }
-        document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none');
-        try {
-            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod","==",txt).get();
-            if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); }
-            else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; }
-        } catch(e) { console.error(e); }
-    }
+    async function onScanSuccess(txt) { if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; } document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none'); try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod","==",txt).get(); if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); } else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; } } catch(e) { console.error(e); } }
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
 </script>
 </body>
