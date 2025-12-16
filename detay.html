@@ -7,7 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script> <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script> 
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
@@ -65,13 +66,18 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h3 id="pageTitle" class="mb-0 fw-bold text-primary"><i class="fa-solid fa-spinner fa-spin"></i></h3>
+        
         <div id="topActionButtons" class="btn-group">
+            <button id="btnAktar" class="btn btn-warning text-dark fw-bold" onclick="openTransferModal()">
+                <i class="fa-solid fa-right-left"></i> Aktar
+            </button>
             <button id="btnDuzenle" class="btn btn-primary" onclick="toggleEdit(true)"><i class="fa-solid fa-pencil"></i> Düzenle</button>
             <button id="btnSil" class="btn btn-danger" onclick="silKovan()"><i class="fa-solid fa-trash"></i> Sil</button>
         </div>
     </div>
     
     <div id="viewMode" class="row mb-4"></div>
+    
     <div id="editMode" class="card shadow-sm mb-4 d-none border-primary">
         <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"><span><i class="fa-solid fa-pen-to-square"></i> Kovanı Düzenle</span><button type="button" class="btn btn-sm btn-light text-primary fw-bold" onclick="toggleEdit(false)">X</button></div>
         <div class="card-body"><form id="editForm"><div class="row g-3"><div class="col-md-6 border-end"><h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan Özellikleri</h6><div class="mb-2"><label class="small fw-bold">Barkod No</label><input type="text" id="e_barkod" class="form-control form-control-sm"></div><div class="row"><div class="col-6 mb-2"><label class="small fw-bold">Tip</label><select id="e_tip" class="form-select form-select-sm"><option>Langstroth</option><option>Dadant</option><option>Karakovan</option><option>Diğer</option></select></div><div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select id="e_irk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option><option>Belfast</option></select></div></div><div class="mb-2"><label class="small fw-bold">Çerçeve</label><input type="number" id="e_cerceve" class="form-control form-control-sm"></div><div class="mb-2"><label class="small fw-bold">Köken</label><select id="e_koken" class="form-select form-select-sm"><option>Kendi Üretimim</option><option>Satın Alma</option><option>Oğul</option></select></div><div class="mb-2"><label class="small fw-bold">Hırçınlık</label><select id="e_hircinlik" class="form-select form-select-sm"><option value="1">1 - Çok Sakin</option><option value="2">2 - Sakin</option><option value="3">3 - Normal</option><option value="4">4 - Hırçın</option><option value="5">5 - Çok Hırçın</option></select></div><div class="d-flex gap-3 mt-2"><div class="form-check"><input class="form-check-input" type="checkbox" id="e_taban"><label class="form-check-label small">Delikli Taban</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="e_polen"><label class="form-check-label small">Polen Tuzaklı</label></div></div></div><div class="col-md-6"><h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png" width="20"> Ana Arı Bilgileri</h6><div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input type="date" id="e_anaDogum" class="form-control form-control-sm"></div><div class="row"><div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select id="e_anaIrk" class="form-select form-select-sm"><option>Melez</option><option>Kafkas</option><option>Karniyol</option><option>İtalyan</option><option>Anadolu</option></select></div><div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select id="e_anaTur" class="form-select form-select-sm"><option>Damızlık (F0)</option><option>Çiftleşmiş (F1)</option><option>Çiftleşmemiş</option><option>Kendi Ürettiğim</option></select></div></div><div class="mb-2"><label class="small fw-bold">Rengi</label><select id="e_anaRenk" class="form-select form-select-sm"><option>Boyasız</option><option>Beyaz</option><option>Sarı</option><option>Kırmızı</option><option>Yeşil</option><option>Mavi</option></select></div><div class="mb-2"><label class="small fw-bold">Performans</label><select id="e_anaPerf" class="form-select form-select-sm"><option>Çok İyi</option><option>İyi</option><option>Orta</option><option>Zayıf</option></select></div><div class="mb-2"><label class="small fw-bold">Planlanan Değişim</label><input type="date" id="e_anaDegisim" class="form-control form-control-sm"></div></div><div class="col-12 text-end border-top pt-3 mt-2"><button type="button" class="btn btn-secondary me-2" onclick="toggleEdit(false)">İptal</button><button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-check"></i> Kaydet</button></div></div></form></div>
@@ -124,6 +130,54 @@
     </div>
 </footer>
 
+<div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-right-left"></i> Kovan Aktarımı / Bölme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="transferForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hedef Kovan (Nereye?)</label>
+                        <select id="transferHedef" class="form-select" required>
+                            <option value="">Yükleniyor...</option>
+                        </select>
+                        <div class="form-text">Listede sadece diğer kovanlar görünür.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">İşlem Türü</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="transferTip" id="tipTasi" value="tasi" checked onchange="toggleTransferInputs()">
+                            <label class="btn btn-outline-warning text-dark" for="tipTasi">Tam Taşıma</label>
+
+                            <input type="radio" class="btn-check" name="transferTip" id="tipBol" value="bol" onchange="toggleTransferInputs()">
+                            <label class="btn btn-outline-warning text-dark" for="tipBol">Oğul/Bölme</label>
+                        </div>
+                    </div>
+
+                    <div id="bolmeInputlari" class="d-none p-3 bg-light border rounded mb-3">
+                        <label class="form-label fw-bold">Aktarılacak Çerçeve Sayısı</label>
+                        <input type="number" id="transferAdet" class="form-control" min="1" value="1">
+                        <div class="form-text text-danger" id="kalanBilgi"></div>
+                    </div>
+
+                    <div class="alert alert-info small">
+                        <i class="fa-solid fa-info-circle"></i> 
+                        <span id="transferAciklama">Mevcut kovanın tüm içeriği hedef kovana taşınacak. Kaynak kovan boşa çıkacak.</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 fw-bold">
+                        <i class="fa-solid fa-check"></i> İşlemi Onayla
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <datalist id="hastalikList"><option value="Varroa"><option value="Nosema"><option value="Yavru Çürüklüğü"><option value="Kireç"></datalist>
 <datalist id="ilacList"><option value="Formik Asit"><option value="Oksalik Asit"><option value="Amitraz"><option value="Kekik Yağı"></datalist>
 
@@ -165,6 +219,78 @@
     function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().then(_=>{html5QrcodeScanner=null;}).catch(e=>console.error(e)); } }
     async function onScanSuccess(txt) { if(html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner=null; } document.getElementById('reader').innerHTML=''; const r=document.getElementById('scanResult'); r.innerHTML=`<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none'); try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod","==",txt).get(); if(!snap.empty) { const id=snap.docs[0].id; const no=snap.docs[0].data().no; r.innerHTML=`<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(()=>window.location.href=`detay.html?id=${id}`,500); } else { r.innerHTML=`<div class="text-danger fw-bold">Bulunamadı!</div>`; } } catch(e) { console.error(e); } }
     document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
+
+    // --- YENİ EKLENEN AKTARIM FONKSİYONLARI ---
+    async function openTransferModal() {
+        const m = new bootstrap.Modal(document.getElementById('transferModal'));
+        const select = document.getElementById('transferHedef');
+        select.innerHTML = '<option value="">Yükleniyor...</option>';
+        m.show();
+        try {
+            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get();
+            select.innerHTML = '<option value="" selected disabled>Hedef Kovanı Seçin</option>';
+            let mevcutKovanNo = document.getElementById('pageTitle').innerText.replace('Kovan: ', '').trim();
+            snap.forEach(doc => {
+                if (doc.id !== kovanId) {
+                    const d = doc.data();
+                    const durum = (d.cerceve === 0) ? " (BOŞ)" : ` (${d.cerceve} Çerçeve)`;
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.text = `Kovan: ${d.no || '?'} ${durum}`;
+                    if(d.cerceve === 0) opt.style.fontWeight = "bold"; 
+                    select.appendChild(opt);
+                }
+            });
+            const currentFrame = parseInt(document.getElementById('e_cerceve').value) || 0;
+            document.getElementById('transferAdet').max = currentFrame;
+            document.getElementById('kalanBilgi').innerText = `Mevcut kovanda ${currentFrame} çerçeve var.`;
+        } catch (e) { alert("Kovan listesi alınamadı: " + e.message); }
+    }
+
+    function toggleTransferInputs() {
+        const tip = document.querySelector('input[name="transferTip"]:checked').value;
+        const div = document.getElementById('bolmeInputlari');
+        const desc = document.getElementById('transferAciklama');
+        if (tip === 'bol') {
+            div.classList.remove('d-none');
+            desc.innerText = "Belirtilen sayıda çerçeve ve üzerindeki arılar hedef kovana aktarılacak. Her iki kovan da aktif kalacak.";
+        } else {
+            div.classList.add('d-none');
+            desc.innerText = "Mevcut kovanın TÜM içeriği (Ana arı dahil) hedef kovana taşınacak. Bu kovan boşa çıkacak (0 çerçeve).";
+        }
+    }
+
+    document.getElementById('transferForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hedefId = document.getElementById('transferHedef').value;
+        const tip = document.querySelector('input[name="transferTip"]:checked').value;
+        const aktarilacakAdet = parseInt(document.getElementById('transferAdet').value);
+        if (!hedefId) { alert("Lütfen hedef kovanı seçin!"); return; }
+        const sourceRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
+        const targetRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(hedefId);
+        if(!confirm("Bu işlemi onaylıyor musunuz?")) return;
+        try {
+            await db.runTransaction(async (t) => {
+                const sDoc = await t.get(sourceRef);
+                const tDoc = await t.get(targetRef);
+                const sData = sDoc.data();
+                const tData = tDoc.data();
+                const bugun = new Date().toISOString().split('T')[0];
+                if (tip === 'tasi') {
+                    t.update(targetRef, { irk: sData.irk, cerceve: sData.cerceve, ana: sData.ana, hircinlik: sData.hircinlik, koken: 'Aktarım', guncelleme: bugun });
+                    t.update(sourceRef, { cerceve: 0, ana: { irk: '-', dogum: '', renk: '-', tur: '-', perf: '-' }, guncelleme: bugun });
+                } else {
+                    const mevcutAdet = sData.cerceve || 0;
+                    const hedefAdet = tData.cerceve || 0;
+                    if (aktarilacakAdet >= mevcutAdet) throw "Hata: Bölme işleminde tüm çerçeveleri aktaramazsınız. Tam taşıma kullanın.";
+                    t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun });
+                    t.update(targetRef, { cerceve: hedefAdet + aktarilacakAdet, irk: sData.irk, koken: 'Oğul/Bölme', guncelleme: bugun });
+                }
+            });
+            alert("Aktarım başarıyla tamamlandı!");
+            location.reload();
+        } catch (e) { console.error(e); alert("İşlem başarısız: " + e); }
+    });
 </script>
 </body>
 </html>
