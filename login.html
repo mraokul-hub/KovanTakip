@@ -1,5 +1,6 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,10 +20,11 @@
             justify-content: center;
             font-family: 'Segoe UI', sans-serif;
         }
+
         .auth-card {
             border: none;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             background: white;
             width: 100%;
             max-width: 400px;
@@ -30,7 +32,7 @@
             margin-top: 60px;
             position: relative;
         }
-        
+
         /* --- LOGO AYARI (TAM OTURMA) --- */
         .logo-container {
             width: 130px;
@@ -38,34 +40,48 @@
             background: white;
             border-radius: 50%;
             position: absolute;
-            top: -65px; /* Yarısı dışarıda */
+            top: -65px;
+            /* Yarısı dışarıda */
             left: 50%;
             transform: translateX(-50%);
-            
-            /* ÖNEMLİ DEĞİŞİKLİKLER BURADA: */
-            padding: 0; /* Boşluk silindi */
-            overflow: hidden; /* Yuvarlağın dışına taşanı kes */
-            border: 5px solid white; /* Beyaz kalın çerçeve */
-            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4); /* Bal rengi gölge */
-            
+
+            /* ÖNEMLİ DEÄİÅİKLİKLER BURADA: */
+            padding: 0;
+            /* Boşluk silindi */
+            overflow: hidden;
+            /* Yuvarlağın dışına taşanı kes */
+            border: 5px solid white;
+            /* Beyaz kalın çerçeve */
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4);
+            /* Bal rengi gölge */
+
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10;
             animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        
+
         .logo-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Resmi yuvarlağa tam yayar/doldurur */
+            object-fit: cover;
+            /* Resmi yuvarlağa tam yayar/doldurur */
             display: block;
         }
+
         /* ------------------------------- */
 
         @keyframes popIn {
-            0% { transform: translateX(-50%) scale(0); opacity: 0; }
-            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            0% {
+                transform: translateX(-50%) scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
         }
 
         .card-body {
@@ -76,93 +92,125 @@
             text-align: center;
         }
 
-        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25); border-color: #ffc107; }
-        .btn-login { background-color: #0d6efd; border: none; padding: 12px; font-size: 1.1rem; transition: 0.3s; width: 100%; border-radius: 10px; }
-        .btn-login:hover { background-color: #0b5ed7; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3); }
-        
-        .footer-link a { color: #0d6efd; text-decoration: none; font-weight: 600; }
-        .footer-link a:hover { text-decoration: underline; }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+            border-color: #ffc107;
+        }
+
+        .btn-login {
+            background-color: #0d6efd;
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+        }
+
+        .footer-link a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container d-flex justify-content-center">
-    <div class="card auth-card">
-        <div class="logo-container">
-            <img src="5.png" alt="Arı Logosu" class="logo-img" onerror="this.src='https://via.placeholder.com/130?text=ARI'">
-        </div>
-
-        <div class="card-body">
-            <h3 class="fw-bold text-dark mb-1">Hoş Geldiniz</h3>
-            <p class="text-muted small mb-4">Kovan Takip Sistemi</p>
-            
-            <div id="alertBox" class="alert alert-danger d-none text-center p-2 small"></div>
-
-            <form id="loginForm" class="text-start">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-secondary">E-posta</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
-                        <input type="email" id="email" class="form-control bg-light border-start-0" placeholder="ornek@mail.com" required>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-secondary">Şifre</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                        <input type="password" id="password" class="form-control bg-light border-start-0" placeholder="******" required>
-                    </div>
-                </div>
-                <div class="d-grid">
-                    <button type="submit" id="loginBtn" class="btn btn-primary btn-login fw-bold text-white">
-                        Giriş Yap
-                    </button>
-                </div>
-            </form>
-            
-            <div class="footer-link mt-4 small">
-                Hesabınız yok mu? <a href="register.html">Hemen Kaydolun</a>
+    <div class="container d-flex justify-content-center">
+        <div class="card auth-card">
+            <div class="logo-container">
+                <img src="5.png" alt="Arı Logosu" class="logo-img"
+                    onerror="this.src='https://via.placeholder.com/130?text=ARI'">
             </div>
-            
-            <div class="text-center mt-4 small text-muted border-top pt-3">
-                © 2025 Hakan Yabgu
+
+            <div class="card-body">
+                <h3 class="fw-bold text-dark mb-1">Hoş Geldiniz</h3>
+                <p class="text-muted small mb-4">Kovan Takip Sistemi</p>
+
+                <div id="alertBox" class="alert alert-danger d-none text-center p-2 small"></div>
+
+                <form id="loginForm" class="text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">E-posta</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="fa-solid fa-envelope text-muted"></i></span>
+                            <input type="email" id="email" class="form-control bg-light border-start-0"
+                                placeholder="ornek@mail.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">Åifre</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" id="password" class="form-control bg-light border-start-0"
+                                placeholder="******" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" id="loginBtn" class="btn btn-primary btn-login fw-bold text-white">
+                            Giriş Yap
+                        </button>
+                    </div>
+                </form>
+
+                <div class="footer-link mt-4 small">
+                    Hesabınız yok mu? <a href="register.html">Hemen Kaydolun</a>
+                </div>
+
+                <div class="text-center mt-4 small text-dark border-top pt-3 fw-bold">
+                <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+                <small class="d-block mt-1">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️ yabguhakan2025@gmail.com</a></small>
+            </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const alertBox = document.getElementById('alertBox');
-    const loginBtn = document.getElementById('loginBtn');
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const alertBox = document.getElementById('alertBox');
+        const loginBtn = document.getElementById('loginBtn');
 
-    auth.onAuthStateChanged(user => { if (user) window.location.href = 'kovanlarim.html'; });
+        auth.onAuthStateChanged(user => { if (user) window.location.href = 'kovanlarim.html'; });
 
-    function showAlert(msg, type='danger') {
-        alertBox.textContent = msg;
-        alertBox.className = `alert alert-${type} text-center p-2 small`;
-        alertBox.classList.remove('d-none');
-    }
+        function showAlert(msg, type = 'danger') {
+            alertBox.textContent = msg;
+            alertBox.className = `alert alert-${type} text-center p-2 small`;
+            alertBox.classList.remove('d-none');
+        }
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Giriş Yapılıyor...';
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Giriş Yapılıyor...';
 
-        auth.signInWithEmailAndPassword(email, password)
-            .catch((error) => {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Giriş Yap';
-                let msg = "Giriş hatası: " + error.message;
-                if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "E-posta veya şifre hatalı.";
-                showAlert(msg);
-            });
-    });
-</script>
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Giriş Yap';
+                    let msg = "Giriş hatası: " + error.message;
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "E-posta veya şifre hatalı.";
+                    showAlert(msg);
+                });
+        });
+    </script>
 </body>
+
 </html>

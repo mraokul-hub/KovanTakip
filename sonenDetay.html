@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sönen Kovan Detayı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        .img-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #ddd;
+            display: none;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .record-img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 4px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .record-img:hover {
+            transform: scale(1.5);
+            transition: 0.3s;
+        }
+
+        .hidden-mode {
+            display: none !important;
+        }
+
+        .nav-btn-group {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .chart-card {
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            border-radius: 12px;
+        }
+
+        .edit-row {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px dashed #0d6efd;
+            margin-top: 5px;
+        }
+
+        /* İMZA STİLİ */
+        .footer-signature {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            margin-top: 40px;
+            background: #fff;
+        }
+
+        .footer-signature a {
+            text-decoration: none;
+        }
+
+        #reader {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="kovanlarim.html"><i
+                    class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="sonenKovanlar.html" class="btn btn-outline-light btn-sm" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; vertical-align: text-bottom;" alt="Sönen"> <span
+                        class="d-none d-md-inline">Sönen</span>
+                </a>
+                <a href="bosKovanlar.html" class="btn btn-outline-light btn-sm" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; vertical-align: text-bottom;" alt="Boş"> <span
+                        class="d-none d-md-inline">Boş</span>
+                </a>
+                <button class="btn btn-outline-light btn-sm" onclick="openScanner()">
+                    <img src="Designer.jpg" style="height: 20px; vertical-align: text-bottom;" alt="Tara"> <span
+                        class="d-none d-md-inline">Tara</span>
+                </button>
+                <a href="kovanlarim.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i>
+                    Listeye Dön</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
+                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        onclick="stopScanner()"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="reader"></div>
+                    <div id="scanResult" class="text-center p-3 d-none">
+                        <div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="nav-btn-group">
+            <button id="btnPrev" class="btn btn-outline-secondary btn-sm nav-btn disabled"><i
+                    class="fa-solid fa-chevron-left"></i> Önceki</button>
+            <button id="btnNext" class="btn btn-outline-secondary btn-sm nav-btn disabled">Sonraki <i
+                    class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h3 id="pageTitle" class="mb-0 fw-bold text-danger"><i class="fa-solid fa-spinner fa-spin"></i></h3>
+
+            <div id="topActionButtons" class="btn-group">
+                <!-- Sönen kovan detayında işlem yapılamaz -->
+            </div>
+        </div>
+
+        <div id="viewMode" class="row mb-4"></div>
+
+
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab"
+                            data-bs-target="#bakimTab"><img src="3.png" width="20"> Bakım</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab"
+                            data-bs-target="#hastalikTab"><img src="4.png" width="20"> Hastalık</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#hasatTab"><img
+                                src="2.png" width="20"> Bal Hasadı</button></li>
+                </ul>
+            </div>
+            <div class="card-body bg-light">
+                <div class="tab-content pt-3">
+                    <div class="tab-pane fade show active" id="bakimTab">
+                        <div id="bakimListesi"></div>
+                    </div>
+                    <div class="tab-pane fade" id="hastalikTab">
+                        <div id="hastalikListesi"></div>
+                    </div>
+                    <div class="tab-pane fade" id="hasatTab">
+                        <div id="grafikKarti" class="card mb-4 shadow-sm border-success chart-card"
+                            style="display:none;">
+                            <div class="card-body p-3">
+                                <h6 class="text-center text-success fw-bold mb-3"><i
+                                        class="fa-solid fa-chart-column"></i> Bal Verim Analizi</h6>
+                                <div style="height: 200px;"><canvas id="balGrafigi"></canvas></div>
+                            </div>
+                        </div>
+                        <div id="hasatListesi"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a
+                href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️
+                yabguhakan2025@gmail.com</a></small>
+    </footer>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(); const auth = firebase.auth();
+        const kovanId = new URLSearchParams(window.location.search).get('id');
+        let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null;
+        const hircinlikMap = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
+
+
+
+        if (!kovanId) window.location.href = "kovanlarim.html";
+        auth.onAuthStateChanged(user => { if (user) { currentUser = user; yukle(); navigasyonuKur(); } else window.location.href = 'login.html'; });
+
+        async function navigasyonuKur() { try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("sonenKovanlar").get(); if (snap.empty) return; let kovanlar = []; snap.forEach(doc => kovanlar.push({ id: doc.id, no: doc.data().no || "" })); kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' })); const idx = kovanlar.findIndex(k => k.id === kovanId); if (idx > 0) { document.getElementById('btnPrev').classList.remove('disabled'); document.getElementById('btnPrev').onclick = () => window.location.href = `sonenDetay.html?id=${kovanlar[idx - 1].id}`; document.getElementById('btnPrev').innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx - 1].no})`; } if (idx < kovanlar.length - 1) { document.getElementById('btnNext').classList.remove('disabled'); document.getElementById('btnNext').onclick = () => window.location.href = `sonenDetay.html?id=${kovanlar[idx + 1].id}`; document.getElementById('btnNext').innerHTML = `Sonraki (${kovanlar[idx + 1].no}) <i class="fa-solid fa-chevron-right"></i>`; } } catch (e) { console.error("Nav hata:", e); } }
+        function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("sonenKovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
+        function formatDate(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0].slice(2)}` : iso; }
+        function formatSonme(ts) { if (!ts) return '-'; const part = ts.substring(0, 10); return formatDate(part) + (ts.length > 10 ? ts.substring(10) : ''); }
+        function renderView(d) {
+            document.getElementById('pageTitle').innerHTML = `<img src="5.png" width="30" class="me-2"> Kovan: ${d.no}`;
+            const hVal = d.hircinlik || 3;
+            const hText = hircinlikMap[hVal] || "Bilinmiyor";
+            const sonmeMetni = d.sonmeTarihi ? `<div class="col-12 mt-3"><div class="alert alert-danger p-2 mb-0 fw-bold"><i class="fa-solid fa-calendar-xmark me-2"></i>Sönme Tarihi: ${formatSonme(d.sonmeTarihi)}</div></div>` : '';
+
+            document.getElementById('viewMode').innerHTML = `
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold border-bottom pb-2 text-primary"><img src="5.png" width="20"> Genel Bilgiler</h6>
+                        <div class="row g-2">
+                            <div class="col-6"><strong>Tip:</strong> ${d.tip}</div>
+                            <div class="col-6"><strong>Irk:</strong> ${d.irk}</div>
+                            <div class="col-6"><strong>Çerçeve:</strong> ${d.cerceve}</div>
+                            <div class="col-6"><strong>Hırçınlık:</strong> ${hText}</div>
+                            <div class="col-6"><strong>Köken:</strong> ${d.koken}</div>
+                            <div class="col-6"><strong>Barkod:</strong> ${d.barkod || '-'}</div>
+                            ${sonmeMetni}
+                            <div class="col-12 mt-2 border-top pt-2 small text-muted">
+                                ${d.taban ? '<i class="fa-solid fa-check text-success"></i> Delikli Taban' : ''} 
+                                ${d.polen ? '<span class="ms-2"><i class="fa-solid fa-check text-success"></i> Polen Tuzaklı</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 border-warning">
+                    <div class="card-body">
+                        <h6 class="fw-bold border-bottom pb-2 text-warning-emphasis"><img src="1.png" width="20"> Ana Arı</h6>
+                        <div class="row g-2">
+                            <div class="col-6"><strong>Irk:</strong> ${d.ana?.irk || '-'}</div>
+                            <div class="col-6"><strong>Renk:</strong> ${d.ana?.renk || '-'}</div>
+                            <div class="col-6"><strong>Perf.:</strong> ${d.ana?.perf || '-'}</div>
+                            <div class="col-6"><strong>Doğum:</strong> ${formatDate(d.ana?.dogum)}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+
+        function altYukle(col, divId) {
+            const el = document.getElementById(divId);
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(async snap => {
+                let docs = [];
+                snap.forEach(d => {
+                    let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt);
+                });
+
+                if (docs.length === 0) {
+                    try {
+                        const skDoc = await db.collection("kullanicilar").doc(currentUser.uid).collection("sonenKovanlar").doc(kovanId).get();
+                        if (skDoc.exists && skDoc.data().no) {
+                            let noStr = skDoc.data().no.toString();
+                            if (noStr.length === 1) noStr = "0" + noStr;
+                            let sonmeTarihi = skDoc.data().sonmeTarihi || "9999-12-31";
+                            if (sonmeTarihi.length > 10) sonmeTarihi = sonmeTarihi.substring(0, 10);
+                            let sonmeTarihiTamsayi = sonmeTarihi + " 23:59:59";
+
+                            const noSnap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(noStr).collection(col).get();
+                            if (noSnap.empty && noStr.startsWith("0")) {
+                                const bareNoSnap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(noStr.substring(1)).collection(col).get();
+                                bareNoSnap.forEach(d => {
+                                    let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar;
+                                    if (dt._tarih <= sonmeTarihiTamsayi) docs.push(dt);
+                                });
+                            } else {
+                                noSnap.forEach(d => {
+                                    let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar;
+                                    if (dt._tarih <= sonmeTarihiTamsayi) docs.push(dt);
+                                });
+                            }
+                        }
+                    } catch (e) { console.error(e); }
+                }
+
+                el.innerHTML = '';
+                docs.sort((a, b) => b._tarih.localeCompare(a._tarih));
+                if (col === 'hasatKayitlari') guncelleGrafik(docs);
+                docs.forEach(data => {
+                    const rowId = `row-${data.id}`;
+                    let border = col.includes('hastalik') ? 'danger' : (col.includes('hasat') ? 'success' : 'primary');
+                    let imgHtml = data.foto ? `<br><img src="${data.foto}" class="record-img">` : '';
+                    let mainInfo = data._baslik || (data._miktar ? data._miktar + ' KG' : 'Kayıt');
+                    if (data.ilac) mainInfo += ` (${data.ilac})`;
+                    el.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="card mb-2 shadow-sm border-start border-4 border-${border}"><div class="card-body p-2"><div class="view-div d-flex justify-content-between"><div><span class="badge bg-secondary">${formatDate(data._tarih)}</span> <strong>${mainInfo}</strong></div></div><div class="view-div text-muted small mt-1">${data.not || ''}</div><div class="view-div">${imgHtml}</div></div></div>`);
+                });
+            });
+        }
+        function guncelleGrafik(docs) { const chartCard = document.getElementById('grafikKarti'); if (!docs.length) { chartCard.style.display = 'none'; return; } chartCard.style.display = 'block'; const curY = new Date().getFullYear(); const past = {}; const curr = {}; docs.forEach(d => { if (!d._miktar) return; const y = parseInt(d._tarih.substring(0, 4)); const val = Number(d._miktar); if (y < curY) { past[y] = (past[y] || 0) + val; } else { curr[d._tarih] = (curr[d._tarih] || 0) + val; } }); const lbl = [], dat = [], bg = [], bd = []; Object.keys(past).sort().forEach(y => { lbl.push(`${y} (Top.)`); dat.push(past[y]); bg.push('rgba(108,117,125,0.6)'); bd.push('grey'); }); Object.keys(curr).sort().forEach(t => { const p = t.split('-'); lbl.push(`${p[2]}.${p[1]}`); dat.push(curr[t]); bg.push('rgba(255, 159, 64, 0.7)'); bd.push('rgba(255, 159, 64, 1)'); }); if (hasatChart) hasatChart.destroy(); const ctx = document.getElementById('balGrafigi').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)'); gradient.addColorStop(1, 'rgba(255, 205, 86, 0.2)'); hasatChart = new Chart(ctx, { type: 'bar', data: { labels: lbl, datasets: [{ label: 'Bal (KG)', data: dat, backgroundColor: gradient, borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, borderRadius: 4, barThickness: 'flex', maxBarThickness: 40 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
+    </script>
+</body>
+
+</html>

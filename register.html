@@ -1,5 +1,6 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,156 +20,205 @@
             justify-content: center;
             font-family: 'Segoe UI', sans-serif;
         }
+
         .auth-card {
             border: none;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             background: white;
             width: 100%;
             max-width: 400px;
-            overflow: visible; /* Logo dışarı taşsın diye */
+            overflow: visible;
+            /* Logo dışarı taşsın diye */
             margin-top: 60px;
             position: relative;
         }
-        
-        /* --- LOGO AYARI (YEŞİL TEMA & TAM OTURMA) --- */
+
+        /* --- LOGO AYARI (YEÅİL TEMA & TAM OTURMA) --- */
         .logo-container {
             width: 130px;
             height: 130px;
             background: white;
             border-radius: 50%;
             position: absolute;
-            top: -65px; /* Yarısı dışarıda */
+            top: -65px;
+            /* Yarısı dışarıda */
             left: 50%;
             transform: translateX(-50%);
-            
+
             /* KUSURSUZ GÖRÜNÜM İÇİN: */
-            padding: 0; /* Boşluk yok */
-            overflow: hidden; /* Dışarı taşanı kes */
-            border: 5px solid white; /* Kalın beyaz çerçeve */
-            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.4); /* Yeşil gölge */
-            
+            padding: 0;
+            /* Boşluk yok */
+            overflow: hidden;
+            /* Dışarı taşanı kes */
+            border: 5px solid white;
+            /* Kalın beyaz çerçeve */
+            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.4);
+            /* Yeşil gölge */
+
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10;
             animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        
+
         .logo-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Resmi alana tam yayar */
+            object-fit: cover;
+            /* Resmi alana tam yayar */
             display: block;
         }
+
         /* ----------------------------------------- */
 
         @keyframes popIn {
-            0% { transform: translateX(-50%) scale(0); opacity: 0; }
-            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            0% {
+                transform: translateX(-50%) scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
         }
 
         .card-body {
-            padding-top: 80px; /* Logo altı boşluk */
+            padding-top: 80px;
+            /* Logo altı boşluk */
             padding-bottom: 30px;
             padding-left: 30px;
             padding-right: 30px;
             text-align: center;
         }
 
-        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); border-color: #198754; }
-        .btn-register { background-color: #198754; border: none; padding: 12px; font-size: 1.1rem; transition: 0.3s; width: 100%; border-radius: 10px; }
-        .btn-register:hover { background-color: #157347; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3); }
-        
-        .footer-link a { color: #198754; text-decoration: none; font-weight: 600; }
-        .footer-link a:hover { text-decoration: underline; }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+            border-color: #198754;
+        }
+
+        .btn-register {
+            background-color: #198754;
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .btn-register:hover {
+            background-color: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+        }
+
+        .footer-link a {
+            color: #198754;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container d-flex justify-content-center">
-    <div class="card auth-card">
-        <div class="logo-container">
-            <img src="5.png" alt="Arı Logosu" class="logo-img" onerror="this.src='https://via.placeholder.com/130?text=ARI'">
-        </div>
-
-        <div class="card-body">
-            <h3 class="fw-bold text-dark mb-1">Aramıza Katılın</h3>
-            <p class="text-muted small mb-4">Yeni bir Kovan Takip hesabı oluşturun</p>
-            
-            <div id="alertBox" class="alert alert-danger d-none text-center p-2 small"></div>
-
-            <form id="registerForm" class="text-start">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-secondary">E-posta</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
-                        <input type="email" id="email" class="form-control bg-light border-start-0" placeholder="ornek@mail.com" required>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-secondary">Şifre Oluştur</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                        <input type="password" id="password" class="form-control bg-light border-start-0" placeholder="En az 6 karakter" required minlength="6">
-                    </div>
-                </div>
-                <div class="d-grid">
-                    <button type="submit" id="registerBtn" class="btn btn-primary btn-register fw-bold text-white">
-                        Kaydı Tamamla
-                    </button>
-                </div>
-            </form>
-            
-            <div class="footer-link mt-4 small">
-                Zaten üye misiniz? <a href="login.html">Giriş Yapın</a>
+    <div class="container d-flex justify-content-center">
+        <div class="card auth-card">
+            <div class="logo-container">
+                <img src="5.png" alt="Arı Logosu" class="logo-img"
+                    onerror="this.src='https://via.placeholder.com/130?text=ARI'">
             </div>
-            
-            <div class="text-center mt-4 small text-muted border-top pt-3">
-                © 2025 Hakan Yabgu
+
+            <div class="card-body">
+                <h3 class="fw-bold text-dark mb-1">Aramıza Katılın</h3>
+                <p class="text-muted small mb-4">Yeni bir Kovan Takip hesabı oluşturun</p>
+
+                <div id="alertBox" class="alert alert-danger d-none text-center p-2 small"></div>
+
+                <form id="registerForm" class="text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">E-posta</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="fa-solid fa-envelope text-muted"></i></span>
+                            <input type="email" id="email" class="form-control bg-light border-start-0"
+                                placeholder="ornek@mail.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">Åifre Oluştur</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i
+                                    class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" id="password" class="form-control bg-light border-start-0"
+                                placeholder="En az 6 karakter" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" id="registerBtn" class="btn btn-primary btn-register fw-bold text-white">
+                            Kaydı Tamamla
+                        </button>
+                    </div>
+                </form>
+
+                <div class="footer-link mt-4 small">
+                    Zaten üye misiniz? <a href="login.html">Giriş Yapın</a>
+                </div>
+
+                <div class="text-center mt-4 small text-dark border-top pt-3 fw-bold">
+                <p class="mb-1">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+                <small class="d-block mt-1">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️ yabguhakan2025@gmail.com</a></small>
+            </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const alertBox = document.getElementById('alertBox');
-    const registerBtn = document.getElementById('registerBtn');
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const alertBox = document.getElementById('alertBox');
+        const registerBtn = document.getElementById('registerBtn');
 
-    auth.onAuthStateChanged(user => { if (user) window.location.href = 'kovanlarim.html'; });
+        auth.onAuthStateChanged(user => { if (user) window.location.href = 'kovanlarim.html'; });
 
-    function showAlert(msg, type='danger') {
-        alertBox.textContent = msg;
-        alertBox.className = `alert alert-${type} text-center p-2 small`;
-        alertBox.classList.remove('d-none');
-    }
+        function showAlert(msg, type = 'danger') {
+            alertBox.textContent = msg;
+            alertBox.className = `alert alert-${type} text-center p-2 small`;
+            alertBox.classList.remove('d-none');
+        }
 
-    document.getElementById('registerForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-        if(password.length < 6) { showAlert("Şifre en az 6 karakter olmalıdır."); return; }
+            if (password.length < 6) { showAlert("Åifre en az 6 karakter olmalıdır."); return; }
 
-        registerBtn.disabled = true;
-        registerBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
 
-        auth.createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                showAlert("Kayıt Başarılı! Yönlendiriliyorsunuz...", "success");
-                setTimeout(() => window.location.href = 'kovanlarim.html', 1500);
-            })
-            .catch((error) => {
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = 'Kaydı Tamamla';
-                let msg = "Kayıt hatası: " + error.message;
-                if(error.code === 'auth/email-already-in-use') msg = "Bu e-posta zaten kullanımda.";
-                showAlert(msg);
-            });
-    });
-</script>
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    showAlert("Kayıt Başarılı! Yönlendiriliyorsunuz...", "success");
+                    setTimeout(() => window.location.href = 'kovanlarim.html', 1500);
+                })
+                .catch((error) => {
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = 'Kaydı Tamamla';
+                    let msg = "Kayıt hatası: " + error.message;
+                    if (error.code === 'auth/email-already-in-use') msg = "Bu e-posta zaten kullanımda.";
+                    showAlert(msg);
+                });
+        });
+    </script>
 </body>
+
 </html>
