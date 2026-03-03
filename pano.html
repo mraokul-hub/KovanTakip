@@ -8,91 +8,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        #reader {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
         }
-
-        .container {
-            flex: 1;
-        }
-
-        /* İMZA STİLİ - Kovanekle.html ile birebir aynı */
+        /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
             padding: 20px;
             font-size: 0.85rem;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            margin-top: 40px;
-            background: #fff;
+            color: var(--bee-text-muted);
+            border-top: 1px solid var(--bee-border);
+            margin-top: auto;
+            background: var(--bee-card-bg);
         }
-
         .footer-signature a {
             text-decoration: none;
-        }
-    </style>
+        }    </style>
 </head>
 
-<body class="bg-light">
+<body class="bg-light pb-5">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="kovanlarim.html"><i
-                    class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
-            <div class="d-flex align-items-center">
-                <a href="kovanlarim.html" class="btn btn-outline-light btn-sm me-2"><i
-                        class="fa-solid fa-arrow-left"></i> Kovanlarım</a>
-                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning btn-sm d-none"><i
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold mb-0" href="kovanlarim.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Kovan Takip
+            </a> <!-- Masaüstü Sağ Menü (Mobilde Gizli) -->
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <a href="bosKovanlar.html" class="btn btn-nav-custom fw-bold" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; margin-right: 4px;" alt="Boş"> Boş
+                </a>
+                <a href="sonenKovanlar.html" class="btn btn-nav-custom fw-bold" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; margin-right: 4px;" alt="Sönen"> Sönen
+                </a>
+                <a href="gorevler.html" class="btn btn-nav-custom fw-bold" title="Görevler">
+                    <i class="fa-solid fa-calendar-check text-primary"></i> Görevler
+                </a>
+                <a href="envanter.html" class="btn btn-nav-custom fw-bold" title="Envanter">
+                    <i class="fa-solid fa-boxes-stacked text-success"></i> Envanter
+                </a>
+                <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
+                        class="fa-solid fa-bullhorn"></i> Duyuru</a>
+                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
                         class="fa-solid fa-pencil"></i> Yönetim</a>
-                <a href="login.html" id="loginBtn" class="btn btn-success btn-sm d-none">Giriş</a>
+                <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+
+
+
+            <!-- Mobil Üst Menü İkonları (Masaüstünde Gizli) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button id="logoutBtnMobile"
+                    class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container pb-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <h3 class="mb-4 text-center text-primary fw-bold"><i class="fa-solid fa-bullhorn me-2"></i>Duyurular
-                </h3>
-                <div id="pano-container">
+                <h4 class="mb-4 text-center text-primary fw-bold"><i class="fa-solid fa-bullhorn me-2"></i>Duyurular
+                </h4>
+                <div id="pano-container" class="d-flex flex-column gap-3">
                     <div class="text-center text-muted py-5">
-                        <div class="spinner-border spinner-border-sm text-primary"></div> Yükleniyor...
+                        <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+                        <p class="mb-0 fw-bold">Yükleniyor...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="footer-signature">
-    <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-    <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️ yabguhakan2025@gmail.com</a></small>
-</footer>
+    <!-- QR TARA MODAL -->
+    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
+                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        onclick="stopScanner()"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="reader"></div>
+                    <div id="scanResult" class="text-center p-3 d-none">
+                        <div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- FLOATING ACTION BUTTONS (Masaüstü ve Mobilde ekranın sağ altında sabit) -->
+    <div class="fab-container">
+        <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <span class="fab-text">Barkod<br>Tara</span>
+        </button>
+    </div>
+
+    <!-- ALT BİLGİ MENÜSÜ -->
+    <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item ">
+            <img src="Boskovan.png" class="img-icon" alt="Boş">
+            <span>Boş Kutu</span>
+        </a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item ">
+            <img src="Sonmus.png" class="img-icon" alt="Sönen">
+            <span>Sönen</span>
+        </a>
+        <a href="gorevler.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-calendar-check fs-5"></i>
+            <span>Görevler</span>
+        </a>
+        <a href="envanter.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-boxes-stacked fs-5"></i>
+            <span>Envanter</span>
+        </a>
+        <a href="pano.html" class="bottom-nav-item active">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
+    </nav>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
         auth.onAuthStateChanged((user) => {
             if (user) {
-                if (user.email === "mremzi@gmail.com") document.getElementById('adminBtn').classList.remove('d-none');
+                if (user.email === "mremzi@gmail.com") {
+                    document.getElementById('adminBtn').classList.remove('d-none');
+                    document.getElementById('adminBtnMobile').classList.remove('d-none');
+                }
             } else {
                 document.getElementById('loginBtn').classList.remove('d-none');
+                document.getElementById('loginBtnMobile').classList.remove('d-none');
             }
         });
 
         db.collection("pano").orderBy("eklenmeTarihi", "desc").get().then(snap => {
             const container = document.getElementById('pano-container');
             container.innerHTML = '';
-            if (snap.empty) { container.innerHTML = '<div class="alert alert-info text-center shadow-sm">Henüz yayınlanmış bir duyuru yok.</div>'; return; }
+            if (snap.empty) { container.innerHTML = '<div class="alert alert-info border-0 rounded-4 text-center shadow-sm">Henüz yayınlanmış bir duyuru yok.</div>'; return; }
 
             // En son duyuru zamanını alıp kaydet (oku olarak işaretle)
             const sonDuyuruZamani = snap.docs[0].data().eklenmeTarihi;
@@ -104,16 +187,76 @@
                 const d = doc.data();
                 const date = d.eklenmeTarihi ? d.eklenmeTarihi.toDate().toLocaleString('tr-TR') : '';
                 container.insertAdjacentHTML('beforeend', `
-                <div class="card mb-3 shadow-sm border-0 border-start border-4 border-info">
+                <div class="card card-modern border-0 border-start border-4 border-info">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold text-dark mb-1">${d.baslik}</h5>
-                        <h6 class="card-subtitle mb-3 text-muted small border-bottom pb-2"><i class="fa-regular fa-clock me-1"></i> ${date}</h6>
-                        <p class="card-text text-secondary" style="white-space: pre-line;">${d.icerik}</p>
+                        <h5 class="card-title fw-bold card-title-modern mb-2">${d.baslik}</h5>
+                        <h6 class="card-subtitle mb-3 text-muted small pb-2 border-bottom"><i class="fa-regular fa-clock me-1"></i> ${date}</h6>
+                        <p class="card-text text-secondary lh-lg mb-0" style="white-space: pre-line;">${d.icerik}</p>
                     </div>
                 </div>`);
             });
         });
+
+        let html5QrcodeScanner = null;
+        let currentUserUid = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) currentUserUid = user.uid;
+            else currentUserUid = null;
+        });
+
+        function openScanner() {
+            if (!currentUserUid) {
+                alert("Barkod okutmak için lütfen önce giriş yapın.");
+                window.location.href = "login.html";
+                return;
+            }
+            const m = new bootstrap.Modal(document.getElementById('scannerModal'));
+            m.show();
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+                html5QrcodeScanner.render(onScanSuccess, () => { });
+            }
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().then(_ => { html5QrcodeScanner = null; }).catch(e => console.error(e));
+            }
+        }
+
+        async function onScanSuccess(txt) {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+            document.getElementById('reader').innerHTML = '';
+            const r = document.getElementById('scanResult');
+            r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`;
+            r.classList.remove('d-none');
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod", "==", txt).get();
+                if (!snap.empty) {
+                    const id = snap.docs[0].id;
+                    const no = snap.docs[0].data().no;
+                    r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`;
+                    setTimeout(() => window.location.href = `detay.html?id=${id}`, 500);
+                } else {
+                    r.innerHTML = `<div class="text-danger fw-bold">Bulunamadı!</div>`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () {
+            stopScanner();
+            document.getElementById('scanResult').classList.add('d-none');
+        });
     </script>
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+    </footer>
 </body>
 
 </html>
+

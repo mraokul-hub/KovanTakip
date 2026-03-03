@@ -8,75 +8,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            flex: 1;
-        }
-
-        /* İMZA STİLİ */
-        .footer-signature {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.85rem;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            margin-top: 40px;
-            background: #fff;
-        }
-
-        .footer-signature a {
-            text-decoration: none;
-        }
-    </style>
+    <script src="firebase-config.js"></script>
 </head>
 
-<body class="bg-light">
+<body class="bg-light pb-5">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
-        <div class="container">
-            <span class="navbar-brand fw-bold"><i class="fa-solid fa-user-shield me-2 text-danger"></i>Yönetim
-                Paneli</span>
-            <div class="d-flex align-items-center">
-                <a href="pano.html" class="btn btn-outline-light btn-sm me-2"><i class="fa-solid fa-arrow-left"></i>
-                    Panoya Dön</a>
-                <button id="logoutBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-right-from-bracket"></i>
-                    Çıkış</button>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold mb-0" href="admin_pano.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Yönetim Paneli
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <button class="theme-toggle-btn d-lg-none" id="themeToggleMobile">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <div class="dropdown d-lg-none">
+                    <button class="btn btn-nav-custom btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Menü
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="pano.html"><i class="fa-solid fa-arrow-left me-1"></i> Panoya
+                                Dön</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><button class="dropdown-item text-danger" id="logoutBtnMobile"><i
+                                    class="fa-solid fa-right-from-bracket me-1"></i> Çıkış</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="collapse navbar-collapse d-none d-lg-block">
+                <ul class="navbar-nav me-auto"></ul>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="theme-toggle-btn d-none d-lg-flex me-2" id="themeToggleDesktop">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <a href="pano.html" class="btn btn-nav-custom btn-sm fw-bold">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Panoya Dön
+                    </a>
+                    <button class="btn btn-outline-danger ms-2 logoutBtnClass" class="btn btn-danger btn-sm fw-bold">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i> Çıkış
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container pb-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow-sm mb-4 border-success">
-                    <div class="card-header bg-success text-white fw-bold"><i
-                            class="fa-solid fa-plus-circle me-2"></i>Yeni Duyuru Yayınla</div>
+                <div class="card card-modern mb-4 border-0 border-start border-4 border-success">
+                    <div
+                        class="card-header bg-transparent border-bottom-0 pb-0 pt-3 text-success fw-bold card-title-modern">
+                        <i class="fa-solid fa-plus-circle me-2"></i>Yeni Duyuru Yayınla
+                    </div>
                     <div class="card-body">
                         <form id="addForm">
-                            <div class="mb-3"><label class="form-label fw-bold">Başlık</label><input type="text"
-                                    id="baslik" class="form-control" placeholder="Duyuru Başlığı" required></div>
-                            <div class="mb-3"><label class="form-label fw-bold">İçerik</label><textarea id="icerik"
-                                    class="form-control" rows="4" placeholder="Duyuru metnini buraya girin..."
-                                    required></textarea></div>
-                            <button type="submit" class="btn btn-success w-100 fw-bold py-2"><i
-                                    class="fa-solid fa-paper-plane me-2"></i> Yayınla</button>
+                            <div class="form-floating mb-3">
+                                <input type="text" id="baslik" class="form-control" placeholder="Duyuru Başlığı"
+                                    required>
+                                <label for="baslik" class="fw-bold">Başlık</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <textarea id="icerik" class="form-control" style="height: 120px"
+                                    placeholder="Duyuru metnini buraya girin..." required></textarea>
+                                <label for="icerik" class="fw-bold">İçerik</label>
+                            </div>
+                            <button type="submit"
+                                class="btn btn-success w-100 fw-bold py-3 rounded-pill btn-touch shadow-sm">
+                                <i class="fa-solid fa-paper-plane me-2"></i> Yayınla
+                            </button>
                         </form>
                     </div>
                 </div>
-                <h5 class="text-muted mb-3 border-bottom pb-2">Yayındaki Duyurular</h5>
-                <div id="adminList">
+                <h5 class="text-muted mb-3 border-bottom pb-2 fw-bold"><i
+                        class="fa-solid fa-users-gear me-2"></i>Bekleyen Onaylar (Yeni Üyeler)</h5>
+                <div id="onayList" class="d-flex flex-column gap-3 mb-5">
                     <div class="text-center text-muted py-3">
-                        <div class="spinner-border spinner-border-sm"></div> Yükleniyor...
+                        <div class="spinner-border spinner-border-sm text-warning mb-2"></div>
+                        <p class="mb-0 fw-bold">Yükleniyor...</p>
+                    </div>
+                </div>
+
+                <h5 class="text-muted mb-3 border-bottom pb-2 fw-bold"><i class="fa-solid fa-list me-2"></i>Yayındaki
+                    Duyurular</h5>
+                <div id="adminList" class="d-flex flex-column gap-3">
+                    <div class="text-center text-muted py-5">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+                        <p class="mb-0 fw-bold">Yükleniyor...</p>
                     </div>
                 </div>
             </div>
@@ -84,20 +112,173 @@
     </div>
 
     <footer class="footer-signature">
-    <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-    <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️ yabguhakan2025@gmail.com</a></small>
-</footer>
+        <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a
+                href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️
+                yabguhakan2025@gmail.com</a></small>
+                        <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item ">
+            <img src="Boskovan.png" class="img-icon" alt="Boş">
+            <span>Boş Kutu</span>
+        </a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item ">
+            <img src="Sonmus.png" class="img-icon" alt="Sönen">
+            <span>Sönen</span>
+        </a>
+        <a href="gorevler.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-calendar-check fs-5"></i>
+            <span>Görevler</span>
+        </a>
+        <a href="envanter.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-boxes-stacked fs-5"></i>
+            <span>Envanter</span>
+        </a>
+        <a href="pano.html" class="bottom-nav-item active">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
+    </nav>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); const auth = firebase.auth();
-        auth.onAuthStateChanged(user => { if (!user || user.email !== "mremzi@gmail.com") { alert("Bu alana sadece yönetici erişebilir!"); window.location.href = "login.html"; } else { listele(); } });
-        document.getElementById('logoutBtn').addEventListener('click', () => { auth.signOut().then(() => window.location.href = "login.html"); });
-        document.getElementById('addForm').addEventListener('submit', e => { e.preventDefault(); const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yayınlanıyor...'; db.collection("pano").add({ baslik: document.getElementById('baslik').value, icerik: document.getElementById('icerik').value, eklenmeTarihi: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { alert("Duyuru başarıyla yayınlandı!"); e.target.reset(); listele(); }).catch(err => { alert("Hata: " + err.message); }).finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> Yayınla'; }); });
-        function listele() { db.collection("pano").orderBy("eklenmeTarihi", "desc").get().then(snap => { const el = document.getElementById('adminList'); el.innerHTML = ''; if (snap.empty) { el.innerHTML = '<div class="alert alert-secondary text-center">Henüz hiç duyuru yok.</div>'; return; } snap.forEach(doc => { const d = doc.data(); let tarihStr = ""; if (d.eklenmeTarihi && d.eklenmeTarihi.toDate) { tarihStr = d.eklenmeTarihi.toDate().toLocaleString('tr-TR'); } const html = `<div class="card mb-3 shadow-sm border-start border-4 border-warning"><div class="card-body"><div class="d-flex justify-content-between align-items-start"><div><h5 class="card-title fw-bold text-dark mb-1">${d.baslik}</h5><small class="text-muted d-block mb-2"><i class="fa-regular fa-clock"></i> ${tarihStr}</small><p class="card-text text-secondary">${d.icerik}</p></div><button onclick="sil('${doc.id}')" class="btn btn-outline-danger btn-sm ms-2" title="Sil"><i class="fa-solid fa-trash"></i></button></div></div></div>`; el.insertAdjacentHTML('beforeend', html); }); }); }
-        function sil(id) { if (confirm("Bu duyuruyu silmek istediğinize emin misiniz?")) { db.collection("pano").doc(id).delete().then(() => listele()).catch(err => alert("Silme hatası: " + err.message)); } }
-    </script>
+        <footer class="footer-signature">
+
+            <script>
+                const db = firebase.firestore(); const auth = firebase.auth();
+
+                auth.onAuthStateChanged(user => {
+                    if (!user || user.email !== "mremzi@gmail.com") {
+                        alert("Bu alana sadece yönetici erişebilir!");
+                        window.location.href = "login.html";
+                    } else {
+                        listele();
+                        bekleyenleriListele();
+                    }
+                });
+
+                document.getElementById('logoutBtn').addEventListener('click', () => { auth.signOut().then(() => window.location.href = "login.html"); });
+                document.getElementById('logoutBtnMobile').addEventListener('click', () => { auth.signOut().then(() => window.location.href = "login.html"); });
+
+                document.getElementById('addForm').addEventListener('submit', e => {
+                    e.preventDefault();
+                    const btn = e.target.querySelector('button');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yayınlanıyor...';
+                    db.collection("pano").add({
+                        baslik: document.getElementById('baslik').value,
+                        icerik: document.getElementById('icerik').value,
+                        eklenmeTarihi: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("Duyuru başarıyla yayınlandı!");
+                        e.target.reset();
+                        listele();
+                    }).catch(err => {
+                        alert("Hata: " + err.message);
+                    }).finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> Yayınla';
+                    });
+                });
+
+                function listele() {
+                    db.collection("pano").orderBy("eklenmeTarihi", "desc").get().then(snap => {
+                        const el = document.getElementById('adminList');
+                        el.innerHTML = '';
+                        if (snap.empty) {
+                            el.innerHTML = '<div class="alert alert-info border-0 rounded-4 text-center">Henüz hiç duyuru yok.</div>';
+                            return;
+                        }
+                        snap.forEach(doc => {
+                            const d = doc.data();
+                            let tarihStr = "";
+                            if (d.eklenmeTarihi && d.eklenmeTarihi.toDate) {
+                                tarihStr = d.eklenmeTarihi.toDate().toLocaleString('tr-TR');
+                            }
+                            const html = `
+                    <div class="card card-modern border-0 border-start border-4 border-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="w-100 me-3">
+                                    <h5 class="card-title card-title-modern fw-bold mb-2">${d.baslik}</h5>
+                                    <small class="text-muted d-block mb-3 border-bottom pb-2"><i class="fa-regular fa-clock me-1"></i> ${tarihStr}</small>
+                                    <p class="card-text text-secondary lh-lg mb-0" style="white-space: pre-line;">${d.icerik}</p>
+                                </div>
+                                <button onclick="sil('${doc.id}')" class="btn btn-outline-danger btn-sm btn-touch flex-shrink-0" title="Sil">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                            el.insertAdjacentHTML('beforeend', html);
+                        });
+                    });
+                }
+
+                function sil(id) {
+                    if (confirm("Bu duyuruyu silmek istediğinize emin misiniz?")) {
+                        db.collection("pano").doc(id).delete().then(() => listele()).catch(err => alert("Silme hatası: " + err.message));
+                    }
+                }
+
+                // --- YENİ ÜYE ONAY İŞLEMLERİ ---
+                function bekleyenleriListele() {
+                    db.collection("kullanicilar").where("onayli", "==", false).get().then(snap => {
+                        const el = document.getElementById('onayList');
+                        el.innerHTML = '';
+                        if (snap.empty) {
+                            el.innerHTML = '<div class="alert alert-success border-0 rounded-4 text-center"><i class="fa-solid fa-check-circle me-1"></i> Bekleyen onay bulunmuyor.</div>';
+                            return;
+                        }
+                        snap.forEach(doc => {
+                            const d = doc.data();
+                            let tarihStr = "";
+                            if (d.kayitTarihi && d.kayitTarihi.toDate) {
+                                tarihStr = d.kayitTarihi.toDate().toLocaleString('tr-TR');
+                            }
+                            const html = `
+                    <div class="card card-modern border-0 border-start border-4 border-info">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-dark"><i class="fa-regular fa-envelope me-1 text-secondary"></i> ${d.email}</div>
+                                    <small class="text-muted"><i class="fa-regular fa-clock me-1"></i> Kayıt: ${tarihStr}</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button onclick="uyeOnayla('${doc.id}')" class="btn btn-sm btn-success fw-bold" title="Onayla">
+                                        <i class="fa-solid fa-check"></i> Onayla
+                                    </button>
+                                    <button onclick="uyeReddet('${doc.id}')" class="btn btn-sm btn-danger fw-bold" title="Reddet ve Sil">
+                                        <i class="fa-solid fa-times"></i> Reddet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                            el.insertAdjacentHTML('beforeend', html);
+                        });
+                    }).catch(err => {
+                        document.getElementById('onayList').innerHTML = '<div class="alert alert-danger">Hata: ' + err.message + '</div>';
+                    });
+                }
+
+                function uyeOnayla(uid) {
+                    if (confirm("Bu üyeyi onaylamak istediğinize emin misiniz? Onaylandıktan sonra giriş yapabilecektir.")) {
+                        db.collection("kullanicilar").doc(uid).update({
+                            onayli: true,
+                            onayTarihi: firebase.firestore.FieldValue.serverTimestamp()
+                        }).then(() => {
+                            bekleyenleriListele();
+                        }).catch(err => alert("Onay hatası: " + err.message));
+                    }
+                }
+
+                function uyeReddet(uid) {
+                    if (confirm("Bu kaydı silmek istediğinize emin misiniz? Kişi giriş yapamayacaktır.")) {
+                        db.collection("kullanicilar").doc(uid).delete().then(() => {
+                            bekleyenleriListele();
+                        }).catch(err => alert("Reddetme hatası: " + err.message));
+                    }
+                }
+            </script>
 </body>
 
 </html>
+

@@ -1,0 +1,530 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stok ve Envanter</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        #reader {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .inventory-card {
+            border-left: 5px solid var(--bee-primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .inventory-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .inventory-card.critical {
+            border-left-color: #dc3545;
+        }
+
+        .critical-badge {
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        /* Hızlı Ekle Etiketleri İçin Tasarım */
+        .quick-tag {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            margin: 0 4px 8px 0;
+            user-select: none;
+        }
+
+        .quick-tag:hover {
+            transform: translateY(-2px);
+            background-color: var(--bee-primary) !important;
+            color: #000 !important;
+            border-color: var(--bee-primary) !important;
+        }
+        /* İMZA STİLİ */
+        .footer-signature {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: var(--bee-text-muted);
+            border-top: 1px solid var(--bee-border);
+            margin-top: auto;
+            background: var(--bee-card-bg);
+        }
+        .footer-signature a {
+            text-decoration: none;
+        }    </style>
+</head>
+
+<body class="bg-light pb-5">
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold mb-0" href="kovanlarim.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Kovan Takip
+            </a>
+            <!-- Masaüstü Sağ Menü (Mobilde Gizli) -->
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <a href="bosKovanlar.html" class="btn btn-nav-custom fw-bold" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; margin-right: 4px;" alt="Boş"> Boş
+                </a>
+                <a href="sonenKovanlar.html" class="btn btn-nav-custom fw-bold" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; margin-right: 4px;" alt="Sönen"> Sönen
+                </a>
+                <a href="gorevler.html" class="btn btn-nav-custom fw-bold" title="Görevler">
+                    <i class="fa-solid fa-calendar-check text-primary"></i> Görevler
+                </a>
+                <a href="envanter.html" class="btn btn-nav-custom fw-bold" title="Envanter">
+                    <i class="fa-solid fa-boxes-stacked text-success"></i> Envanter
+                </a>
+                <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
+                        class="fa-solid fa-bullhorn"></i> Duyuru</a>
+                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
+                        class="fa-solid fa-pencil"></i> Yönetim</a>
+                <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+
+
+
+            <!-- Mobil Üst Menü İkonları (Masaüstünde Gizli) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button id="logoutBtnMobile"
+                    class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-2 mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0" style="color: var(--bee-text-main)"><i
+                    class="fa-solid fa-boxes-stacked me-2 text-warning"></i> Depo Durumu</h4>
+            <button class="btn btn-sm btn-bee-primary d-lg-none shadow-sm" data-bs-toggle="modal"
+                data-bs-target="#envanterModal" onclick="yeniEnvanter()">
+                <i class="fa-solid fa-plus"></i> Ekle
+            </button>
+        </div>
+
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-warning" role="status"></div>
+            <p class="mt-2 text-muted">Stok bilgileri yükleniyor...</p>
+        </div>
+
+        <div class="row g-3" id="envanterListesi">
+            <!-- Liste Buraya Gelecek -->
+        </div>
+
+    </div>
+
+    <!-- Envanter Ekle/Düzenle Modal -->
+    <div class="modal fade" id="envanterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content card-modern">
+                <div class="modal-header border-bottom border-warning border-3">
+                    <h5 class="modal-title fw-bold text-dark" id="modalTitle"><i
+                            class="fa-solid fa-box-open text-warning"></i> Ürün Ekle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="envanterForm">
+                        <input type="hidden" id="e_id">
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold mb-1"><i
+                                    class="fa-solid fa-bolt text-warning"></i> Hızlı Ekle (Tıkla ve Doldur)</label>
+                            <div class="d-flex flex-wrap" id="standardEnvanterTags">
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Kovan', 'Adet')">Kovan</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Çerçeve', 'Adet')">Çerçeve</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Temel Petek', 'Kg')">Temel Petek</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Fondan Şeker / Kek', 'Kg')">Fondan Şeker / Kek</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Körük', 'Adet')">Körük</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Arıcı Maskesi / Tulumu', 'Adet')">Arıcı Maskesi /
+                                    Tulumu</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('El Demiri', 'Adet')">El Demiri</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Varroa İlacı', 'Kutu')">Varroa İlacı</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Yemlik', 'Adet')">Yemlik</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Bal Süzme Makinesi', 'Adet')">Bal Süzme Makinesi</span>
+                                <span class="badge bg-white text-dark border quick-tag"
+                                    onclick="hizliDoldur('Sır Bıçağı', 'Adet')">Sır Bıçağı</span>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="e_ad" placeholder="Örn: Çerçeve, Şurup, Kek..."
+                                list="envanterListesiDatalist" required>
+                            <label for="e_ad">Malzeme / Ürün Adı</label>
+                            <datalist id="envanterListesiDatalist">
+                                <option value="Kovan">
+                                <option value="Çerçeve">
+                                <option value="Temel Petek">
+                                <option value="Körük">
+                                <option value="Arıcı Maskesi">
+                                <option value="Arıcı Tulumu">
+                                <option value="Arıcı Eldiveni">
+                                <option value="El Demiri">
+                                <option value="Arı Fırçası">
+                                <option value="Varroa İlacı">
+                                <option value="Fondan Şeker">
+                                <option value="Arı Keki">
+                                <option value="Yemlik">
+                                <option value="Bal Süzme Makinesi">
+                                <option value="Sır Bıçağı">
+                                <option value="Ana Arı Izgarası">
+                            </datalist>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-8">
+                                <div class="form-floating">
+                                    <input type="number" step="0.1" class="form-control" id="e_miktar"
+                                        placeholder="Miktar" required>
+                                    <label for="e_miktar">Mevcut Miktar</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-floating">
+                                    <select class="form-select" id="e_birim">
+                                        <option value="Adet">Adet</option>
+                                        <option value="Kg">Kg</option>
+                                        <option value="Litre">Lt</option>
+                                        <option value="Kutu">Kutu</option>
+                                        <option value="Çuval">Çuval</option>
+                                    </select>
+                                    <label for="e_birim">Birim</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3 border border-danger rounded">
+                            <input type="number" step="0.1"
+                                class="form-control text-danger fw-bold bg-danger bg-opacity-10" id="e_kritik"
+                                placeholder="Kritik Seviye" value="5" required>
+                            <label for="e_kritik" class="text-danger"><i class="fa-solid fa-bell"></i> Kritik Uyarı
+                                Seviyesi</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="e_skt"
+                                placeholder="Son Kullanma Tarihi (Opsiyonel)">
+                            <label for="e_skt">Son Kullanma Tarihi (Ops.)</label>
+                        </div>
+
+                        <div class="alert alert-secondary small py-2 mb-3">
+                            <i class="fa-solid fa-circle-info"></i> Mevcut miktar, kritik seviyenin altına düştüğünde
+                            sistem size uyarı verecektir.
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold" id="submitBtn">
+                            <i class="fa-solid fa-check me-1"></i> Kaydet
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item ">
+            <img src="Boskovan.png" class="img-icon" alt="Boş">
+            <span>Boş Kutu</span>
+        </a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item ">
+            <img src="Sonmus.png" class="img-icon" alt="Sönen">
+            <span>Sönen</span>
+        </a>
+        <a href="gorevler.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-calendar-check fs-5"></i>
+            <span>Görevler</span>
+        </a>
+        <a href="envanter.html" class="bottom-nav-item active">
+            <i class="fa-solid fa-boxes-stacked fs-5"></i>
+            <span>Envanter</span>
+        </a>
+        <a href="pano.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        let currentUserUid = null;
+        let envModalInstance = null;
+        let html5QrcodeScanner = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUserUid = user.uid;
+                envanterYukle(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+        document.getElementById('logoutBtnMobile').addEventListener('click', () => auth.signOut());
+
+        document.addEventListener('DOMContentLoaded', () => {
+            envModalInstance = new bootstrap.Modal(document.getElementById('envanterModal'));
+            document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () {
+                stopScanner();
+                document.getElementById('scanResult').classList.add('d-none');
+            });
+        });
+
+        function openScanner() {
+            if (!currentUserUid) {
+                alert("Barkod okutmak için lütfen önce giriş yapın.");
+                window.location.href = "login.html";
+                return;
+            }
+            const m = new bootstrap.Modal(document.getElementById('scannerModal'));
+            m.show();
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+                html5QrcodeScanner.render(onScanSuccess, () => { });
+            }
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().then(_ => { html5QrcodeScanner = null; }).catch(e => console.error(e));
+            }
+        }
+
+        async function onScanSuccess(txt) {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+            document.getElementById('reader').innerHTML = '';
+            const r = document.getElementById('scanResult');
+            r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`;
+            r.classList.remove('d-none');
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod", "==", txt).get();
+                if (!snap.empty) {
+                    const id = snap.docs[0].id;
+                    const no = snap.docs[0].data().no;
+                    r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`;
+                    setTimeout(() => window.location.href = `detay.html?id=${id}`, 500);
+                } else {
+                    r.innerHTML = `<div class="text-danger fw-bold">Bulunamadı!</div>`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Hızlı form doldurma fonksiyonu
+        function hizliDoldur(ad, birim) {
+            document.getElementById('e_ad').value = ad;
+            document.getElementById('e_birim').value = birim;
+            // Odaklanmayı değere çevir
+            document.getElementById('e_miktar').focus();
+        }
+
+        function yeniEnvanter() {
+            document.getElementById('envanterForm').reset();
+            document.getElementById('e_id').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-box-open text-warning"></i> Yeni Ürün Ekle';
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-check me-1"></i> Kaydet';
+            document.getElementById('e_kritik').value = 5;
+        }
+
+        function duzenleEnvanter(id, ad, miktar, birim, kritik, skt) {
+            document.getElementById('e_id').value = id;
+            document.getElementById('e_ad').value = ad;
+            document.getElementById('e_miktar').value = miktar;
+            document.getElementById('e_birim').value = birim;
+            document.getElementById('e_kritik').value = kritik;
+            document.getElementById('e_skt').value = skt && skt !== 'undefined' ? skt : '';
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-primary"></i> Ürünü Düzenle';
+            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-arrows-rotate me-1"></i> Güncelle';
+            envModalInstance.show();
+        }
+
+        async function hizliGuncelle(id, miktar, degisim) {
+            try {
+                const yeniMiktar = parseFloat(miktar) + degisim;
+                if (yeniMiktar < 0) return;
+                await db.collection("kullanicilar").doc(currentUserUid).collection("envanter").doc(id).update({
+                    miktar: yeniMiktar,
+                    guncellemeTarihi: new Date().toISOString()
+                });
+            } catch (e) { console.error("Güncelleme hatası", e); }
+        }
+
+        function silEnvanter(id) {
+            if (confirm("Bu ürünü listeden silmek istediğinize emin misiniz?")) {
+                db.collection("kullanicilar").doc(currentUserUid).collection("envanter").doc(id).delete();
+            }
+        }
+
+        document.getElementById('envanterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('e_id').value;
+            const data = {
+                ad: document.getElementById('e_ad').value,
+                miktar: parseFloat(document.getElementById('e_miktar').value),
+                birim: document.getElementById('e_birim').value,
+                kritik: parseFloat(document.getElementById('e_kritik').value),
+                skt: document.getElementById('e_skt').value || null,
+                guncellemeTarihi: new Date().toISOString()
+            };
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+
+            try {
+                if (id) {
+                    await db.collection("kullanicilar").doc(currentUserUid).collection("envanter").doc(id).update(data);
+                } else {
+                    data.eklenmeTarihi = new Date().toISOString();
+                    await db.collection("kullanicilar").doc(currentUserUid).collection("envanter").add(data);
+                }
+                envModalInstance.hide();
+            } catch (err) {
+                alert("Hata: " + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        function formatDateTr(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toLocaleDateString('tr-TR');
+        }
+
+        function envanterYukle(uid) {
+            const div = document.getElementById('envanterListesi');
+
+            db.collection("kullanicilar").doc(uid).collection("envanter").orderBy("ad").onSnapshot(snap => {
+                document.getElementById('loading').style.display = 'none';
+                div.innerHTML = '';
+
+                if (snap.empty) {
+                    div.innerHTML = `
+                    <div class="col-12 py-5 text-center text-muted">
+                        <i class="fa-solid fa-box-open fs-1 mb-3 text-secondary" style="opacity:0.5"></i>
+                        <h5>Deponuz boş</h5>
+                        <p>Henüz envanterinize bir ürün eklemediniz.</p>
+                        <button class="btn btn-bee-primary mt-2" data-bs-toggle="modal" data-bs-target="#envanterModal" onclick="yeniEnvanter()">İlk Ürünü Ekle</button>
+                    </div>`;
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const isCritical = d.miktar <= d.kritik;
+                    const cardClass = isCritical ? 'critical' : '';
+                    const badgeHtml = isCritical ? `<span class="badge bg-danger critical-badge"><i class="fa-solid fa-triangle-exclamation"></i> Azaldı</span>` : '<span class="badge bg-success">Yeterli</span>';
+
+                    let sktHtml = '';
+                    if (d.skt) {
+                        const sktDate = new Date(d.skt);
+                        const today = new Date();
+                        const isExpired = sktDate < today;
+                        const sktColor = isExpired ? 'text-danger fw-bold' : 'text-muted';
+                        sktHtml = `<div class="small mt-1 ${sktColor}"><i class="fa-regular fa-calendar-xmark"></i> SKT: ${formatDateTr(d.skt)} ${isExpired ? '(Tarihi Geçti)' : ''}</div>`;
+                    }
+
+                    div.insertAdjacentHTML('beforeend', `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card card-modern inventory-card ${cardClass} h-100">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="fw-bold mb-0 text-dark" style="color: var(--bee-text-main)"><i class="fa-solid fa-box text-secondary me-2"></i>${d.ad}</h5>
+                                    ${badgeHtml}
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between my-3 px-2 py-3 bg-light rounded border">
+                                    <button class="btn btn-outline-danger btn-sm" onclick="hizliGuncelle('${doc.id}', ${d.miktar}, -1)"><i class="fa-solid fa-minus"></i></button>
+                                    <div class="text-center">
+                                        <span class="fs-4 fw-bold ${isCritical ? 'text-danger' : 'text-dark'}">${d.miktar}</span>
+                                        <span class="text-muted fw-bold ms-1">${d.birim}</span>
+                                    </div>
+                                    <button class="btn btn-outline-success btn-sm" onclick="hizliGuncelle('${doc.id}', ${d.miktar}, 1)"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                ${sktHtml}
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <span class="small text-muted">Kritik: ${d.kritik} ${d.birim}</span>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="duzenleEnvanter('${doc.id}', '${d.ad}', '${d.miktar}', '${d.birim}', '${d.kritik}', '${d.skt}')"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="silEnvanter('${doc.id}')"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`);
+                });
+            }, err => {
+                console.error("Envanter çekilemedi:", err);
+                div.innerHTML = `<div class="col-12"><div class="alert alert-danger">Veriler yüklenirken bir hata oluştu: ${err.message}</div></div>`;
+            });
+        }
+    </script>
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+    </footer>
+</body>
+
+</html>
+

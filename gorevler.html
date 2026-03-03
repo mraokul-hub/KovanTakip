@@ -1,0 +1,616 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Görevler</title>
+    <link rel="icon" href="5.jpg" type="image/jpeg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        #reader {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .task-card {
+            border-left: 5px solid var(--bee-primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-card.task-overdue {
+            border-left-color: #dc3545;
+        }
+
+        .task-card.task-completed {
+            border-left-color: #198754;
+            opacity: 0.7;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .task-completed .task-title {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .date-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: var(--bee-gray);
+            color: var(--bee-text-muted);
+        }
+
+        .date-badge.danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .date-badge.warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .date-badge.success {
+            background-color: #198754;
+            color: #fff;
+        }
+
+        /* Hızlı Ekle Etiketleri İçin Tasarım */
+        .quick-tag {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            margin: 0 4px 8px 0;
+            user-select: none;
+        }
+
+        .quick-tag:hover {
+            transform: translateY(-2px);
+            background-color: var(--bee-primary) !important;
+            color: #000 !important;
+            border-color: var(--bee-primary) !important;
+        }
+        /* İMZA STİLİ */
+        .footer-signature {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: var(--bee-text-muted);
+            border-top: 1px solid var(--bee-border);
+            margin-top: auto;
+            background: var(--bee-card-bg);
+        }
+        .footer-signature a {
+            text-decoration: none;
+        }    </style>
+</head>
+
+<body class="bg-light pb-5">
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold mb-0" href="kovanlarim.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Kovan Takip
+            </a>
+            <!-- Masaüstü Sağ Menü (Mobilde Gizli) -->
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <a href="bosKovanlar.html" class="btn btn-nav-custom fw-bold" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; margin-right: 4px;" alt="Boş"> Boş
+                </a>
+                <a href="sonenKovanlar.html" class="btn btn-nav-custom fw-bold" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; margin-right: 4px;" alt="Sönen"> Sönen
+                </a>
+                <a href="gorevler.html" class="btn btn-nav-custom fw-bold" title="Görevler">
+                    <i class="fa-solid fa-calendar-check text-primary"></i> Görevler
+                </a>
+                <a href="envanter.html" class="btn btn-nav-custom fw-bold" title="Envanter">
+                    <i class="fa-solid fa-boxes-stacked text-success"></i> Envanter
+                </a>
+                <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
+                        class="fa-solid fa-bullhorn"></i> Duyuru</a>
+                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
+                        class="fa-solid fa-pencil"></i> Yönetim</a>
+                <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+
+
+
+            <!-- Mobil Üst Menü İkonları (Masaüstünde Gizli) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button id="logoutBtnMobile"
+                    class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-2 mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0" style="color: var(--bee-text-main)"><i
+                    class="fa-regular fa-calendar-check me-2 text-primary"></i> Yapılacaklar</h4>
+            <button class="btn btn-sm btn-bee-primary d-lg-none shadow-sm" data-bs-toggle="modal"
+                data-bs-target="#gorevModal" onclick="yeniGorev()">
+                <i class="fa-solid fa-plus"></i> Ekle
+            </button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills nav-fill bg-white border rounded-pill shadow-sm mb-4 p-1" id="taskTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill fw-bold" id="bekleyenler-tab" data-bs-toggle="tab"
+                    data-bs-target="#bekleyenler" type="button" role="tab" aria-controls="bekleyenler"
+                    aria-selected="true">Bekleyenler <span class="badge bg-danger ms-1"
+                        id="badgeBekleyen">0</span></button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-bold" id="tamamlananlar-tab" data-bs-toggle="tab"
+                    data-bs-target="#tamamlananlar" type="button" role="tab" aria-controls="tamamlananlar"
+                    aria-selected="false">Tamamlananlar</button>
+            </li>
+        </ul>
+
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Görevler yükleniyor...</p>
+        </div>
+
+        <div class="tab-content" id="taskTabsContent">
+            <!-- Bekleyenler List -->
+            <div class="tab-pane fade show active" id="bekleyenler" role="tabpanel" aria-labelledby="bekleyenler-tab">
+                <div class="row g-3" id="listeBekleyen"></div>
+            </div>
+
+            <!-- Tamamlananlar List -->
+            <div class="tab-pane fade" id="tamamlananlar" role="tabpanel" aria-labelledby="tamamlananlar-tab">
+                <div class="row g-3" id="listeTamamlanan"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Görev Ekle/Düzenle Modal -->
+    <div class="modal fade" id="gorevModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content card-modern">
+                <div class="modal-header border-bottom border-primary border-3">
+                    <h5 class="modal-title fw-bold text-dark" id="modalTitle"><i
+                            class="fa-solid fa-clipboard-list text-primary"></i> Yeni Görev</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="gorevForm">
+                        <input type="hidden" id="g_id">
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold mb-1"><i
+                                    class="fa-solid fa-bolt text-primary"></i> Standart Görevler (Tıkla ve
+                                Doldur)</label>
+                            <div class="d-flex flex-wrap" id="standardGorevTags">
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('İlkbahar Genel Kontrolü')">İlkbahar Kontrolü</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Varroa İlaçlaması')">Varroa İlaçlaması</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Teşvik Şuruplaması')">Teşvik Şuruplaması</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Çerçeve / Kat İlavesi')">Çerçeve Ekle</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Oğul Kontrolü')">Oğul Kontrolü</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Bal Hasadı')">Bal Hasadı</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Sonbahar Beslemesi')">Sonbahar Beslemesi</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Kışlatma Hazırlığı / İzolasyon')">Kışlatma
+                                    Hazırlığı</span>
+                                <span class="badge bg-light text-dark border quick-tag"
+                                    onclick="hizliGorevDoldur('Kış Ortası Oksalik Asit Uygulaması')">Oksalik Asit</span>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="g_baslik"
+                                placeholder="Örn: Kovan 3 Varroa İlacı" list="gorevlerDatalist" required>
+                            <label for="g_baslik">Görev Başlığı</label>
+                            <datalist id="gorevlerDatalist">
+                                <option value="İlkbahar Genel Kontrolü">
+                                <option value="Kışlık Kovan Temizliği">
+                                <option value="Teşvik Şuruplaması">
+                                <option value="İlkbahar Varroa İlaçlaması">
+                                <option value="Çerçeve / Kat İlavesi">
+                                <option value="Oğul Kontrolü">
+                                <option value="Bal Hasadı">
+                                <option value="Sonbahar Beslemesi">
+                                <option value="Sonbahar Varroa İlaçlaması">
+                                <option value="Kışlatma Hazırlığı / İzolasyon">
+                                <option value="Kış Ortası Oksalik Asit Uygulaması">
+                            </datalist>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="g_detay" placeholder="Detay"
+                                style="height: 100px"></textarea>
+                            <label for="g_detay">Açıklama / Detaylar</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control fw-bold" id="g_tarih" placeholder="Planlanan Tarih"
+                                required>
+                            <label for="g_tarih"><i class="fa-solid fa-calendar-day"></i> Planlanan Tarih</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="g_onem">
+                                <option value="Normal" selected>Normal</option>
+                                <option value="Yüksek">Yüksek Öncelik</option>
+                                <option value="Düşük">Düşük Öncelik</option>
+                            </select>
+                            <label for="g_onem">Öncelik Derecesi</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="submitBtn">
+                            <i class="fa-solid fa-save me-1"></i> Kaydet
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item ">
+            <img src="Boskovan.png" class="img-icon" alt="Boş">
+            <span>Boş Kutu</span>
+        </a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item ">
+            <img src="Sonmus.png" class="img-icon" alt="Sönen">
+            <span>Sönen</span>
+        </a>
+        <a href="gorevler.html" class="bottom-nav-item active">
+            <i class="fa-solid fa-calendar-check fs-5"></i>
+            <span>Görevler</span>
+        </a>
+        <a href="envanter.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-boxes-stacked fs-5"></i>
+            <span>Envanter</span>
+        </a>
+        <a href="pano.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        let currentUserUid = null;
+        let gorevModalInstance = null;
+        let html5QrcodeScanner = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUserUid = user.uid;
+                gorevleriYukle(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+        document.getElementById('logoutBtnMobile').addEventListener('click', () => auth.signOut());
+
+        document.addEventListener('DOMContentLoaded', () => {
+            gorevModalInstance = new bootstrap.Modal(document.getElementById('gorevModal'));
+            document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () {
+                stopScanner();
+                document.getElementById('scanResult').classList.add('d-none');
+            });
+        });
+
+        function openScanner() {
+            if (!currentUserUid) {
+                alert("Barkod okutmak için lütfen önce giriş yapın.");
+                window.location.href = "login.html";
+                return;
+            }
+            const m = new bootstrap.Modal(document.getElementById('scannerModal'));
+            m.show();
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+                html5QrcodeScanner.render(onScanSuccess, () => { });
+            }
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().then(_ => { html5QrcodeScanner = null; }).catch(e => console.error(e));
+            }
+        }
+
+        async function onScanSuccess(txt) {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+            document.getElementById('reader').innerHTML = '';
+            const r = document.getElementById('scanResult');
+            r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`;
+            r.classList.remove('d-none');
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod", "==", txt).get();
+                if (!snap.empty) {
+                    const id = snap.docs[0].id;
+                    const no = snap.docs[0].data().no;
+                    r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`;
+                    setTimeout(() => window.location.href = `detay.html?id=${id}`, 500);
+                } else {
+                    r.innerHTML = `<div class="text-danger fw-bold">Bulunamadı!</div>`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Hızlı Görev Doldurma
+        function hizliGorevDoldur(baslik) {
+            document.getElementById('g_baslik').value = baslik;
+            document.getElementById('g_tarih').focus();
+        }
+
+        function formatDisplayDate(isoString) {
+            if (!isoString) return '';
+            const t = new Date(isoString);
+            return t.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function checkDateStatus(isoString) {
+            if (!isoString) return { class: 'date-badge', text: 'Tarih Yok', overdue: false };
+            const taskDate = new Date(isoString + "T00:00:00");
+
+            // Bugünü tam gece yarısına sıfırla ki gün bazında karşılaştırma yapalım
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = taskDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let info = { overdue: false };
+            if (diffDays < 0) {
+                info.class = 'date-badge danger border fw-bold';
+                info.icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                info.text = `${Math.abs(diffDays)} gün gecikti`;
+                info.overdue = true;
+            } else if (diffDays === 0) {
+                info.class = 'date-badge warning border fw-bold';
+                info.icon = '<i class="fa-solid fa-clock"></i>';
+                info.text = `Bugün Yapılacak`;
+            } else if (diffDays <= 3) {
+                info.class = 'date-badge text-warning border fw-bold';
+                info.icon = '<i class="fa-regular fa-calendar"></i>';
+                info.text = `${diffDays} gün kaldı`;
+            } else {
+                info.class = 'date-badge border';
+                info.icon = '<i class="fa-regular fa-calendar"></i>';
+                info.text = formatDisplayDate(isoString);
+            }
+            return info;
+        }
+
+        function yeniGorev() {
+            document.getElementById('gorevForm').reset();
+            document.getElementById('g_id').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-clipboard-list text-primary"></i> Yeni Görev';
+
+            // Varsayılan bugünün tarihi
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('g_tarih').value = today;
+        }
+
+        function duzenleGorev(id, baslik, detay, tarih, onem) {
+            document.getElementById('g_id').value = id;
+            document.getElementById('g_baslik').value = baslik;
+            document.getElementById('g_detay').value = detay !== 'undefined' ? detay : '';
+            document.getElementById('g_tarih').value = tarih;
+            document.getElementById('g_onem').value = onem;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-warning"></i> Görevi Düzenle';
+            gorevModalInstance.show();
+        }
+
+        async function toggleDurum(id, currentDurum) {
+            try {
+                await db.collection("kullanicilar").doc(currentUserUid).collection("gorevler").doc(id).update({
+                    tamamlandi: !currentDurum,
+                    tamamlanmaTarihi: !currentDurum ? new Date().toISOString() : null
+                });
+            } catch (e) { console.error("Durum güncellenemedi", e); }
+        }
+
+        function silGorev(id) {
+            if (confirm("Bu görevi tamamen silmek istediğinize emin misiniz?")) {
+                db.collection("kullanicilar").doc(currentUserUid).collection("gorevler").doc(id).delete();
+            }
+        }
+
+        document.getElementById('gorevForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('g_id').value;
+            const baslik = document.getElementById('g_baslik').value.trim();
+            const tarih = document.getElementById('g_tarih').value;
+
+            if (!baslik || !tarih) return;
+
+            const data = {
+                baslik: baslik,
+                detay: document.getElementById('g_detay').value.trim(),
+                tarih: tarih,
+                onem: document.getElementById('g_onem').value,
+                guncellemeTarihi: new Date().toISOString()
+            };
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+
+            try {
+                if (id) {
+                    await db.collection("kullanicilar").doc(currentUserUid).collection("gorevler").doc(id).update(data);
+                } else {
+                    data.tamamlandi = false;
+                    data.eklenmeTarihi = new Date().toISOString();
+                    await db.collection("kullanicilar").doc(currentUserUid).collection("gorevler").add(data);
+                }
+                gorevModalInstance.hide();
+            } catch (err) {
+                alert("Hata: " + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        function gorevleriYukle(uid) {
+            const listBekleyen = document.getElementById('listeBekleyen');
+            const listTamamlanan = document.getElementById('listeTamamlanan');
+            const badgeBekleyen = document.getElementById('badgeBekleyen');
+
+            // Tarihe göre artan olarak sırala (yakından uzağa)
+            db.collection("kullanicilar").doc(uid).collection("gorevler").orderBy("tarih", "asc").onSnapshot(snap => {
+                document.getElementById('loading').style.display = 'none';
+                listBekleyen.innerHTML = '';
+                listTamamlanan.innerHTML = '';
+
+                let bekleyenSayisi = 0;
+                let tamamlananSayisi = 0;
+
+                if (snap.empty) {
+                    const emptyState = `
+                    <div class="col-12 py-5 text-center text-muted">
+                        <i class="fa-solid fa-clipboard-check fs-1 mb-3 text-secondary" style="opacity:0.5"></i>
+                        <h5>Planlanmış göreviniz yok</h5>
+                        <p>Arılığınızda yapılması gereken işleri buraya ekleyerek takip edebilirsiniz.</p>
+                        <button class="btn btn-bee-primary mt-2" data-bs-toggle="modal" data-bs-target="#gorevModal" onclick="yeniGorev()">İlk Görevi Ekle</button>
+                    </div>`;
+                    listBekleyen.innerHTML = emptyState;
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const durum = d.tamamlandi;
+                    const ds = checkDateStatus(d.tarih);
+
+                    // Kart sınıfları
+                    let cardClass = '';
+                    if (durum) cardClass = 'task-completed';
+                    else if (ds.overdue) cardClass = 'task-overdue';
+
+                    // Öncelik ikonu
+                    let onemHtml = '';
+                    if (d.onem === 'Yüksek') onemHtml = '<i class="fa-solid fa-fire text-danger" title="Yüksek Öncelik"></i>';
+                    else if (d.onem === 'Düşük') onemHtml = '<i class="fa-solid fa-arrow-down text-secondary" title="Düşük Öncelik"></i>';
+
+                    const actionBtns = `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item py-2" href="#" onclick="duzenleGorev('${doc.id}', '${d.baslik.replace(/'/g, "\\'")}', '${(d.detay || '').replace(/'/g, "\\'")}', '${d.tarih}', '${d.onem}')"><i class="fa-solid fa-pen text-primary me-2"></i> Düzenle</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger py-2" href="#" onclick="silGorev('${doc.id}')"><i class="fa-solid fa-trash me-2"></i> Sil</a></li>
+                            </ul>
+                        </div>
+                    `;
+
+                    const dateBadgeHtml = durum ? `<span class="date-badge success border"><i class="fa-solid fa-check-double"></i> Yapıldı: ${formatDisplayDate(d.tamamlanmaTarihi)}</span>`
+                        : `<span class="${ds.class}">${ds.icon} ${ds.text}</span>`;
+
+                    const cardHtml = `
+                    <div class="col-12">
+                        <div class="card card-modern task-card ${cardClass} border-0 shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <input class="form-check-input task-checkbox border-2" type="checkbox" ${durum ? 'checked' : ''} onchange="toggleDurum('${doc.id}', ${durum})" title="Tamamlandı olarak işaretle">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1 task-title text-dark" style="color: var(--bee-text-main)">${onemHtml} ${d.baslik}</h6>
+                                        ${d.detay ? `<div class="small text-muted mb-2 text-truncate" style="max-width: 80%;">${d.detay}</div>` : ''}
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            ${dateBadgeHtml}
+                                        </div>
+                                    </div>
+                                    <div class="ms-2">
+                                        ${actionBtns}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    if (durum) {
+                        listTamamlanan.insertAdjacentHTML('afterbegin', cardHtml); // Tamamlananlar en üste gelir
+                        tamamlananSayisi++;
+                    } else {
+                        listBekleyen.insertAdjacentHTML('beforeend', cardHtml); // Tarihe göre olan (en yakından en uzağa)
+                        bekleyenSayisi++;
+                    }
+                });
+
+                badgeBekleyen.innerText = bekleyenSayisi;
+                if (bekleyenSayisi === 0) {
+                    listBekleyen.innerHTML = `<div class="col-12 py-4 text-center text-muted"><i class="fa-solid fa-champagne-glasses fs-2 mb-2"></i><br>Harika! Bekleyen hiçbir göreviniz yok.</div>`;
+                }
+                if (tamamlananSayisi === 0) {
+                    listTamamlanan.innerHTML = `<div class="col-12 py-4 text-center text-muted">Henüz tamamlanmış bir görev yok.</div>`;
+                }
+
+            }, err => {
+                console.error("Görevler çekilemedi:", err);
+                document.getElementById('taskTabsContent').innerHTML = `<div class="alert alert-danger mx-3">Veriler yüklenirken bir hata oluştu: ${err.message}</div>`;
+            });
+        }
+    </script>
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+    </footer>
+</body>
+
+</html>
+

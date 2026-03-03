@@ -1,0 +1,567 @@
+/* ==========================================================
+   KovanTakip Ortak Stil ve Gece Modu Tanımlamaları
+   ========================================================== */
+
+/* Modern Yazı Tipi */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Açık Tema (Light Mode) Renkleri */
+    --bee-primary: #F59E0B;
+    /* Kehribar (Amber) */
+    --bee-primary-hover: #D97706;
+    --bee-secondary: #475569;
+    /* Koyu Gri */
+    --bee-accent: #10B981;
+    /* Doğa Yeşili */
+    --bee-danger: #EF4444;
+    /* Kırmızı */
+
+    --bee-bg: #F8FAFC;
+    --bee-card-bg: #FFFFFF;
+    --bee-border: #E2E8F0;
+    --bee-text-main: #1E293B;
+    --bee-text-muted: #64748B;
+    --bee-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    /* Z-Index Seviyeleri */
+    --zi-bottom-nav: 1030;
+    --zi-fab: 1040;
+}
+
+/* Koyu Tema (Dark Mode) Renkleri */
+body.dark-theme {
+    --bee-bg: #0F172A;
+    /* Çok Koyu Lacivert/Siyah */
+    --bee-card-bg: #1E293B;
+    --bee-border: #334155;
+    --bee-text-main: #F8FAFC;
+    --bee-text-muted: #94A3B8;
+    --bee-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+    /* Mevcut renklere dark mode uyumu */
+    --bee-primary: #FBBF24;
+    --bee-primary-hover: #F59E0B;
+
+    /* ── Bootstrap CSS Değişkeni Override'ları ──────────────────
+       Bootstrap kendi --bs-* değişkenlerini kullanır. Dark modda
+       bunları gezmeden tüm bileşenler (kart, modal, tab, form…)
+       otomatik olarak doğru renklerle renderlanır.
+    ─────────────────────────────────────────────────────────── */
+    --bs-body-color: #F8FAFC;
+    --bs-body-color-rgb: 248, 250, 252;
+    --bs-body-bg: #0F172A;
+    --bs-body-bg-rgb: 15, 23, 42;
+
+    --bs-secondary-color: #94A3B8;
+    --bs-tertiary-color: #64748B;
+    --bs-border-color: #334155;
+    --bs-border-color-translucent: rgba(51, 65, 85, 0.5);
+
+    /* Kart */
+    --bs-card-bg: #1E293B;
+    --bs-card-color: #F8FAFC;
+    --bs-card-cap-bg: rgba(255, 255, 255, 0.05);
+    --bs-card-border-color: #334155;
+
+    /* Modal */
+    --bs-modal-bg: #1E293B;
+    --bs-modal-color: #F8FAFC;
+    --bs-modal-header-border-color: #334155;
+
+    /* Listeleme (list-group) */
+    --bs-list-group-bg: #1E293B;
+    --bs-list-group-color: #F8FAFC;
+    --bs-list-group-border-color: #334155;
+
+    /* Sekmeler (nav-tabs) */
+    --bs-nav-tabs-link-active-color: #F8FAFC;
+    --bs-nav-tabs-link-active-bg: #1E293B;
+    --bs-nav-tabs-border-color: #334155;
+    --bs-nav-link-color: #94A3B8;
+    --bs-nav-link-hover-color: #FBBF24;
+
+    /* Form girişleri */
+    --bs-input-bg: #0F172A;
+    --bs-input-color: #F8FAFC;
+    --bs-input-border-color: #334155;
+
+    /* Tablo */
+    --bs-table-bg: transparent;
+    --bs-table-color: #F8FAFC;
+    --bs-table-border-color: #334155;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+
+    /* Alert */
+    --bs-alert-bg: #1E293B;
+    --bs-alert-border-color: #334155;
+    --bs-alert-color: #F8FAFC;
+
+    /* Dropdown */
+    --bs-dropdown-bg: #1E293B;
+    --bs-dropdown-color: #F8FAFC;
+    --bs-dropdown-border-color: #334155;
+    --bs-dropdown-link-color: #F8FAFC;
+    --bs-dropdown-link-hover-bg: #334155;
+}
+
+
+/* Genel Yapı */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bee-bg);
+    color: var(--bee-text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 70px;
+    /* Mobilde Bottom Navigation bar için yer aç */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Koyu Tema Bootstrap Geçerli Kılmaları */
+body.dark-theme .bg-white,
+body.dark-theme .bg-light {
+    background-color: var(--bee-card-bg) !important;
+}
+
+body.dark-theme .text-dark,
+body.dark-theme .text-body {
+    color: var(--bee-text-main) !important;
+}
+
+body.dark-theme .text-muted {
+    color: var(--bee-text-muted) !important;
+}
+
+body.dark-theme .border,
+body.dark-theme .border-bottom,
+body.dark-theme .border-top {
+    border-color: var(--bee-border) !important;
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    border-color: #334155;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    border-color: var(--bee-primary);
+    box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
+}
+
+body.dark-theme .modal-content {
+    background-color: var(--bee-card-bg);
+    color: var(--bee-text-main);
+}
+
+
+/* ==========================================================
+   Navbar (Gezinme Çubuğu)
+   ========================================================== */
+
+.navbar-custom {
+    background-color: var(--bee-card-bg);
+    border-bottom: 1px solid var(--bee-border);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-theme .navbar-custom {
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Navbar içindeki yazı rengi tüm temalarda doğru çalışsın */
+.navbar-custom .navbar-brand,
+.navbar-custom .btn-nav-custom {
+    color: var(--bee-text-main) !important;
+}
+
+/* ==========================================================
+   Modern Bileşenler (Kartlar, Butonlar)
+   ========================================================== */
+
+/* Modern İkon Boyutları (PNG/JPG kullanımı tutularak) */
+.icon-md {
+    height: 24px;
+    width: auto;
+    vertical-align: text-bottom;
+}
+
+.icon-lg {
+    height: 32px;
+    width: auto;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Modern Kartlar */
+.card-modern {
+    background-color: var(--bee-card-bg);
+    border: 1px solid var(--bee-border);
+    border-radius: 16px;
+    box-shadow: var(--bee-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.card-clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+body.dark-theme .card-clickable:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+}
+
+.card-header-modern {
+    padding: 16px 20px 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+    background-color: transparent;
+}
+
+.card-title-modern {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--bee-text-main);
+}
+
+.card-body-modern {
+    padding: 8px 20px 20px 20px;
+}
+
+/* Modern Butonlar (Touch Target) */
+.btn-touch {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.btn-bee-primary {
+    background-color: var(--bee-primary);
+    color: #1E293B !important;
+    font-weight: 700;
+}
+
+.btn-bee-primary i {
+    color: #1E293B !important;
+}
+
+body.dark-theme .btn-bee-primary {
+    color: #0F172A !important;
+}
+
+body.dark-theme .btn-bee-primary i {
+    color: #0F172A !important;
+}
+
+.btn-bee-outline {
+    color: var(--bee-primary);
+    border: 1px solid var(--bee-primary);
+    background-color: transparent;
+}
+
+.btn-bee-outline:hover,
+.btn-bee-outline:focus {
+    background-color: var(--bee-primary);
+    color: white;
+}
+
+body.dark-theme .btn-bee-outline:hover {
+    color: #0F172A;
+}
+
+body.dark-theme .btn-outline-danger {
+    color: #f87171;
+    border-color: #f87171;
+}
+
+body.dark-theme .btn-outline-danger:hover {
+    background-color: #f87171;
+    color: #0F172A;
+}
+
+.btn-nav-custom {
+    color: var(--bee-text-main);
+    border: 1px solid var(--bee-border);
+    background-color: transparent;
+    font-weight: 500;
+}
+
+.btn-nav-custom:hover {
+    background-color: var(--bee-bg);
+    color: var(--bee-text-main);
+    border-color: var(--bee-primary);
+}
+
+@keyframes exaggerated-pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.9);
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1.1) rotate(-3deg);
+    }
+
+    20% {
+        transform: scale(1.1) rotate(3deg);
+    }
+
+    30% {
+        transform: scale(1.1) rotate(-3deg);
+    }
+
+    40% {
+        transform: scale(1.1) rotate(0deg);
+    }
+
+    70% {
+        box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+        transform: scale(1);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        transform: scale(1);
+    }
+}
+
+.has-new {
+    animation: exaggerated-pulse-red 1.5s infinite cubic-bezier(0.66, 0, 0, 1) !important;
+    background-color: var(--bee-danger) !important;
+    color: white !important;
+    border-color: var(--bee-danger) !important;
+    font-weight: 900 !important;
+}
+
+.has-new i {
+    color: white !important;
+}
+
+/* Özet Paneli (Dashboard Kartları) */
+.summary-card {
+    background-color: var(--bee-card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--bee-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--bee-shadow);
+}
+
+.summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Özel Renklendirmeler */
+.bg-amber-soft {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--bee-primary);
+}
+
+.bg-red-soft {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--bee-danger);
+}
+
+.bg-gray-soft {
+    background-color: rgba(100, 116, 139, 0.15);
+    color: var(--bee-secondary);
+}
+
+
+/* ==========================================================
+   Mobil Özel Bileşenler (Alt Gezinme, FAB)
+   ========================================================== */
+
+/* Floating Action Button (FAB) */
+.fab-container {
+    position: fixed;
+    bottom: 90px;
+    /* Bottom Nav Bar'ın üzerine denk gelecek şekilde */
+    right: 20px;
+    z-index: var(--zi-fab);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.fab {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    background-color: var(--bee-primary);
+    color: #fff !important;
+    /* Her zaman beyaz */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border: none;
+    transition: transform 0.2s ease, background-color 0.2s;
+    text-decoration: none;
+    gap: 2px;
+}
+
+body.dark-theme .fab {
+    color: #0F172A !important;
+}
+
+.fab:active,
+.fab:hover {
+    transform: scale(1.05);
+    background-color: var(--bee-primary-hover);
+}
+
+.fab-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.fab-secondary {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background-color: var(--bee-card-bg);
+    color: var(--bee-text-main) !important;
+    border: 1px solid var(--bee-border);
+    font-size: 1.25rem;
+    box-shadow: var(--bee-shadow);
+}
+
+/* Desktop'ta FAB biraz daha aşağıda olsun (Bottom nav yok çünkü) */
+@media (min-width: 768px) {
+    .fab-container {
+        bottom: 30px;
+        right: 30px;
+    }
+
+    body {
+        padding-bottom: 0px;
+    }
+}
+
+
+/* Alt Gezinme Çubuğu (Bottom Navigation) SADECE MOBİL İÇİN */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: var(--bee-card-bg);
+    border-top: 1px solid var(--bee-border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: var(--zi-bottom-nav);
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--bee-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    width: 100%;
+    height: 100%;
+    transition: color 0.2s;
+}
+
+.bottom-nav-item i {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+}
+
+/* PNG/JPG ikonlar için wrapper */
+.bottom-nav-item .img-icon {
+    height: 22px;
+    width: auto;
+    margin-bottom: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
+    color: var(--bee-primary);
+}
+
+.bottom-nav-item.active i {
+    color: var(--bee-primary);
+}
+
+.bottom-nav-item.active .img-icon {
+    opacity: 1;
+}
+
+/* Desktop'ta Bottom Nav Gizle */
+@media (min-width: 768px) {
+    .bottom-nav {
+        display: none !important;
+    }
+}
+
+/* Genel İmza Stili (Temaya uygunluk için) */
+.footer-signature {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.85rem;
+    border-top: 1px solid var(--bee-border);
+    margin-top: auto;
+    /* Sayfanın her zaman en altına iter */
+    background: var(--bee-card-bg);
+}
+
+.footer-signature p,
+.footer-signature small {
+    color: var(--bee-text-main);
+}
+
+.footer-signature a {
+    color: var(--bee-primary);
+    text-decoration: none;
+}
+
+/* Kovan Detayları Navigasyon Butonlari */
+.nav-btn-group {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.nav-btn {
+    font-weight: bold;
+    min-width: 120px;
+}

@@ -3,21 +3,61 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="5.jpg" type="image/jpeg">
     <title>Kovan Detayı</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- KovanTakip Özel Tasarım Stilleri ve Tema Yönetimi -->
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
     <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        /* DETAY SAYFASI ÖZEL STİLLERİ */
+        .highlight-data {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--bee-border);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--bee-text-muted);
+            font-weight: 600;
+            padding: 12px 20px;
+            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: var(--bee-primary);
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: transparent;
+            color: var(--bee-primary);
+            border-bottom: 2px solid var(--bee-primary);
+        }
+
+        .list-group-item {
+            background-color: transparent;
+            border-color: var(--bee-border);
+            color: var(--bee-text-main);
+            padding: 12px 15px;
         }
 
         .container {
@@ -77,48 +117,72 @@
             margin-top: 5px;
         }
 
+
+
+        #reader {
+            width: 100%;
+        }
+
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
             padding: 20px;
             font-size: 0.85rem;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            margin-top: 40px;
-            background: #fff;
+            color: var(--bee-text-muted);
+            border-top: 1px solid var(--bee-border);
+            margin-top: auto;
+            background: var(--bee-card-bg);
         }
 
         .footer-signature a {
             text-decoration: none;
         }
-
-        #reader {
-            width: 100%;
-        }
     </style>
 </head>
 
-<body class="bg-light">
+<body class="bg-light pb-5">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="kovanlarim.html"><i
-                    class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
-            <div class="d-flex align-items-center gap-2">
-                <a href="sonenKovanlar.html" class="btn btn-outline-light btn-sm" title="Eski Sönen Kovanlar">
-                    <img src="Sonmus.png" style="height: 20px; vertical-align: text-bottom;" alt="Sönen"> <span
-                        class="d-none d-md-inline">Sönen</span>
-                </a>
-                <a href="bosKovanlar.html" class="btn btn-outline-light btn-sm" title="Boş Kovanlar">
-                    <img src="Boskovan.png" style="height: 20px; vertical-align: text-bottom;" alt="Boş"> <span
-                        class="d-none d-md-inline">Boş</span>
-                </a>
-                <button class="btn btn-outline-light btn-sm" onclick="openScanner()">
-                    <img src="Designer.jpg" style="height: 20px; vertical-align: text-bottom;" alt="Tara"> <span
-                        class="d-none d-md-inline">Tara</span>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4 shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold mb-0" href="kovanlarim.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Kovan Takip
+            </a>
+            <!-- Masaüstü Sağ Menü (Mobilde Gizli) -->
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
                 </button>
-                <a href="kovanlarim.html" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i>
-                    Listeye Dön</a>
+                <a href="bosKovanlar.html" class="btn btn-nav-custom fw-bold" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; margin-right: 4px;" alt="Boş"> Boş
+                </a>
+                <a href="sonenKovanlar.html" class="btn btn-nav-custom fw-bold" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; margin-right: 4px;" alt="Sönen"> Sönen
+                </a>
+                <a href="gorevler.html" class="btn btn-nav-custom fw-bold" title="Görevler">
+                    <i class="fa-solid fa-calendar-check text-primary"></i> Görevler
+                </a>
+                <a href="envanter.html" class="btn btn-nav-custom fw-bold" title="Envanter">
+                    <i class="fa-solid fa-boxes-stacked text-success"></i> Envanter
+                </a>
+                <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
+                        class="fa-solid fa-bullhorn"></i> Duyuru</a>
+                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
+                        class="fa-solid fa-pencil"></i> Yönetim</a>
+                <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+
+            <!-- Mobil Üst Menü İkonları (Masaüstünde Gizli) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button id="logoutBtnMobile"
+                    class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -142,277 +206,521 @@
         </div>
     </div>
 
-    <div class="container pb-5">
-        <div class="nav-btn-group">
-            <button id="btnPrev" class="btn btn-outline-secondary btn-sm nav-btn disabled"><i
-                    class="fa-solid fa-chevron-left"></i> Önceki</button>
-            <button id="btnNext" class="btn btn-outline-secondary btn-sm nav-btn disabled">Sonraki <i
-                    class="fa-solid fa-chevron-right"></i></button>
+    <div class="container py-4">
+
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Kovan bilgileri yükleniyor...</p>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <h3 id="pageTitle" class="mb-0 fw-bold text-primary"><i class="fa-solid fa-spinner fa-spin"></i></h3>
+        <div id="kovanIcerik" style="display: none;">
 
-            <div id="topActionButtons" class="btn-group">
-                <button id="btnAktar" class="btn btn-warning text-dark fw-bold" onclick="openTransferModal()">
-                    <i class="fa-solid fa-right-left"></i> Aktar
-                </button>
-                <button id="btnDuzenle" class="btn btn-primary" onclick="toggleEdit(true)"><i
-                        class="fa-solid fa-pencil"></i> Düzenle</button>
-                <button class="btn btn-danger text-white fw-bold border border-light" onclick="kovanSondu()">
-                    <img src="Sonmus.png" style="height: 20px; vertical-align: text-bottom;" alt="Sönen"> Kovan Söndü
-                </button>
-                <button id="btnSil" class="btn btn-outline-danger" onclick="silKovan()"><i
-                        class="fa-solid fa-trash"></i>
-                    Sil</button>
+            <div class="nav-btn-group">
+                <button id="btnPrev" class="btn btn-outline-secondary btn-sm nav-btn disabled"><i
+                        class="fa-solid fa-chevron-left"></i> Önceki</button>
+                <button id="btnNext" class="btn btn-outline-secondary btn-sm nav-btn disabled">Sonraki <i
+                        class="fa-solid fa-chevron-right"></i></button>
             </div>
-        </div>
 
-        <div id="viewMode" class="row mb-4"></div>
+            <!-- ÜST BİLGİ KARTLARI (Görsel Hiyerarşi Vurgusu) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-modern h-100 p-3 text-center border-top border-4 border-warning">
+                        <img src="5.png" class="mx-auto mb-2" style="height: 40px;">
+                        <div class="text-muted small fw-bold text-uppercase">Kovan Numarası</div>
+                        <div class="highlight-data text-primary" id="v-no">-</div>
+                        <div class="badge bg-light text-dark border mt-2 mx-auto d-inline-block" id="v-tip">-</div>
+                    </div>
+                </div>
 
-        <div id="editMode" class="card shadow-sm mb-4 d-none border-primary">
-            <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-pen-to-square"></i> Kovanı Düzenle</span><button type="button"
-                    class="btn btn-sm btn-light text-primary fw-bold" onclick="toggleEdit(false)">X</button>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-modern h-100 p-3 text-center">
+                        <div class="mb-2" style="color: var(--bee-accent); font-size: 2rem;"><i
+                                class="fa-solid fa-layer-group"></i></div>
+                        <div class="text-muted small fw-bold text-uppercase">Çerçeve Sayısı</div>
+                        <div class="highlight-data" style="color: var(--bee-text-main);" id="v-cerceve">0</div>
+                        <div class="small mt-2 text-muted" id="v-guc">Güç: -</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-modern h-100 p-3 text-center">
+                        <img src="1.png" class="mx-auto mb-2" style="height: 40px;">
+                        <div class="text-muted small fw-bold text-uppercase">Ana Arı İzi</div>
+                        <div class="highlight-data text-warning" style="font-size: 1.5rem;" id="v-ana-irk">-</div>
+                        <div class="badge mt-2 mx-auto d-inline-block" id="v-ana-durum"
+                            style="background-color: var(--bee-bg); color: var(--bee-secondary); border: 1px solid var(--bee-border);">
+                            Durum: -</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="card card-modern h-100 p-3 d-flex flex-column justify-content-center gap-2">
+                        <button class="btn btn-touch btn-bee-primary w-100" data-bs-toggle="modal"
+                            data-bs-target="#editModal">
+                            <i class="fa-solid fa-pen"></i> Künyeyi Düzenle
+                        </button>
+                        <button class="btn btn-touch btn-bee-outline w-100" onclick="openTransferModal()">
+                            <i class="fa-solid fa-code-branch"></i> Aktar / Böl / Birleştir
+                        </button>
+                        <button class="btn btn-touch text-white fw-bold w-100 mb-1 shadow-sm"
+                            style="background-color: #10B981; border-color: #059669;"
+                            onmouseover="this.style.backgroundColor='#059669'"
+                            onmouseout="this.style.backgroundColor='#10B981'" onclick="raporOlustur()">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Yapay Zeka Raporu
+                        </button>
+                        <button class="btn btn-touch btn-outline-danger rounded-pill fw-bold w-100"
+                            onclick="kovanSondu()">
+                            <img src="Sonmus.png" style="height:20px; margin-right:5px;"> Kovan Söndü
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <form id="editForm">
+
+            <!-- DETAYLI TEKNİK BİLGİLER -->
+            <div class="card card-modern mb-4">
+                <div class="card-header-modern pb-0">
+                    <h5 class="fw-bold mb-0 text-muted"><i class="fa-solid fa-circle-info me-2"></i>Genel Özellikler
+                    </h5>
+                </div>
+                <div class="card-body-modern pt-3">
                     <div class="row g-3">
-                        <div class="col-md-6 border-end">
-                            <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan Özellikleri
-                            </h6>
-                            <div class="mb-2"><label class="small fw-bold">Barkod No</label><input type="text"
-                                    id="e_barkod" class="form-control form-control-sm"></div>
-                            <div class="row">
-                                <div class="col-6 mb-2"><label class="small fw-bold">Tip</label><select id="e_tip"
-                                        class="form-select form-select-sm">
-                                        <option>Langstroth</option>
-                                        <option>Dadant</option>
-                                        <option>Karakovan</option>
-                                        <option>Diğer</option>
-                                    </select></div>
-                                <div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select id="e_irk"
-                                        class="form-select form-select-sm">
-                                        <option>Melez</option>
-                                        <option>Kafkas</option>
-                                        <option>Karniyol</option>
-                                        <option>İtalyan</option>
-                                        <option>Anadolu</option>
-                                        <option>Belfast</option>
-                                    </select></div>
-                            </div>
-                            <div class="mb-2"><label class="small fw-bold">Çerçeve</label><input type="number"
-                                    id="e_cerceve" class="form-control form-control-sm"></div>
-                            <div class="mb-2"><label class="small fw-bold">Köken</label><select id="e_koken"
-                                    class="form-select form-select-sm">
-                                    <option>Kendi Üretimim</option>
-                                    <option>Satın Alma</option>
-                                    <option>Oğul</option>
-                                </select></div>
-                            <div class="mb-2"><label class="small fw-bold">Hırçınlık</label><select id="e_hircinlik"
-                                    class="form-select form-select-sm">
-                                    <option value="1">1 - Çok Sakin</option>
-                                    <option value="2">2 - Sakin</option>
-                                    <option value="3">3 - Normal</option>
-                                    <option value="4">4 - Hırçın</option>
-                                    <option value="5">5 - Çok Hırçın</option>
-                                </select></div>
-                            <div class="d-flex gap-3 mt-2">
-                                <div class="form-check"><input class="form-check-input" type="checkbox"
-                                        id="e_taban"><label class="form-check-label small">Delikli Taban</label></div>
-                                <div class="form-check"><input class="form-check-input" type="checkbox"
-                                        id="e_polen"><label class="form-check-label small">Polen Tuzaklı</label></div>
-                            </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted d-block">Irk</small>
+                            <span class="fw-bold fs-6" id="v-irk">-</span>
                         </div>
-                        <div class="col-md-6">
-                            <h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png" width="20"> Ana Arı
-                                Bilgileri</h6>
-                            <div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input type="date"
-                                    id="e_anaDogum" class="form-control form-control-sm"></div>
-                            <div class="row">
-                                <div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select
-                                        id="e_anaIrk" class="form-select form-select-sm">
-                                        <option>Melez</option>
-                                        <option>Kafkas</option>
-                                        <option>Karniyol</option>
-                                        <option>İtalyan</option>
-                                        <option>Anadolu</option>
-                                    </select></div>
-                                <div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select id="e_anaTur"
-                                        class="form-select form-select-sm">
-                                        <option>Damızlık (F0)</option>
-                                        <option>Çiftleşmiş (F1)</option>
-                                        <option>Çiftleşmemiş</option>
-                                        <option>Kendi Ürettiğim</option>
-                                    </select></div>
-                            </div>
-                            <div class="mb-2"><label class="small fw-bold">Rengi</label><select id="e_anaRenk"
-                                    class="form-select form-select-sm">
-                                    <option>Boyasız</option>
-                                    <option>Beyaz</option>
-                                    <option>Sarı</option>
-                                    <option>Kırmızı</option>
-                                    <option>Yeşil</option>
-                                    <option>Mavi</option>
-                                </select></div>
-                            <div class="mb-2"><label class="small fw-bold">Performans</label><select id="e_anaPerf"
-                                    class="form-select form-select-sm">
-                                    <option>Çok İyi</option>
-                                    <option>İyi</option>
-                                    <option>Orta</option>
-                                    <option>Zayıf</option>
-                                </select></div>
-                            <div class="mb-2"><label class="small fw-bold">Planlanan Değişim</label><input type="date"
-                                    id="e_anaDegisim" class="form-control form-control-sm"></div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted d-block">Hırçınlık (1-5)</small>
+                            <span class="fw-bold fs-6" id="v-hircinlik">-</span>
                         </div>
-                        <div class="col-12 text-end border-top pt-3 mt-2"><button type="button"
-                                class="btn btn-secondary me-2" onclick="toggleEdit(false)">İptal</button><button
-                                type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-check"></i>
-                                Kaydet</button></div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted d-block">Köken (Kaynak)</small>
+                            <span class="fw-bold fs-6" id="v-koken">-</span>
+                            <div class="text-primary small fw-bold d-none mt-1" id="v-soy-container"><i
+                                    class="fa-solid fa-tree me-1"></i>Soy: <span id="v-soy">-</span></div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-muted d-block">Son Güncelleme</small>
+                            <span class="fw-bold fs-6" id="v-guncelleme">-</span>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-white">
-                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab"
-                            data-bs-target="#bakimTab"><img src="3.png" width="20"> Bakım</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab"
-                            data-bs-target="#hastalikTab"><img src="4.png" width="20"> Hastalık</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#hasatTab"><img
-                                src="2.png" width="20"> Bal Hasadı</button></li>
-                </ul>
-            </div>
-            <div class="card-body bg-light">
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="bakimTab">
-                        <form class="mb-4 p-3 bg-white rounded border" onsubmit="kayitEkle(event, 'bakimKayitlari')">
-                            <div class="row g-2">
-                                <div class="col-md-3"><input type="date" name="tarih" class="form-control"
-                                        id="bakimTarih"></div>
-                                <div class="col-md-4"><input type="text" name="islem" class="form-control"
-                                        placeholder="İşlem" required></div>
-                                <div class="col-md-5"><input type="text" name="not" class="form-control"
-                                        placeholder="Notlar"></div>
-                                <div class="col-12 d-flex align-items-center gap-2"><label
-                                        class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto
-                                        <input type="file" accept="image/*" hidden
-                                            onchange="handlePhoto(this, 'bakimPreview', 'bakimBase64')"></label><img
-                                        id="bakimPreview" class="img-preview"><input type="hidden" name="foto"
-                                        id="bakimBase64"><button class="btn btn-primary btn-sm ms-auto px-4"
-                                        type="submit">Kaydet</button></div>
-                            </div>
-                        </form>
-                        <div id="bakimListesi"></div>
-                    </div>
-                    <div class="tab-pane fade" id="hastalikTab">
-                        <form class="mb-4 p-3 bg-white rounded border border-danger"
-                            onsubmit="kayitEkle(event, 'hastalikKayitlari')">
-                            <div class="row g-2">
-                                <div class="col-md-3"><input type="date" name="tarih" class="form-control"
-                                        id="hastalikTarih"></div>
-                                <div class="col-md-3"><input type="text" name="hastalik" class="form-control"
-                                        placeholder="Hastalık" required></div>
-                                <div class="col-md-3"><input type="text" name="ilac" class="form-control"
-                                        placeholder="İlaç"></div>
-                                <div class="col-md-3"><input type="text" name="not" class="form-control"
-                                        placeholder="Notlar"></div>
-                                <div class="col-12 d-flex align-items-center gap-2 mt-2"><label
-                                        class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i> Foto
-                                        <input type="file" accept="image/*" hidden
-                                            onchange="handlePhoto(this, 'hastalikPreview', 'hastalikBase64')"></label><img
-                                        id="hastalikPreview" class="img-preview"><input type="hidden" name="foto"
-                                        id="hastalikBase64"><button class="btn btn-danger btn-sm ms-auto px-4"
-                                        type="submit">Kaydet</button></div>
-                            </div>
-                        </form>
-                        <div id="hastalikListesi"></div>
-                    </div>
-                    <div class="tab-pane fade" id="hasatTab">
-                        <form class="mb-4 p-3 bg-white rounded border border-success"
-                            onsubmit="kayitEkle(event, 'hasatKayitlari')">
-                            <div class="row g-2">
-                                <div class="col-md-3"><input type="date" name="tarih" class="form-control"
-                                        id="hasatTarih"></div>
-                                <div class="col-md-3"><input type="number" step="0.1" name="miktar" class="form-control"
-                                        placeholder="KG" required></div>
-                                <div class="col-md-4"><input type="text" name="not" class="form-control"
-                                        placeholder="Notlar"></div>
-                                <div class="col-md-2"><button class="btn btn-success w-100"
-                                        type="submit">Kaydet</button></div>
-                            </div>
-                        </form>
-                        <div id="grafikKarti" class="card mb-4 shadow-sm border-success chart-card"
-                            style="display:none;">
-                            <div class="card-body p-3">
-                                <h6 class="text-center text-success fw-bold mb-3"><i
-                                        class="fa-solid fa-chart-column"></i> Bal Verim Analizi</h6>
-                                <div style="height: 200px;"><canvas id="balGrafigi"></canvas></div>
-                            </div>
+            <!-- KOVAN GELİŞİMİ VE DURUM RAPORU -->
+            <div class="card card-modern mb-4 border-info">
+                <div class="card-header-modern pb-0 bg-info bg-opacity-10 border-bottom border-info">
+                    <h5 class="fw-bold mb-0 text-info-emphasis"><i class="fa-solid fa-chart-line me-2"></i>Gelişim ve
+                        Durum Özeti</h5>
+                </div>
+                <div class="card-body-modern pt-3 pb-4">
+                    <div class="row g-3 text-center">
+                        <div class="col-4 border-end">
+                            <div class="text-muted small fw-bold text-uppercase mb-1">Toplam Hasat</div>
+                            <div class="fs-4 fw-bold text-success" id="rep-hasat">0 kg</div>
                         </div>
-                        <div id="hasatListesi"></div>
+                        <div class="col-4 border-end">
+                            <div class="text-muted small fw-bold text-uppercase mb-1">Son İşlem</div>
+                            <div class="fs-6 fw-bold mt-2" id="rep-sonislem">-</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted small fw-bold text-uppercase mb-1">Bakım (Bu Yıl)</div>
+                            <div class="fs-4 fw-bold text-primary" id="rep-bakim">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KÜNYE DÜZENLE MODAL -->
+            <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content card-modern">
+                        <div class="modal-header border-bottom border-primary border-3">
+                            <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square"></i> Kovanı
+                                Düzenle</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <form id="editForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6 border-end">
+                                        <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan
+                                            Özellikleri
+                                        </h6>
+                                        <div class="mb-2"><label class="small fw-bold">Barkod No</label><input
+                                                type="text" id="e_barkod" class="form-control form-control-sm"></div>
+                                        <div class="row">
+                                            <div class="col-6 mb-2"><label class="small fw-bold">Tip</label><select
+                                                    id="e_tip" class="form-select form-select-sm">
+                                                    <option>Langstroth</option>
+                                                    <option>Dadant</option>
+                                                    <option>Karakovan</option>
+                                                    <option>Diğer</option>
+                                                </select></div>
+                                            <div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select
+                                                    id="e_irk" class="form-select form-select-sm">
+                                                    <option>Melez</option>
+                                                    <option>Kafkas</option>
+                                                    <option>Karniyol</option>
+                                                    <option>İtalyan</option>
+                                                    <option>Anadolu</option>
+                                                    <option>Belfast</option>
+                                                </select></div>
+                                        </div>
+                                        <div class="mb-2"><label class="small fw-bold">Çerçeve</label><input
+                                                type="number" id="e_cerceve" class="form-control form-control-sm"></div>
+                                        <div class="mb-2"><label class="small fw-bold">Köken</label><select id="e_koken"
+                                                class="form-select form-select-sm" onchange="toggleSoy()">
+                                                <option>Kendi Üretimim</option>
+                                                <option>Satın Alma</option>
+                                                <option>Oğul</option>
+                                            </select></div>
+                                        <div class="mb-2 d-none" id="e_soy_container">
+                                            <label class="small fw-bold text-primary"><i
+                                                    class="fa-solid fa-tree me-1"></i>Ana Kovan (Soy)</label>
+                                            <input type="text" id="e_soy"
+                                                class="form-control form-control-sm border-primary bg-primary bg-opacity-10"
+                                                placeholder="Örn: Kovan 5">
+                                        </div>
+                                        <div class="mb-2"><label class="small fw-bold">Hırçınlık</label><select
+                                                id="e_hircinlik" class="form-select form-select-sm">
+                                                <option value="1">1 - Çok Sakin</option>
+                                                <option value="2">2 - Sakin</option>
+                                                <option value="3">3 - Normal</option>
+                                                <option value="4">4 - Hırçın</option>
+                                                <option value="5">5 - Çok Hırçın</option>
+                                            </select></div>
+                                        <div class="d-flex gap-3 mt-2">
+                                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                    id="e_taban"><label class="form-check-label small">Delikli
+                                                    Taban</label>
+                                            </div>
+                                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                    id="e_polen"><label class="form-check-label small">Polen
+                                                    Tuzaklı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png"
+                                                width="20"> Ana
+                                            Arı Bilgileri</h6>
+                                        <div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input
+                                                type="date" id="e_anaDogum" class="form-control form-control-sm"></div>
+                                        <div class="row">
+                                            <div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select
+                                                    id="e_anaIrk" class="form-select form-select-sm">
+                                                    <option>Melez</option>
+                                                    <option>Kafkas</option>
+                                                    <option>Karniyol</option>
+                                                    <option>İtalyan</option>
+                                                    <option>Anadolu</option>
+                                                </select></div>
+                                            <div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select
+                                                    id="e_anaTur" class="form-select form-select-sm">
+                                                    <option>Damızlık (F0)</option>
+                                                    <option>Çiftleşmiş (F1)</option>
+                                                    <option>Çiftleşmemiş</option>
+                                                    <option>Kendi Ürettiğim</option>
+                                                </select></div>
+                                        </div>
+                                        <div class="mb-2"><label class="small fw-bold">Rengi</label><select
+                                                id="e_anaRenk" class="form-select form-select-sm">
+                                                <option>Boyasız</option>
+                                                <option>Beyaz</option>
+                                                <option>Sarı</option>
+                                                <option>Kırmızı</option>
+                                                <option>Yeşil</option>
+                                                <option>Mavi</option>
+                                            </select></div>
+                                        <div class="mb-2"><label class="small fw-bold">Performans</label><select
+                                                id="e_anaPerf" class="form-select form-select-sm">
+                                                <option>Çok İyi</option>
+                                                <option>İyi</option>
+                                                <option>Orta</option>
+                                                <option>Zayıf</option>
+                                            </select></div>
+                                        <div class="mb-2"><label class="small fw-bold">Planlanan Değişim</label><input
+                                                type="date" id="e_anaDegisim" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 text-end border-top pt-3 mt-2"><button type="button"
+                                            class="btn btn-secondary me-2" data-bs-dismiss="modal">İptal</button><button
+                                            type="submit" class="btn btn-success fw-bold"><i
+                                                class="fa-solid fa-check"></i>
+                                            Kaydet</button></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKMELER VE TABLOLAR -->
+            <div class="card card-modern mb-5">
+                <div class="card-header bg-transparent pt-3 pb-0 border-0">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="bakim-tab" data-bs-toggle="tab"
+                                data-bs-target="#bakimTab"><img src="3.png" width="20"> Bakım /
+                                Besleme</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hastalik-tab" data-bs-toggle="tab"
+                                data-bs-target="#hastalikTab"><img src="4.png" width="20">
+                                Hastalık / Tedavi</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hasat-tab" data-bs-toggle="tab" data-bs-target="#hasatTab"><img
+                                    src="2.png" width="20"> Bal Hasadı</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body-modern bg-light">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="bakimTab">
+                            <form class="mb-4 p-3 bg-white rounded border border-success"
+                                onsubmit="kayitEkle(event, 'bakimKayitlari')">
+                                <div class="row g-2">
+                                    <div class="col-md-3"><input type="date" name="tarih"
+                                            class="form-control form-control-sm border-success" id="bakimTarih"></div>
+                                    <div class="col-md-4"><input type="text" name="islem"
+                                            class="form-control form-control-sm border-success" placeholder="İşlem"
+                                            required></div>
+                                    <div class="col-md-5"><input type="text" name="not"
+                                            class="form-control form-control-sm border-success" placeholder="Notlar">
+                                    </div>
+
+                                    <!-- YENİ ALANLAR (OPSİYONEL YAPAY ZEKA GİRDİLERİ) -->
+                                    <div class="col-md-2">
+                                        <input type="number" name="cerceveGuncelle" class="form-control form-control-sm"
+                                            placeholder="Toplam Çerçeve"
+                                            title="Bu bakımda kovanın toplam çerçeve sayısı" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" name="kapaliYavru" class="form-control form-control-sm"
+                                            placeholder="Yavrulu Çerçeve" title="Kapalı Yavrulu Çerçeve Sayısı">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" name="balliCerceve" class="form-control form-control-sm"
+                                            placeholder="Ballı Çerçeve" title="Ballı / Polenli Çerçeve Sayısı">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="yuksuk" id="yuksukSayi"
+                                            class="form-control form-control-sm" placeholder="Ana Arı Yüksüğü Sayısı"
+                                            min="0" title="Ana Arı Yüksüğü varsa sayısını girin, yoksa boş bırakın">
+                                        <small class="text-muted" style="font-size:0.7rem;">(Yok ise boş
+                                            bırakın)</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="erkekAri" class="form-select form-select-sm" title="Erkek Arı">
+                                            <option value="" selected>Erkek Arı: Belirtilmedi</option>
+                                            <option value="Yok">Yok</option>
+                                            <option value="Az">Az</option>
+                                            <option value="Normal">Normal</option>
+                                            <option value="Çok">Çok</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="varroaYuk" class="form-select form-select-sm"
+                                            title="Varroa / Parazit Yükü">
+                                            <option value="" selected>Varroa: Belirtilmedi</option>
+                                            <option value="Yok">Yok</option>
+                                            <option value="Az">Az</option>
+                                            <option value="Orta">Orta</option>
+                                            <option value="Çok">Çok</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" name="polenTuzak" class="form-control form-control-sm"
+                                            placeholder="Polenli Çerçeve" min="0" title="Polenli Çerçeve sayısı">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="kovanKati" class="form-select form-select-sm"
+                                            title="Kovan Kat Sayısı">
+                                            <option value="" selected>Kovan Katı: Belirtilmedi</option>
+                                            <option value="1">1 Kat (Sadece Kuluçkalık)</option>
+                                            <option value="2">2 Kat (Kuluçkalık + Ballık)</option>
+                                            <option value="3">3 Kat</option>
+                                            <option value="4">4 Kat</option>
+                                            <option value="5">5+ Kat</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 d-flex align-items-center gap-2 mt-2">
+                                        <label class="btn btn-outline-secondary btn-sm"><i
+                                                class="fa-solid fa-camera"></i> Foto
+                                            <input type="file" accept="image/*" hidden
+                                                onchange="handlePhoto(this, 'bakimPreview', 'bakimBase64')">
+                                        </label>
+                                        <img id="bakimPreview" class="img-preview">
+                                        <input type="hidden" name="foto" id="bakimBase64">
+                                        <button class="btn btn-success btn-sm ms-auto px-4 fw-bold"
+                                            type="submit">Kaydet</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div id="bakimListesi"></div>
+                        </div>
+                        <div class="tab-pane fade" id="hastalikTab">
+                            <form class="mb-4 p-3 bg-white rounded border border-danger"
+                                onsubmit="kayitEkle(event, 'hastalikKayitlari')">
+                                <div class="row g-2">
+                                    <div class="col-md-3"><input type="date" name="tarih" class="form-control"
+                                            id="hastalikTarih"></div>
+                                    <div class="col-md-3"><input type="text" name="hastalik" class="form-control"
+                                            placeholder="Hastalık" required list="hastalikList"></div>
+                                    <div class="col-md-3"><input type="text" name="ilac" class="form-control"
+                                            placeholder="İlaç" list="ilacList"></div>
+                                    <div class="col-md-3"><input type="text" name="not" class="form-control"
+                                            placeholder="Notlar"></div>
+                                    <div class="col-12 d-flex align-items-center gap-2 mt-2"><label
+                                            class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i>
+                                            Foto
+                                            <input type="file" accept="image/*" hidden
+                                                onchange="handlePhoto(this, 'hastalikPreview', 'hastalikBase64')"></label><img
+                                            id="hastalikPreview" class="img-preview"><input type="hidden" name="foto"
+                                            id="hastalikBase64"><button class="btn btn-danger btn-sm ms-auto px-4"
+                                            type="submit">Kaydet</button></div>
+                                </div>
+                            </form>
+                            <div id="hastalikListesi"></div>
+                        </div>
+                        <div class="tab-pane fade" id="hasatTab">
+                            <form class="mb-4 p-3 bg-white rounded border border-success"
+                                onsubmit="kayitEkle(event, 'hasatKayitlari')">
+                                <div class="row g-2">
+                                    <div class="col-md-3"><input type="date" name="tarih" class="form-control"
+                                            id="hasatTarih"></div>
+                                    <div class="col-md-3"><input type="number" step="0.1" name="miktar"
+                                            class="form-control" placeholder="KG" required></div>
+                                    <div class="col-md-4"><input type="text" name="not" class="form-control"
+                                            placeholder="Notlar"></div>
+                                    <div class="col-md-2"><button class="btn btn-success w-100"
+                                            type="submit">Kaydet</button></div>
+                                </div>
+                            </form>
+                            <div id="grafikKarti" class="card mb-4 shadow-sm border-success chart-card"
+                                style="display:none;">
+                                <div class="card-body p-3">
+                                    <h6 class="text-center text-success fw-bold mb-3"><i
+                                            class="fa-solid fa-chart-column"></i> Bal Verim Analizi</h6>
+                                    <div style="height: 200px;"><canvas id="balGrafigi"></canvas></div>
+                                </div>
+                            </div>
+                            <div id="hasatListesi"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="footer-signature">
-        <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a
-                href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️
-                yabguhakan2025@gmail.com</a></small>
-    </footer>
+    </div>
+    </div>
 
+    <!-- YAPAY ZEKA RAPOR MODAL -->
+    <div class="modal fade" id="raporModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #10B981, #059669);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-robot me-2"></i>Kovan Gelişim Raporu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light" id="raporIcerik"><!-- JS ile dolacak --></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBİL ALT GEZİNME -->
+    <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item"><img src="Boskovan.png" class="img-icon" alt="Boş"><span>Boş
+                Kutu</span></a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item"><img src="Sonmus.png" class="img-icon"
+                alt="Sönen"><span>Sönen</span></a>
+        <a href="gorevler.html" class="bottom-nav-item"><i
+                class="fa-solid fa-calendar-check fs-5"></i><span>Görevler</span></a>
+        <a href="envanter.html" class="bottom-nav-item"><i
+                class="fa-solid fa-boxes-stacked fs-5"></i><span>Envanter</span></a>
+        <a href="pano.html" class="bottom-nav-item"><i class="fa-solid fa-bullhorn fs-5"></i><span>Duyuru</span></a>
+    </nav>
+
+    <div class="fab-container">
+        <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <span class="fab-text">Barkod<br>Tara</span>
+        </button>
+    </div>
+
+    <!-- KOVAN AKTARIM MODAL -->
     <div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
+            <div class="modal-content card-modern">
+                <div class="modal-header border-bottom border-warning border-3">
                     <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-right-left"></i> Kovan Aktarımı /
                         Bölme</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="transferForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Hedef Kovan (Nereye?)</label>
+                        <div class="mb-3"><label class="form-label fw-bold">Hedef Kovan (Nereye?)</label>
                             <select id="transferHedef" class="form-select" required>
                                 <option value="">Yükleniyor...</option>
                             </select>
                             <div class="form-text">Listede sadece diğer kovanlar görünür.</div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">İşlem Türü</label>
+                        <div class="mb-3"><label class="form-label fw-bold">İşlem Türü</label>
                             <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="transferTip" id="tipTasi" value="tasi"
                                     checked onchange="toggleTransferInputs()">
                                 <label class="btn btn-outline-warning text-dark" for="tipTasi">Tam Taşıma</label>
-
                                 <input type="radio" class="btn-check" name="transferTip" id="tipBol" value="bol"
                                     onchange="toggleTransferInputs()">
                                 <label class="btn btn-outline-warning text-dark" for="tipBol">Oğul/Bölme</label>
+                                <input type="radio" class="btn-check" name="transferTip" id="tipBirlestir"
+                                    value="birlestir" onchange="toggleTransferInputs()">
+                                <label class="btn btn-outline-warning text-dark" for="tipBirlestir">Birleştirme</label>
                             </div>
                         </div>
-
                         <div id="bolmeInputlari" class="d-none p-3 bg-light border rounded mb-3">
                             <label class="form-label fw-bold">Aktarılacak Çerçeve Sayısı</label>
-                            <input type="number" id="transferAdet" class="form-control" min="1" value="1">
+                            <input type="number" id="transferAdet" class="form-control" min="1" value="1"
+                                oninput="checkFullMerge()">
                             <div class="form-text text-danger" id="kalanBilgi"></div>
+                            <div id="anaAriSecim" class="d-none mt-3 p-2 border border-danger rounded bg-white">
+                                <label class="form-label fw-bold text-danger mb-1"><i class="fa-solid fa-crown"></i>
+                                    Hangi Ana Arı Kalacak?</label>
+                                <select id="kalacakAnaAri" class="form-select border-danger">
+                                    <option value="hedef">Hedef Kovanın Ana Arısı</option>
+                                    <option value="kaynak">Bu Kovanın Ana Arısı</option>
+                                </select>
+                            </div>
                         </div>
-
-                        <div class="alert alert-info small">
-                            <i class="fa-solid fa-info-circle"></i>
-                            <span id="transferAciklama">Mevcut kovanın tüm içeriği hedef kovana taşınacak. Kaynak kovan
-                                boşa çıkacak.</span>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100 fw-bold">
-                            <i class="fa-solid fa-check"></i> İşlemi Onayla
-                        </button>
+                        <div class="alert alert-info small"><i class="fa-solid fa-info-circle"></i> <span
+                                id="transferAciklama">Mevcut kovanın tüm içeriği hedef kovana taşınacak.</span></div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold"><i class="fa-solid fa-check"></i>
+                            İşlemi Onayla</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARKOD TARAYICI MODAL -->
+    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
+                            style="height:24px;vertical-align:sub;border-radius:4px;" alt="Tara">Barkod Tara</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        onclick="stopScanner()"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="reader"></div>
+                    <div id="scanResult" class="text-center p-3 d-none">
+                        <div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...
+                    </div>
                 </div>
             </div>
         </div>
@@ -432,12 +740,11 @@
     </datalist>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="weather.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(); const auth = firebase.auth();
         const kovanId = new URLSearchParams(window.location.search).get('id');
-        let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null;
+        let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null; let kovanData = null;
         const hircinlikMap = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -450,61 +757,237 @@
         if (!kovanId) window.location.href = "kovanlarim.html";
         auth.onAuthStateChanged(user => { if (user) { currentUser = user; yukle(); navigasyonuKur(); } else window.location.href = 'login.html'; });
 
-        async function navigasyonuKur() { try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get(); if (snap.empty) return; let kovanlar = []; snap.forEach(doc => kovanlar.push({ id: doc.id, no: doc.data().no || "" })); kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' })); const idx = kovanlar.findIndex(k => k.id === kovanId); if (idx > 0) { document.getElementById('btnPrev').classList.remove('disabled'); document.getElementById('btnPrev').onclick = () => window.location.href = `detay.html?id=${kovanlar[idx - 1].id}`; document.getElementById('btnPrev').innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx - 1].no})`; } if (idx < kovanlar.length - 1) { document.getElementById('btnNext').classList.remove('disabled'); document.getElementById('btnNext').onclick = () => window.location.href = `detay.html?id=${kovanlar[idx + 1].id}`; document.getElementById('btnNext').innerHTML = `Sonraki (${kovanlar[idx + 1].no}) <i class="fa-solid fa-chevron-right"></i>`; } } catch (e) { console.error("Nav hata:", e); } }
+        async function navigasyonuKur() {
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get();
+                if (snap.empty) return;
+                let kovanlar = [];
+                snap.forEach(doc => kovanlar.push({ id: doc.id, no: doc.data().no || "" }));
+                kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' }));
+                const idx = kovanlar.findIndex(k => k.id === kovanId);
+                const btnPrev = document.getElementById('btnPrev');
+                const btnNext = document.getElementById('btnNext');
+                if (idx > 0) {
+                    btnPrev.classList.remove('disabled'); btnPrev.removeAttribute('disabled');
+                    btnPrev.innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx - 1].no})`;
+                    btnPrev.addEventListener('click', () => window.location.href = `detay.html?id=${kovanlar[idx - 1].id}`);
+                }
+                if (idx < kovanlar.length - 1) {
+                    btnNext.classList.remove('disabled'); btnNext.removeAttribute('disabled');
+                    btnNext.innerHTML = `Sonraki (${kovanlar[idx + 1].no}) <i class="fa-solid fa-chevron-right"></i>`;
+                    btnNext.addEventListener('click', () => window.location.href = `detay.html?id=${kovanlar[idx + 1].id}`);
+                }
+            } catch (e) { console.error("Nav hata:", e); }
+        }
+
         function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
         function formatDate(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0].slice(2)}` : iso; }
-        function renderView(d) { document.getElementById('pageTitle').innerHTML = `<img src="5.png" width="30" class="me-2"> Kovan: ${d.no}`; const hVal = d.hircinlik || 3; const hText = hircinlikMap[hVal] || "Bilinmiyor"; document.getElementById('viewMode').innerHTML = `<div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body"><h6 class="fw-bold border-bottom pb-2 text-primary"><img src="5.png" width="20"> Genel Bilgiler</h6><div class="row g-2"><div class="col-6"><strong>Tip:</strong> ${d.tip}</div><div class="col-6"><strong>Irk:</strong> ${d.irk}</div><div class="col-6"><strong>Çerçeve:</strong> ${d.cerceve}</div><div class="col-6"><strong>Hırçınlık:</strong> ${hText}</div><div class="col-6"><strong>Köken:</strong> ${d.koken}</div><div class="col-6"><strong>Barkod:</strong> ${d.barkod || '-'}</div><div class="col-12 mt-2 border-top pt-2 small text-muted">${d.taban ? '<i class="fa-solid fa-check text-success"></i> Delikli Taban' : ''} ${d.polen ? '<span class="ms-2"><i class="fa-solid fa-check text-success"></i> Polen Tuzaklı</span>' : ''}</div></div></div></div></div><div class="col-md-6"><div class="card shadow-sm h-100 border-warning"><div class="card-body"><h6 class="fw-bold border-bottom pb-2 text-warning-emphasis"><img src="1.png" width="20"> Ana Arı</h6><div class="row g-2"><div class="col-6"><strong>Irk:</strong> ${d.ana?.irk}</div><div class="col-6"><strong>Renk:</strong> ${d.ana?.renk}</div><div class="col-6"><strong>Perf.:</strong> ${d.ana?.perf}</div><div class="col-6"><strong>Doğum:</strong> ${formatDate(d.ana?.dogum)}</div></div></div></div></div>`; document.getElementById('e_barkod').value = d.barkod || ''; document.getElementById('e_tip').value = d.tip; document.getElementById('e_irk').value = d.irk; document.getElementById('e_cerceve').value = d.cerceve; document.getElementById('e_koken').value = d.koken; document.getElementById('e_hircinlik').value = d.hircinlik; document.getElementById('e_taban').checked = d.taban; document.getElementById('e_polen').checked = d.polen; document.getElementById('e_anaDogum').value = d.ana?.dogum; document.getElementById('e_anaIrk').value = d.ana?.irk; document.getElementById('e_anaTur').value = d.ana?.tur; document.getElementById('e_anaRenk').value = d.ana?.renk; document.getElementById('e_anaPerf').value = d.ana?.perf; document.getElementById('e_anaDegisim').value = d.ana?.degisim; }
-        function toggleEdit(show) { document.getElementById('viewMode').classList.toggle('d-none', show); document.getElementById('editMode').classList.toggle('d-none', !show); document.getElementById('topActionButtons').classList.toggle('hidden-mode', show); }
-        document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); const ud = { barkod: document.getElementById('e_barkod').value, tip: document.getElementById('e_tip').value, irk: document.getElementById('e_irk').value, cerceve: Number(document.getElementById('e_cerceve').value), koken: document.getElementById('e_koken').value, hircinlik: Number(document.getElementById('e_hircinlik').value), taban: document.getElementById('e_taban').checked, polen: document.getElementById('e_polen').checked, ana: { dogum: document.getElementById('e_anaDogum').value, irk: document.getElementById('e_anaIrk').value, tur: document.getElementById('e_anaTur').value, renk: document.getElementById('e_anaRenk').value, perf: document.getElementById('e_anaPerf').value, degisim: document.getElementById('e_anaDegisim').value }, guncelleme: new Date().toISOString().split('T')[0] }; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(() => toggleEdit(false)); });
+
+        function renderView(d) {
+            kovanData = d;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('kovanIcerik').style.display = 'block';
+            const hVal = d.hircinlik || 3;
+            const hText = hircinlikMap[hVal] || "Bilinmiyor";
+            document.getElementById('v-no').innerText = d.no || '?';
+            document.getElementById('v-tip').innerText = d.tip || '-';
+            document.getElementById('v-cerceve').innerText = d.cerceve || '0';
+            let guc = '-';
+            if (d.cerceve >= 7) guc = 'Güçlü <i class="fa-solid fa-arrow-trend-up text-success"></i>';
+            else if (d.cerceve >= 4) guc = 'Normal <i class="fa-solid fa-equals text-warning"></i>';
+            else if (d.cerceve > 0) guc = 'Zayıf <i class="fa-solid fa-arrow-trend-down text-danger"></i>';
+            document.getElementById('v-guc').innerHTML = `Güç: ${guc}`;
+            document.getElementById('v-ana-irk').innerHTML = (window.getAnaAriRenk ? window.getAnaAriRenk(d.ana?.dogum, d.ana?.renk) : '') + (d.ana?.irk || 'Bilinmiyor');
+            document.getElementById('v-ana-durum').innerText = `Durum: ${d.ana?.perf || 'Bilinmiyor'}`;
+            if (document.getElementById('v-irk')) document.getElementById('v-irk').innerText = d.irk || '-';
+            if (document.getElementById('v-hircinlik')) document.getElementById('v-hircinlik').innerText = `${hVal} - ${hText}`;
+            if (document.getElementById('v-koken')) document.getElementById('v-koken').innerText = d.koken || '-';
+            if (document.getElementById('v-soy-container')) {
+                const soyCont = document.getElementById('v-soy-container');
+                if ((d.koken === 'Oğul' || d.koken === 'Kendi Üretimim') && d.soy) { soyCont.classList.remove('d-none'); document.getElementById('v-soy').innerText = d.soy; }
+                else soyCont.classList.add('d-none');
+            }
+            if (document.getElementById('v-guncelleme')) document.getElementById('v-guncelleme').innerText = d.guncelleme ? formatDate(d.guncelleme) : '-';
+            document.getElementById('e_barkod').value = d.barkod || '';
+            document.getElementById('e_tip').value = d.tip || '';
+            document.getElementById('e_irk').value = d.irk || '';
+            document.getElementById('e_cerceve').value = d.cerceve || '';
+            document.getElementById('e_koken').value = d.koken || '';
+            document.getElementById('e_soy').value = d.soy || '';
+            document.getElementById('e_hircinlik').value = d.hircinlik || 3;
+            document.getElementById('e_taban').checked = d.taban || false;
+            document.getElementById('e_polen').checked = d.polen || false;
+            document.getElementById('e_anaDogum').value = d.ana?.dogum || '';
+            document.getElementById('e_anaIrk').value = d.ana?.irk || '';
+            document.getElementById('e_anaTur').value = d.ana?.tur || '';
+            document.getElementById('e_anaRenk').value = d.ana?.renk || '';
+            document.getElementById('e_anaPerf').value = d.ana?.perf || '';
+            document.getElementById('e_anaDegisim').value = d.ana?.degisim || '';
+            toggleSoy();
+        }
+
+        function toggleSoy() {
+            const k = document.getElementById('e_koken').value;
+            const c = document.getElementById('e_soy_container');
+            if (k === 'Oğul' || k === 'Kendi Üretimim') c.classList.remove('d-none');
+            else { c.classList.add('d-none'); document.getElementById('e_soy').value = ''; }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); const ud = { barkod: document.getElementById('e_barkod').value, tip: document.getElementById('e_tip').value, irk: document.getElementById('e_irk').value, cerceve: Number(document.getElementById('e_cerceve').value), koken: document.getElementById('e_koken').value, soy: document.getElementById('e_soy').value, hircinlik: Number(document.getElementById('e_hircinlik').value), taban: document.getElementById('e_taban').checked, polen: document.getElementById('e_polen').checked, ana: { dogum: document.getElementById('e_anaDogum').value, irk: document.getElementById('e_anaIrk').value, tur: document.getElementById('e_anaTur').value, renk: document.getElementById('e_anaRenk').value, perf: document.getElementById('e_anaPerf').value, degisim: document.getElementById('e_anaDegisim').value }, guncelleme: new Date().toISOString().split('T')[0] }; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(() => { const md = bootstrap.Modal.getInstance(document.getElementById('editModal')); if (md) md.hide(); }); });
         function handlePhoto(input, imgId, hiddenId) { if (input.files[0]) { const r = new FileReader(); r.onload = function (e) { const img = new Image(); img.onload = function () { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = img.width; let h = img.height; if (w > 800) { h *= 800 / w; w = 800; } c.width = w; c.height = h; ctx.drawImage(img, 0, 0, w, h); document.getElementById(imgId).src = c.toDataURL('image/jpeg', 0.7); document.getElementById(imgId).style.display = 'block'; document.getElementById(hiddenId).value = c.toDataURL('image/jpeg', 0.7); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); } }
-        function kayitEkle(e, col) { e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); if (!d.tarih) d.tarih = new Date().toISOString().split('T')[0]; if (col === 'hasatKayitlari') d.miktar = Number(d.miktar); if (col === 'bakimKayitlari') d.foto = document.getElementById('bakimBase64').value; if (col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(() => { e.target.reset(); document.querySelectorAll('.img-preview').forEach(i => i.style.display = 'none'); document.querySelectorAll('input[type=hidden]').forEach(i => i.value = ''); document.getElementById('bakimTarih').value = new Date().toISOString().split('T')[0]; document.getElementById('hastalikTarih').value = new Date().toISOString().split('T')[0]; document.getElementById('hasatTarih').value = new Date().toISOString().split('T')[0]; }); }
-        function altYukle(col, divId) { const el = document.getElementById(divId); db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => { el.innerHTML = ''; let docs = []; snap.forEach(d => { let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); }); docs.sort((a, b) => b._tarih.localeCompare(a._tarih)); if (col === 'hasatKayitlari') guncelleGrafik(docs); docs.forEach(data => { const rowId = `row-${data.id}`; let border = col.includes('hastalik') ? 'danger' : (col.includes('hasat') ? 'success' : 'primary'); let imgHtml = data.foto ? `<br><img src="${data.foto}" class="record-img">` : ''; let mainInfo = data._baslik || (data._miktar ? data._miktar + ' KG' : 'Kayıt'); if (data.ilac) mainInfo += ` (${data.ilac})`; el.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="card mb-2 shadow-sm border-start border-4 border-${border}"><div class="card-body p-2"><div class="view-div d-flex justify-content-between"><div><span class="badge bg-secondary">${formatDate(data._tarih)}</span> <strong>${mainInfo}</strong></div><div class="btn-group btn-group-sm"><button onclick="toggleRowEdit('${rowId}', true)" class="btn btn-outline-primary"><i class="fa-solid fa-pencil"></i></button><button onclick="sil('${col}','${data.id}')" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button></div></div><div class="view-div text-muted small mt-1">${data.not || ''}</div><div class="view-div">${imgHtml}</div><div class="edit-row d-none"><div class="input-group input-group-sm mb-1"><span class="input-group-text">Tarih</span><input type="date" class="form-control edit-date" value="${data.tarih}"></div>${col === 'hasatKayitlari' ? `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Miktar</span><input type="number" class="form-control edit-val" value="${data.miktar}"></div>` : `<div class="input-group input-group-sm mb-1"><span class="input-group-text">Başlık</span><input type="text" class="form-control edit-val" value="${mainInfo.split(' (')[0]}"></div>`}<div class="input-group input-group-sm mb-1"><span class="input-group-text">Not</span><input type="text" class="form-control edit-not" value="${data.not || ''}"></div><div class="text-end mt-2"><button onclick="toggleRowEdit('${rowId}', false)" class="btn btn-sm btn-secondary">İptal</button><button onclick="saveRow('${col}', '${data.id}', '${rowId}')" class="btn btn-sm btn-success">Kaydet</button></div></div></div></div>`); }); }); }
+        function kayitEkle(e, col) {
+            e.preventDefault();
+            const d = Object.fromEntries(new FormData(e.target));
+            if (!d.tarih) d.tarih = new Date().toISOString().split('T')[0];
+            if (col === 'hasatKayitlari') d.miktar = Number(d.miktar);
+            if (col === 'bakimKayitlari') {
+                d.foto = document.getElementById('bakimBase64').value;
+                if (d.cerceveGuncelle !== '') d.cerceveGuncelle = parseInt(d.cerceveGuncelle); else delete d.cerceveGuncelle;
+                if (d.kapaliYavru !== '') d.kapaliYavru = parseInt(d.kapaliYavru); else d.kapaliYavru = null;
+                if (d.balliCerceve !== '') d.balliCerceve = parseInt(d.balliCerceve); else d.balliCerceve = null;
+                const sayiVal = document.getElementById('yuksukSayi').value;
+                d.yuksuk = sayiVal !== '' ? Number(sayiVal) : 0;
+                if (d.kovanKati !== '') d.kovanKati = parseInt(d.kovanKati); else delete d.kovanKati;
+                if (d.polenTuzak !== '') d.polenTuzak = parseInt(d.polenTuzak); else delete d.polenTuzak;
+            }
+            if (col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value;
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(() => {
+                e.target.reset();
+                document.querySelectorAll('.img-preview').forEach(i => i.style.display = 'none');
+                document.querySelectorAll('input[type=hidden]').forEach(i => i.value = '');
+                document.getElementById('bakimTarih').value = new Date().toISOString().split('T')[0];
+                document.getElementById('hastalikTarih').value = new Date().toISOString().split('T')[0];
+                document.getElementById('hasatTarih').value = new Date().toISOString().split('T')[0];
+            });
+        }
+
+        function altYukle(col, divId) {
+            const el = document.getElementById(divId);
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => {
+                el.innerHTML = '';
+                let docs = [];
+                snap.forEach(d => { let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); });
+                docs.sort((a, b) => b._tarih.localeCompare(a._tarih));
+                if (col === 'hasatKayitlari') { guncelleGrafik(docs); let toplamHasat = docs.reduce((s, d) => s + (Number(d.miktar) || 0), 0); const repHasat = document.getElementById('rep-hasat'); if (repHasat) repHasat.innerText = toplamHasat.toFixed(1) + ' kg'; }
+                if (col === 'bakimKayitlari') { const buYil = String(new Date().getFullYear()); let yilBakim = docs.filter(d => (d.tarih || '').startsWith(buYil)).length; const repBakim = document.getElementById('rep-bakim'); if (repBakim) repBakim.innerText = yilBakim; }
+                if (docs.length > 0) { let latest = docs[0]._tarih; const repSon = document.getElementById('rep-sonislem'); if (repSon) { let cur = repSon.getAttribute('data-date') || ""; if (latest > cur) { repSon.setAttribute('data-date', latest); repSon.innerText = formatDate(latest); } } }
+                docs.forEach(data => {
+                    const rowId = `row-${data.id}`;
+                    let border = col.includes('hastalik') ? 'danger' : (col.includes('hasat') ? 'success' : 'primary');
+                    let imgHtml = data.foto ? `<br><img src="${data.foto}" class="record-img">` : '';
+                    let mainInfo = data._baslik || (data._miktar ? data._miktar + ' KG' : 'Kayıt');
+                    if (data.ilac) mainInfo += ` (${data.ilac})`;
+                    let extraTags = '';
+                    if (col === 'bakimKayitlari') {
+                        if (data.cerceveGuncelle != null && data.cerceveGuncelle !== '') extraTags += `<span class="badge bg-secondary me-1 border"><i class="fa-solid fa-layer-group"></i> ${data.cerceveGuncelle} Çrç</span>`;
+                        if (data.kapaliYavru != null && data.kapaliYavru !== '') extraTags += `<span class="badge bg-warning text-dark me-1 border"><i class="fa-solid fa-layer-group"></i> Yavru: ${data.kapaliYavru}</span>`;
+                        if (data.balliCerceve != null && data.balliCerceve !== '') extraTags += `<span class="badge bg-warning text-dark me-1 border"><i class="fa-solid fa-droplet"></i> Bal: ${data.balliCerceve}</span>`;
+                        if (data.varroaYuk && data.varroaYuk !== '') extraTags += `<span class="badge bg-danger me-1 border"><i class="fa-solid fa-spider"></i> Varroa: ${data.varroaYuk}</span>`;
+                        if (data.yuksuk && data.yuksuk !== '') extraTags += `<span class="badge bg-warning text-dark me-1 border"><i class="fa-solid fa-crown"></i> Yüksük: ${data.yuksuk}</span>`;
+                        if (data.erkekAri && data.erkekAri !== '') extraTags += `<span class="badge bg-info text-dark me-1 border"><i class="fa-solid fa-mars"></i> Erkek: ${data.erkekAri}</span>`;
+                        if (data.polenTuzak && data.polenTuzak !== '' && data.polenTuzak !== '0') extraTags += `<span class="badge bg-success text-white me-1 border"><i class="fa-solid fa-seedling"></i> Polen: ${data.polenTuzak}</span>`;
+                        if (data.kovanKati && data.kovanKati !== '') extraTags += `<span class="badge bg-primary me-1 border"><i class="fa-solid fa-boxes-stacked"></i> ${data.kovanKati} Kat</span>`;
+                    }
+                    if (extraTags) extraTags = `<div class="view-div mt-2">${extraTags}</div>`;
+                    let editHtml = `<div class="edit-row d-none mt-2 p-2 bg-light border rounded">
+                        <div class="row g-1 mb-1">
+                            <div class="col-4"><div class="input-group input-group-sm"><span class="input-group-text">Tarih</span><input type="date" class="form-control edit-date" value="${data.tarih}"></div></div>
+                            <div class="col-8">${col === 'hasatKayitlari' ? `<div class="input-group input-group-sm"><span class="input-group-text">Miktar</span><input type="number" class="form-control edit-val" value="${data.miktar}"></div>` : `<div class="input-group input-group-sm"><span class="input-group-text">Başlık</span><input type="text" class="form-control edit-val" value="${mainInfo.split(' (')[0]}"></div>`}</div>
+                        </div>
+                        <div class="input-group input-group-sm mb-1"><span class="input-group-text">Not</span><input type="text" class="form-control edit-not" value="${data.not || ''}"></div>
+                        ${col === 'bakimKayitlari' ? `
+                        <div class="row g-1 mb-1">
+                            <div class="col-3"><input type="number" class="form-control form-control-sm edit-cerceveGuncelle" placeholder="Toplam Çrç" value="${data.cerceveGuncelle != null ? data.cerceveGuncelle : ''}"></div>
+                            <div class="col-3"><input type="number" class="form-control form-control-sm edit-kapaliyavru" placeholder="Kapalı Yavru" value="${data.kapaliYavru != null ? data.kapaliYavru : ''}"></div>
+                            <div class="col-3"><input type="number" class="form-control form-control-sm edit-balli" placeholder="Ballı Ç." value="${data.balliCerceve != null ? data.balliCerceve : ''}"></div>
+                            <div class="col-3"><select class="form-select form-select-sm edit-varroayuk"><option value="">Varroa</option><option value="Yok" ${data.varroaYuk === 'Yok' ? 'selected' : ''}>Yok</option><option value="Az" ${data.varroaYuk === 'Az' ? 'selected' : ''}>Az</option><option value="Orta" ${data.varroaYuk === 'Orta' ? 'selected' : ''}>Orta</option><option value="Çok" ${data.varroaYuk === 'Çok' ? 'selected' : ''}>Çok</option></select></div>
+                        </div>
+                        <div class="row g-1 mb-1">
+                            <div class="col-3"><input type="number" class="form-control form-control-sm edit-yuksuk" placeholder="Yüksük" min="0" value="${data.yuksuk != null ? data.yuksuk : ''}"></div>
+                            <div class="col-3"><select class="form-select form-select-sm edit-erkek"><option value="">Erkek Arı</option><option value="Yok" ${data.erkekAri === 'Yok' ? 'selected' : ''}>Yok</option><option value="Az" ${data.erkekAri === 'Az' ? 'selected' : ''}>Az</option><option value="Normal" ${data.erkekAri === 'Normal' ? 'selected' : ''}>Normal</option><option value="Çok" ${data.erkekAri === 'Çok' ? 'selected' : ''}>Çok</option></select></div>
+                            <div class="col-3"><input type="number" class="form-control form-control-sm edit-polen" placeholder="Polen Çrç" min="0" value="${data.polenTuzak != null ? data.polenTuzak : ''}"></div>
+                            <div class="col-3"><select class="form-select form-select-sm edit-kovanKati"><option value="">Kovan Katı</option><option value="1" ${data.kovanKati == 1 ? 'selected' : ''}>1 Kat</option><option value="2" ${data.kovanKati == 2 ? 'selected' : ''}>2 Kat</option><option value="3" ${data.kovanKati == 3 ? 'selected' : ''}>3 Kat</option><option value="4" ${data.kovanKati == 4 ? 'selected' : ''}>4 Kat</option><option value="5" ${data.kovanKati == 5 ? 'selected' : ''}>5+ Kat</option></select></div>
+                        </div>` : ''}
+                        <div class="text-end mt-2">
+                            <button onclick="toggleRowEdit('${rowId}', false)" class="btn btn-sm btn-secondary">İptal</button>
+                            <button onclick="saveRow('${col}', '${data.id}', '${rowId}')" class="btn btn-sm btn-success">Kaydet</button>
+                        </div>
+                    </div>`;
+                    el.insertAdjacentHTML('beforeend', `<div id="${rowId}" class="card card-modern mb-2 p-3 border-start border-4 border-${border}">
+                        <div class="view-div d-flex justify-content-between align-items-center">
+                            <div><span class="badge bg-secondary me-2">${formatDate(data._tarih)}</span> <strong style="color:var(--bee-text-main);font-size:1.1em">${mainInfo}</strong></div>
+                            <div class="btn-group btn-group-sm">
+                                <button onclick="toggleRowEdit('${rowId}', true)" class="btn btn-touch btn-outline-primary"><i class="fa-solid fa-pencil"></i></button>
+                                <button onclick="sil('${col}','${data.id}')" class="btn btn-touch btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="view-div text-muted small mt-2 px-2" style="border-left:2px solid #ccc">${data.not || 'Not eklenmemiş.'}</div>
+                        ${extraTags}<div class="view-div">${imgHtml}</div>${editHtml}
+                    </div>`);
+                });
+            });
+        }
+
         function toggleRowEdit(rowId, show) { const row = document.getElementById(rowId); row.querySelectorAll('.view-div').forEach(e => e.classList.toggle('d-none', show)); row.querySelector('.edit-row').classList.toggle('d-none', !show); }
-        function saveRow(col, id, rowId) { const row = document.getElementById(rowId); const tarih = row.querySelector('.edit-date').value; const val = row.querySelector('.edit-val').value; const not = row.querySelector('.edit-not').value; const updateData = { tarih: tarih, not: not }; if (col === 'hasatKayitlari') updateData.miktar = Number(val); else if (col === 'hastalikKayitlari') updateData.hastalik = val; else updateData.islem = val; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData).then(() => toggleRowEdit(rowId, false)); }
+        function saveRow(col, id, rowId) {
+            const row = document.getElementById(rowId);
+            const tarih = row.querySelector('.edit-date').value;
+            const val = row.querySelector('.edit-val').value;
+            const not = row.querySelector('.edit-not').value;
+            const updateData = { tarih: tarih, not: not };
+            if (col === 'hasatKayitlari') updateData.miktar = Number(val);
+            else if (col === 'hastalikKayitlari') updateData.hastalik = val;
+            else {
+                updateData.islem = val;
+                const ec = row.querySelector('.edit-cerceveGuncelle'); if (ec && ec.value !== '') updateData.cerceveGuncelle = parseInt(ec.value); else updateData.cerceveGuncelle = firebase.firestore.FieldValue.delete();
+                const eky = row.querySelector('.edit-kapaliyavru'); if (eky && eky.value !== '') updateData.kapaliYavru = parseInt(eky.value); else updateData.kapaliYavru = null;
+                const ebc = row.querySelector('.edit-balli'); if (ebc && ebc.value !== '') updateData.balliCerceve = parseInt(ebc.value); else updateData.balliCerceve = null;
+                const evy = row.querySelector('.edit-varroayuk'); if (evy && evy.value !== '') updateData.varroaYuk = evy.value; else updateData.varroaYuk = firebase.firestore.FieldValue.delete();
+                const ey = row.querySelector('.edit-yuksuk'); if (ey && ey.value !== '') updateData.yuksuk = parseInt(ey.value); else updateData.yuksuk = firebase.firestore.FieldValue.delete();
+                const ee = row.querySelector('.edit-erkek'); if (ee && ee.value !== '') updateData.erkekAri = ee.value; else updateData.erkekAri = firebase.firestore.FieldValue.delete();
+                const ep = row.querySelector('.edit-polen'); if (ep && ep.value !== '') updateData.polenTuzak = parseInt(ep.value); else updateData.polenTuzak = firebase.firestore.FieldValue.delete();
+                const ek = row.querySelector('.edit-kovanKati'); if (ek && ek.value !== '') updateData.kovanKati = parseInt(ek.value); else updateData.kovanKati = firebase.firestore.FieldValue.delete();
+            }
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData).then(() => toggleRowEdit(rowId, false));
+        }
         function guncelleGrafik(docs) { const chartCard = document.getElementById('grafikKarti'); if (!docs.length) { chartCard.style.display = 'none'; return; } chartCard.style.display = 'block'; const curY = new Date().getFullYear(); const past = {}; const curr = {}; docs.forEach(d => { if (!d._miktar) return; const y = parseInt(d._tarih.substring(0, 4)); const val = Number(d._miktar); if (y < curY) { past[y] = (past[y] || 0) + val; } else { curr[d._tarih] = (curr[d._tarih] || 0) + val; } }); const lbl = [], dat = [], bg = [], bd = []; Object.keys(past).sort().forEach(y => { lbl.push(`${y} (Top.)`); dat.push(past[y]); bg.push('rgba(108,117,125,0.6)'); bd.push('grey'); }); Object.keys(curr).sort().forEach(t => { const p = t.split('-'); lbl.push(`${p[2]}.${p[1]}`); dat.push(curr[t]); bg.push('rgba(255, 159, 64, 0.7)'); bd.push('rgba(255, 159, 64, 1)'); }); if (hasatChart) hasatChart.destroy(); const ctx = document.getElementById('balGrafigi').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)'); gradient.addColorStop(1, 'rgba(255, 205, 86, 0.2)'); hasatChart = new Chart(ctx, { type: 'bar', data: { labels: lbl, datasets: [{ label: 'Bal (KG)', data: dat, backgroundColor: gradient, borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, borderRadius: 4, barThickness: 'flex', maxBarThickness: 40 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
         function sil(col, id) { if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).delete(); }
-        function silKovan() { if (confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).delete().then(() => window.location.href = "kovanlarim.html"); }
 
-        async function kovanSondu() {
-            if (!confirm("Emin misiniz? Kovan bilgileri 'Eski Sönen Kovanlar' bölümüne aktarılacak, sadece numarası kalarak 'Boş Kovanlar' bölümüne taşınacaktır.")) return;
-
+        async function silKovan() {
+            if (!confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) return;
             try {
                 const kovanRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
-                // ÖNEMLİ: Sönen kovanın ID'sini eski aktif kovanla AYNI tutuyoruz ki geçmiş alt koleksiyonlara ulaşabilelim
+                for (const col of ['bakimKayitlari', 'hastalikKayitlari', 'hasatKayitlari']) {
+                    const snap = await kovanRef.collection(col).get();
+                    const batch = db.batch();
+                    snap.forEach(doc => batch.delete(doc.ref));
+                    if (!snap.empty) await batch.commit();
+                }
+                await kovanRef.delete();
+                window.location.href = "kovanlarim.html";
+            } catch (err) { console.error("Silme hatası:", err); alert("Silme başarısız: " + err.message); }
+        }
+
+        async function kovanSondu() {
+            if (!confirm("Emin misiniz? Kovan 'Eski Sönen Kovanlar' bölümüne aktarılacak.")) return;
+            try {
+                const kovanRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
                 const sonenKovanlarRef = db.collection("kullanicilar").doc(currentUser.uid).collection("sonenKovanlar").doc(kovanId);
                 const bosKovanlarRef = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc();
-
                 await db.runTransaction(async (t) => {
                     const doc = await t.get(kovanRef);
-                    if (!doc.exists) {
-                        throw "Kovan bulunamadı!";
-                    }
+                    if (!doc.exists) throw "Kovan bulunamadı!";
                     const data = doc.data();
-
-                    // 1. Orijinal veriyi sonenKovanlar'a ekle (sonmeTarihi ile)
                     const simdi = new Date();
                     const pad = (n) => String(n).padStart(2, '0');
-                    const tarihSaat = `${simdi.getFullYear()}-${pad(simdi.getMonth() + 1)}-${pad(simdi.getDate())} ${pad(simdi.getHours())}:${pad(simdi.getMinutes())}`;
-                    data.sonmeTarihi = tarihSaat;
+                    data.sonmeTarihi = `${simdi.getFullYear()}-${pad(simdi.getMonth() + 1)}-${pad(simdi.getDate())} ${pad(simdi.getHours())}:${pad(simdi.getMinutes())}`;
                     t.set(sonenKovanlarRef, data);
-
-                    // 2. Sadece no ve barkod ile boş kovanlara ekle
-                    t.set(bosKovanlarRef, {
-                        no: data.no || "",
-                        barkod: data.barkod || "",
-                        olusturmaTarihi: new Date().toISOString().split('T')[0]
-                    });
-
-                    // 3. Aktif kovanlardan sil
+                    t.set(bosKovanlarRef, { no: data.no || "", barkod: data.barkod || "", olusturmaTarihi: new Date().toISOString().split('T')[0] });
                     t.delete(kovanRef);
                 });
-
                 alert("Kovan başarıyla sönen kovanlara taşındı!");
                 window.location.href = "sonenKovanlar.html";
-            } catch (error) {
-                console.error("Kovan söndürme hatası:", error);
-                alert("İşlem başarısız: " + (error.message || error));
-            }
+            } catch (error) { console.error("Kovan söndürme hatası:", error); alert("İşlem başarısız: " + (error.message || error)); }
         }
 
         function openScanner() { const m = new bootstrap.Modal(document.getElementById('scannerModal')); m.show(); if (!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false); html5QrcodeScanner.render(onScanSuccess, () => { }); } }
@@ -512,7 +995,6 @@
         async function onScanSuccess(txt) { if (html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner = null; } document.getElementById('reader').innerHTML = ''; const r = document.getElementById('scanResult'); r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none'); try { const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod", "==", txt).get(); if (!snap.empty) { const id = snap.docs[0].id; const no = snap.docs[0].data().no; r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(() => window.location.href = `detay.html?id=${id}`, 500); } else { r.innerHTML = `<div class="text-danger fw-bold">Bulunamadı!</div>`; } } catch (e) { console.error(e); } }
         document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
 
-        // --- YENİ EKLENEN AKTARIM FONKSİYONLARI ---
         async function openTransferModal() {
             const m = new bootstrap.Modal(document.getElementById('transferModal'));
             const select = document.getElementById('transferHedef');
@@ -520,138 +1002,359 @@
             m.show();
             try {
                 select.innerHTML = '<option value="" selected disabled>Hedef Kovanı Seçin</option>';
-                const bugun = new Date().toISOString().split('T')[0];
-
-                // Aktif Kovanları Getir
                 const snapK = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get();
-                const optGroupK = document.createElement('optgroup');
-                optGroupK.label = "Aktif Kovanlar";
-                snapK.forEach(doc => {
-                    if (doc.id !== kovanId) {
-                        const d = doc.data();
-                        const durum = (d.cerceve === 0) ? " (BOŞ)" : ` (${d.cerceve} Çerçeve)`;
-                        const opt = document.createElement('option');
-                        opt.value = `kovan|${doc.id}`;
-                        opt.text = `Kovan: ${d.no || '?'} ${durum}`;
-                        if (d.cerceve === 0) opt.style.fontWeight = "bold";
-                        optGroupK.appendChild(opt);
-                    }
-                });
+                const optGroupK = document.createElement('optgroup'); optGroupK.label = "Aktif Kovanlar";
+                snapK.forEach(doc => { if (doc.id !== kovanId) { const d = doc.data(); const durum = (d.cerceve === 0) ? " (BOŞ)" : ` (${d.cerceve} Çerçeve)`; const opt = document.createElement('option'); opt.value = `kovan|${doc.id}`; opt.text = `Kovan: ${d.no || '?'} ${durum}`; optGroupK.appendChild(opt); } });
                 if (optGroupK.children.length > 0) select.appendChild(optGroupK);
-
-                // Boş Kovan Arşivini (Kutuları) Getir
                 const snapB = await db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").get();
-                const optGroupB = document.createElement('optgroup');
-                optGroupB.label = "Boş Kovan Arşivi (Depoda)";
-                snapB.forEach(doc => {
-                    const d = doc.data();
-                    const opt = document.createElement('option');
-                    opt.value = `bos|${doc.id}`;
-                    opt.text = `Kovan No: ${d.no || '?'}`;
-                    opt.style.color = "gray";
-                    optGroupB.appendChild(opt);
-                });
+                const optGroupB = document.createElement('optgroup'); optGroupB.label = "Boş Kovan Arşivi";
+                snapB.forEach(doc => { const d = doc.data(); const opt = document.createElement('option'); opt.value = `bos|${doc.id}`; opt.text = `Kovan No: ${d.no || '?'}`; opt.style.color = "gray"; optGroupB.appendChild(opt); });
                 if (optGroupB.children.length > 0) select.appendChild(optGroupB);
-
                 const currentFrame = parseInt(document.getElementById('e_cerceve').value) || 0;
                 document.getElementById('transferAdet').max = currentFrame;
                 document.getElementById('kalanBilgi').innerText = `Mevcut kovanda ${currentFrame} çerçeve var.`;
             } catch (e) { alert("Kovan listesi alınamadı: " + e.message); }
         }
-
-        function toggleTransferInputs() {
-            const tip = document.querySelector('input[name="transferTip"]:checked').value;
-            const div = document.getElementById('bolmeInputlari');
-            const desc = document.getElementById('transferAciklama');
-            if (tip === 'bol') {
-                div.classList.remove('d-none');
-                desc.innerText = "Belirtilen sayıda çerçeve ve üzerindeki arılar hedef kovana aktarılacak. Her iki kovan da aktif kalacak.";
-            } else {
-                div.classList.add('d-none');
-                desc.innerText = "Mevcut kovanın TÜM arıları hedef kovana taşınacak. Kaynak kovan boşalacağı için sistemde otomatik olarak 'Boş Kovanlar' (depo) bölümüne aktarılacaktır.";
-            }
-        }
-
+        function toggleTransferInputs() { const tip = document.querySelector('input[name="transferTip"]:checked').value; const div = document.getElementById('bolmeInputlari'); const desc = document.getElementById('transferAciklama'); if (tip === 'bol' || tip === 'birlestir') { div.classList.remove('d-none'); checkFullMerge(); desc.innerText = tip === 'bol' ? "Belirtilen sayıda çerçeve hedef kovana aktarılacak." : "Belirtilen sayıda çerçeve hedef kovana eklenecek."; } else { div.classList.add('d-none'); desc.innerText = "Mevcut kovanın TÜM arıları hedef kovana taşınacak."; } }
+        function checkFullMerge() { const tip = document.querySelector('input[name="transferTip"]:checked').value; const currentFrame = parseInt(document.getElementById('e_cerceve').value) || 0; const aktarilacak = parseInt(document.getElementById('transferAdet').value) || 0; const anaAriDiv = document.getElementById('anaAriSecim'); if (tip === 'birlestir' && aktarilacak >= currentFrame && currentFrame > 0) { anaAriDiv.classList.remove('d-none'); } else { anaAriDiv.classList.add('d-none'); } }
         document.getElementById('transferForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const hedefSecim = document.getElementById('transferHedef').value;
             const tip = document.querySelector('input[name="transferTip"]:checked').value;
             const aktarilacakAdet = parseInt(document.getElementById('transferAdet').value);
             if (!hedefSecim) { alert("Lütfen hedef kovanı seçin!"); return; }
-
             const [hedefTip, hedefId] = hedefSecim.split('|');
             const sourceRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
             const targetRef = db.collection("kullanicilar").doc(currentUser.uid).collection((hedefTip === 'bos') ? "bosKovanlar" : "kovanlar").doc(hedefId);
-
-            if (!confirm("Oğul / Aktarım veya Tam Taşıma işlemini onaylıyor musunuz? (Tam taşıma mevcut kovanınızı listelerden kaldırır)")) return;
+            if (!confirm("İşlemi onaylıyor musunuz?")) return;
             try {
                 await db.runTransaction(async (t) => {
                     const sDoc = await t.get(sourceRef);
                     if (!sDoc.exists) throw "Kaynak kovan bulunamadı!";
                     const sData = sDoc.data();
                     const bugun = new Date().toISOString().split('T')[0];
-
-                    let finalTargetRef = targetRef;
-                    let tData = {};
-
-                    if (hedefTip === 'bos') {
-                        const bDoc = await t.get(targetRef);
-                        if (!bDoc.exists) throw "Seçilen boş kovan bulunamadı!";
-                        const bData = bDoc.data();
-
-                        // Boş kovanı aktif kovanlara geçirmek için yeni referans
-                        finalTargetRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc();
-                        tData = {
-                            no: bData.no || "",
-                            barkod: bData.barkod || "",
-                            tip: "Langstroth",
-                            irk: "-",
-                            cerceve: 0,
-                            koken: "",
-                            hircinlik: 3,
-                            olusturmaTarihi: bugun
-                        };
-                        t.delete(targetRef); // Boş arşivden sil, aktife alınıyor!
-                    } else {
-                        const tDoc = await t.get(targetRef);
-                        if (!tDoc.exists) throw "Hedef kovan bulunamadı!";
-                        tData = tDoc.data();
-                    }
-
-                    if (tip === 'tasi') {
-                        t.set(finalTargetRef, { ...tData, irk: sData.irk, cerceve: sData.cerceve, ana: sData.ana, hircinlik: sData.hircinlik, koken: 'Aktarım', guncelleme: bugun }, { merge: true });
-
-                        // Tam taşıma sonucu boşalan kaynak kovanı 'Boş Kovanlar' arşivine at
-                        const bosKovanlarRefTasi = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc();
-                        t.set(bosKovanlarRefTasi, {
-                            no: sData.no || "",
-                            barkod: sData.barkod || "",
-                            olusturmaTarihi: bugun,
-                            eskiId: sourceRef.id
-                        });
-                        t.delete(sourceRef); // Kaynak kovanı aktiften sil, artık Boş Kovan!
-                    } else {
-                        // Oğul/Bölme
-                        const mevcutAdet = sData.cerceve || 0;
-                        const hedefAdet = tData.cerceve || 0;
-                        if (aktarilacakAdet >= mevcutAdet) throw "Hata: Bölme işleminde tüm çerçeveleri aktaramazsınız. Tam taşıma kullanın.";
-
-                        t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun });
-                        t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, irk: sData.irk, koken: 'Oğul/Bölme', guncelleme: bugun }, { merge: true });
-                    }
+                    let finalTargetRef = targetRef; let tData = {};
+                    if (hedefTip === 'bos') { const bDoc = await t.get(targetRef); if (!bDoc.exists) throw "Seçilen boş kovan bulunamadı!"; const bData = bDoc.data(); finalTargetRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(); tData = { no: bData.no || "", barkod: bData.barkod || "", tip: "Langstroth", irk: "-", cerceve: 0, koken: "", hircinlik: 3, olusturmaTarihi: bugun }; t.delete(targetRef); }
+                    else { const tDoc = await t.get(targetRef); if (!tDoc.exists) throw "Hedef kovan bulunamadı!"; tData = tDoc.data(); }
+                    if (tip === 'tasi') { t.set(finalTargetRef, { ...tData, irk: sData.irk, cerceve: sData.cerceve, ana: sData.ana, hircinlik: sData.hircinlik, koken: 'Aktarım', guncelleme: bugun }, { merge: true }); const bosRef = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id }); t.delete(sourceRef); }
+                    else if (tip === 'birlestir') { const mevcutAdet = sData.cerceve || 0; const hedefAdet = tData.cerceve || 0; if (aktarilacakAdet >= mevcutAdet) { const secilenAna = document.getElementById('kalacakAnaAri').value; let finalAna = secilenAna === 'kaynak' ? (sData.ana || null) : (tData.ana || null); let finalIrk = secilenAna === 'kaynak' ? (sData.irk || "-") : (tData.irk || "-"); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + mevcutAdet, ana: finalAna, irk: finalIrk, koken: 'Tam Birleştirme', guncelleme: bugun }, { merge: true }); const bosRef2 = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef2, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id }); t.delete(sourceRef); } else { t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun }); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, koken: 'Kısmi Birleştirme', guncelleme: bugun }, { merge: true }); } }
+                    else { const mevcutAdet = sData.cerceve || 0; const hedefAdet = tData.cerceve || 0; if (aktarilacakAdet >= mevcutAdet) throw "Bölme işleminde tüm çerçeveleri aktaramazsınız."; t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun }); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, irk: sData.irk, koken: 'Oğul/Bölme', guncelleme: bugun }, { merge: true }); }
                 });
                 alert("Aktarım başarıyla tamamlandı!");
-
-                if (tip === 'tasi') {
-                    // Tam taşımada kaynak kovan silindiği için anasayfaya dön
-                    window.location.href = "kovanlarim.html";
-                } else {
-                    location.reload();
-                }
-
+                if (tip === 'tasi') window.location.href = "kovanlarim.html"; else location.reload();
             } catch (e) { console.error(e); alert("İşlem başarısız: " + e); }
         });
+
+        // --- YAPAY ZEKA KOVAN RAPORU ---
+        async function raporOlustur() {
+            if (!kovanData) return;
+            const rIcerik = document.getElementById('raporIcerik');
+            rIcerik.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-success"></div><div class="mt-2 text-muted fw-bold">Veriler analiz ediliyor...</div></div>`;
+            new bootstrap.Modal(document.getElementById('raporModal')).show();
+            const d = kovanData; const uid = currentUser.uid;
+            const now = new Date(); const currentMonth = now.getMonth() + 1; const currentYear = now.getFullYear();
+            let bakimlar = [], hastaliklar = [], hasatlar = [];
+            try {
+                const [bSnap, hSnap, haSnap] = await Promise.all([
+                    db.collection('kullanicilar').doc(uid).collection('kovanlar').doc(kovanId).collection('bakimKayitlari').orderBy('tarih', 'desc').get(),
+                    db.collection('kullanicilar').doc(uid).collection('kovanlar').doc(kovanId).collection('hastalikKayitlari').orderBy('tarih', 'desc').get(),
+                    db.collection('kullanicilar').doc(uid).collection('kovanlar').doc(kovanId).collection('hasatKayitlari').orderBy('tarih', 'desc').get()
+                ]);
+                bSnap.forEach(doc => bakimlar.push({ id: doc.id, ...doc.data() }));
+                hSnap.forEach(doc => hastaliklar.push({ id: doc.id, ...doc.data() }));
+                haSnap.forEach(doc => hasatlar.push({ id: doc.id, ...doc.data() }));
+            } catch (e) { console.error('Rapor veri hatası:', e); }
+            const sonBakim = bakimlar[0] || null;
+            // Çerçeve: önce son bakım kaydından, yoksa kovan özelliklerinden
+            const cerceveHam = sonBakim?.cerceveGuncelle ?? null;
+            const cerceve = (cerceveHam !== null && cerceveHam !== '' && !isNaN(cerceveHam)) ? Number(cerceveHam) : (d.cerceve || 0);
+            const cerceveKaynagi = (cerceveHam !== null && cerceveHam !== '' && !isNaN(cerceveHam)) ? 'son bakım kaydı' : 'kovan özellikleri';
+            const irk = d.irk || 'Bilinmiyor'; const tip = d.tip || 'Bilinmiyor'; const hircinlik = d.hircinlik || 3; const koken = d.koken || 'Bilinmiyor';
+            const anaDogum = d.ana?.dogum || null; const anaIrk = d.ana?.irk || null; const anaTur = d.ana?.tur || null;
+            let anaYas = anaDogum ? (currentYear - parseInt(anaDogum)) : null;
+            let bolgeAdi = null, sicaklik = null;
+            try {
+                let gruplar = []; try { gruplar = JSON.parse(localStorage.getItem('kovan_gruplari') || '[]'); } catch (e2) { }
+                let aktifId = localStorage.getItem('kovan_aktif_grup_id');
+                let aktifGrup = gruplar.find(g => g.id === aktifId) || gruplar[0];
+                if (!aktifGrup && d.bolgeGrupId) aktifGrup = gruplar.find(g => g.id === d.bolgeGrupId);
+                if (aktifGrup && aktifGrup.lat && aktifGrup.lon) {
+                    bolgeAdi = `${aktifGrup.grupAdi || ''}${aktifGrup.sehir ? ' (' + aktifGrup.sehir + ')' : ''}`.trim();
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${aktifGrup.lat}&longitude=${aktifGrup.lon}&current_weather=true&timezone=auto`);
+                    const wData = await wRes.json(); sicaklik = wData.current_weather?.temperature ?? null;
+                } else if (d.bolgeGrupAdi) bolgeAdi = d.bolgeGrupAdi;
+            } catch (e) { }
+            const MEVSIM = currentMonth >= 3 && currentMonth <= 5 ? 'İlkbahar' : currentMonth >= 6 && currentMonth <= 8 ? 'Yaz' : currentMonth >= 9 && currentMonth <= 11 ? 'Sonbahar' : 'Kış';
+            let kritikler = [], dikkats = [], iyiler = [], eylemler = [], skorlar = {};
+            // MOD-1: KOLONİ GÜCÜ
+            (function () {
+                let s = cerceve >= 10 ? 100 : cerceve >= 7 ? 80 : cerceve >= 4 ? 50 : 20;
+                const yavru = sonBakim?.kapaliYavru ?? null;
+                const kati = sonBakim?.kovanKati != null ? Number(sonBakim.kovanKati) : 1;
+                if (yavru !== null && cerceve > 0 && yavru / cerceve > 0.6) s = Math.min(100, s + 10);
+                skorlar.koloni = s;
+                if (cerceve <= 3) { kritikler.push(`<i class="fa-solid fa-triangle-exclamation"></i> <b>Zayıf Koloni (${cerceve} çerçeve — kaynak: ${cerceveKaynagi}):</b> Kritik eşik altında. Acilen besleme ve kovan daraltma yapılmalı.`); eylemler.push('🔴 Acil besleme başlat'); eylemler.push('🔴 Kovan kapasitesini daralt'); }
+                else if (cerceve <= 6) { dikkats.push(`<i class="fa-solid fa-seedling"></i> <b>Gelişmekte (${cerceve} çerçeve — kaynak: ${cerceveKaynagi}):</b> Teşvik beslemesi ile güçlenebilir.`); eylemler.push('🟡 Teşvik beslemesine devam et'); }
+                else if (cerceve <= 9) { iyiler.push(`<i class="fa-solid fa-check-circle"></i> <b>Güçlü Koloni (${cerceve} çerçeve):</b> Nektar akımına hazır.`); }
+                else {
+                    if (kati > 1) {
+                        iyiler.push(`<i class="fa-solid fa-layer-group"></i> <b>Maksimum Güç (${cerceve} çerçeve):</b> Çok katlı sistemde güçlü üretim yapıyor. Oğul eğilimine karşı memeleri kontrol edin.`);
+                        if (MEVSIM === 'İlkbahar' || MEVSIM === 'Yaz') eylemler.push('🟢 Oğul kontrolü (yüksük) yapın veya yeni kat değerlendirin');
+                    } else {
+                        iyiler.push(`<i class="fa-solid fa-layer-group"></i> <b>Maksimum Güç (${cerceve} çerçeve):</b> Tek katta sıkışma olabilir. Oğul baskısına karşı ballık ekleyin.`);
+                        if (MEVSIM === 'İlkbahar' || MEVSIM === 'Yaz') eylemler.push('🟢 Gövdeye ballık (kat) ekle veya bölme planla');
+                    }
+                }
+            })();
+            // MOD-2: ANA ARI
+            (function () {
+                if (!anaIrk) { skorlar.anaAri = 0; kritikler.push(`<i class="fa-solid fa-skull"></i> <b>Anasız Kovan Riski:</b> Ana arı kaydı bulunmuyor.`); eylemler.push('🔴 Ana arı varlığını kontrol et'); return; }
+                let s = 100;
+                if (anaYas >= 3) { s = 20; kritikler.push(`<i class="fa-solid fa-crown text-danger"></i> <b>Yaşlı Ana Arı (${anaYas} yaş — ${anaIrk}):</b> İlk fırsatta değişim önerilir.`); eylemler.push('🔴 Ana arı değişimini planla'); }
+                else if (anaYas === 2) { s = 60; dikkats.push(`<i class="fa-solid fa-crown text-warning"></i> <b>Olgun Ana Arı (${anaYas} yaş):</b> Gelecek yıl değişim planlanabilir.`); }
+                else { iyiler.push(`<i class="fa-solid fa-crown text-success"></i> <b>Genç Ana Arı (${anaYas} yaş — ${anaIrk}):</b> Pik verim döneminde.`); }
+                if (hircinlik >= 4) { s = Math.max(0, s - 15); dikkats.push(`<i class="fa-solid fa-face-angry"></i> <b>Agresif Koloni (${hircinlik}/5):</b> Sessiz ırk ana tercih edilmeli.`); }
+                skorlar.anaAri = s;
+            })();
+            // MOD-3: VARROA
+            (function () {
+                const vk = bakimlar.map(b => b.varroaYuk).filter(Boolean);
+                const sv = { 'Yok': 0, 'Az': 1, 'Orta': 2, 'Çok': 3 };
+                const son3 = vk.slice(0, 3); const maxSon3 = son3.reduce((m, v) => Math.max(m, sv[v] || 0), 0);
+                const artanTrend = son3.length >= 2 && (sv[son3[0]] > sv[son3[1]]);
+                if (maxSon3 >= 3) { skorlar.varroa = 10; kritikler.push(`<i class="fa-solid fa-bug"></i> <b>Kritik Varroa Yükü:</b> Oksalik/formik asit ile acil müdahale gerekli.`); eylemler.push('🔴 Varroa tedavisini başlat'); }
+                else if (maxSon3 >= 2 || artanTrend) { skorlar.varroa = 45; dikkats.push(`<i class="fa-solid fa-bug"></i> <b>Yükselen Varroa Trendi:</b> Taban sayımı yapın.`); eylemler.push('🟡 Varroa taban sayımı yap'); }
+                else if (maxSon3 === 1) { skorlar.varroa = 75; iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Düşük Varroa Baskısı:</b> Rutin takip sürdürülmeli.`); }
+                else { skorlar.varroa = vk.length > 0 ? 95 : 70; if (vk.length > 0) iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Varroa Yok/Çok Az:</b> İzlemeye devam edin.`); }
+            })();
+            // MOD-4: YÜKSÜK
+            (function () {
+                const sy = sonBakim?.yuksuk ?? null; const iy = bakimlar[1]?.yuksuk ?? null;
+                if (sy > 0) { const artis = iy !== null && sy > iy; skorlar.yuksuk = artis ? 20 : 40; kritikler.push(`<i class="fa-solid fa-bell"></i> <b>Oğul/Ana Değişim Riski (${sy} yüksük):</b> Memeleri inceleyin.`); eylemler.push(`🔴 Ana arı yüksüklerini incele`); }
+                else if (sy === 0 && MEVSIM === 'İlkbahar') { skorlar.yuksuk = 70; dikkats.push(`<i class="fa-solid fa-magnifying-glass"></i> <b>İlkbahar Oğul Takibi:</b> Her 7-10 günde kontrol edin.`); eylemler.push('🟡 Her 7-10 günde yüksük kontrolü yap'); }
+                else { skorlar.yuksuk = 95; }
+            })();
+            // MOD-5: HASAT
+            (function () {
+                if (hasatlar.length === 0) { skorlar.hasat = 50; return; }
+                const yh = {}; hasatlar.forEach(h => { const y = h.tarih?.substring(0, 4); if (y) yh[y] = (yh[y] || 0) + (Number(h.miktar) || 0); });
+                const yillar = Object.keys(yh).sort(); const toplamHasat = hasatlar.reduce((t, h) => t + (Number(h.miktar) || 0), 0); const ort = toplamHasat / yillar.length;
+                iyiler.push(`<i class="fa-solid fa-jar"></i> <b>Hasat Geçmişi (${yillar.length} yıl, ort. ${ort.toFixed(1)} kg/yıl):</b> ${yillar.map(y => `<span class="badge bg-warning text-dark me-1">${y}: ${yh[y].toFixed(1)} kg</span>`).join('')}`);
+                const sy = yillar[yillar.length - 1]; const oy = yillar[yillar.length - 2];
+                if (oy && yh[sy] < yh[oy] * 0.7) { dikkats.push(`<i class="fa-solid fa-arrow-trend-down"></i> <b>Hasat Düşüşü:</b> ${sy} yılı: ${yh[sy].toFixed(1)} kg.`); eylemler.push('🟡 Hasat düşüşünün nedenini araştır'); }
+                skorlar.hasat = Math.min(100, (toplamHasat / (yillar.length * 15)) * 100);
+            })();
+            // MOD-6: HASTALIK
+            (function () {
+                if (hastaliklar.length === 0) { skorlar.hastalik = 90; iyiler.push(`<i class="fa-solid fa-heart-pulse"></i> <b>Hastalık Kaydı Yok:</b> İzlemeye devam edin.`); return; }
+                const son90 = now.getTime() - 90 * 24 * 60 * 60 * 1000;
+                const yakin = hastaliklar.filter(h => { try { return new Date(h.tarih).getTime() > son90; } catch { return false; } });
+                const tekrar = {}; yakin.forEach(h => { if (h.hastalik) tekrar[h.hastalik] = (tekrar[h.hastalik] || 0) + 1; });
+                const kronik = Object.entries(tekrar).filter(([, c]) => c >= 2);
+                if (kronik.length > 0) { skorlar.hastalik = 20; kronik.forEach(([ad, sayi]) => kritikler.push(`<i class="fa-solid fa-virus"></i> <b>Tekrarlayan Hastalık — ${ad} (${sayi}x/90gün):</b> Uzman desteği alın.`)); eylemler.push('🔴 Tekrarlayan hastalık için uzman görüşü al'); }
+                else if (yakin.length > 0) { skorlar.hastalik = 55; dikkats.push(`<i class="fa-solid fa-pills"></i> <b>Son 90 Günde ${yakin.length} Hastalık Kaydı:</b> ${yakin.map(h => h.hastalik).join(', ')}.`); }
+                else { skorlar.hastalik = 85; iyiler.push(`<i class="fa-solid fa-heart-pulse"></i> <b>Son 90 Günde Hastalık Yok:</b> Toplam ${hastaliklar.length} geçmiş kayıt.`); }
+            })();
+            // MOD-7: BESLENME
+            (function () {
+                const balli = sonBakim?.balliCerceve ?? null; const pollen = sonBakim?.polenTuzak ?? null; let s = 80;
+                if (balli !== null) {
+                    if (balli === 0 && (MEVSIM === 'Sonbahar' || MEVSIM === 'Kış')) { s = 10; kritikler.push(`<i class="fa-solid fa-bone"></i> <b>Kış Açlık Riski:</b> Ballı çerçeve yok! Acil fondan/kek uygulanmalı.`); eylemler.push('🔴 Acil kış beslemesi yap'); }
+                    else if (balli <= 1 && cerceve >= 7) { s = 35; dikkats.push(`<i class="fa-solid fa-wheat-awn"></i> <b>Düşük Bal Stoğu (${balli} çerçeve):</b> Kış öncesi kontrol et.`); eylemler.push('🟡 Bal stoğunu destekle'); }
+                    else if (balli >= 3) { s = 95; iyiler.push(`<i class="fa-solid fa-jar"></i> <b>Yeterli Bal Stoğu (${balli} çerçeve).</b>`); }
+                }
+                if (pollen !== null && pollen > 0) iyiler.push(`<i class="fa-solid fa-seedling"></i> <b>Polenli Çerçeve (${pollen}):</b> Larva gelişimini destekler.`);
+                skorlar.beslenme = s;
+            })();
+            // MOD-8: BAKIM DÜZENLİLİĞİ
+            (function () {
+                if (bakimlar.length === 0) { skorlar.bakimFreq = 30; dikkats.push(`<i class="fa-solid fa-calendar-xmark"></i> <b>Bakım Kaydı Yok.</b>`); eylemler.push('🟡 Düzenli bakım kaydı tutmaya başla'); return; }
+                const sonTarih = new Date(bakimlar[0].tarih); const gunFark = Math.floor((now - sonTarih) / (1000 * 60 * 60 * 24));
+                const esik = MEVSIM === 'Kış' ? 30 : MEVSIM === 'Sonbahar' ? 21 : 14;
+                if (gunFark > esik) { skorlar.bakimFreq = 30; dikkats.push(`<i class="fa-solid fa-calendar-xmark"></i> <b>Bakım Aralığı Uzun (${gunFark} gün):</b> ${MEVSIM} için önerilen ${esik} gün.`); eylemler.push(`🟡 En kısa sürede kovan kontrolü yap`); }
+                else { skorlar.bakimFreq = 90; iyiler.push(`<i class="fa-solid fa-calendar-check"></i> <b>Düzenli Bakım (${gunFark} gün önce, ${bakimlar.length} toplam kayıt).</b>`); }
+            })();
+            // MOD-9: HAVA
+            (function () {
+                if (sicaklik === null) { skorlar.hava = 60; return; }
+                if (sicaklik < 8) { skorlar.hava = 40; kritikler.push(`<i class="fa-solid fa-snowflake"></i> <b>Kritik Düşük Sıcaklık (${sicaklik}°C):</b> Kovan AÇILMAZ.`); eylemler.push('🔴 Kovan AÇILMAZ — dış yalıtım kontrol et'); }
+                else if (sicaklik < 14) { skorlar.hava = 65; dikkats.push(`<i class="fa-solid fa-temperature-low"></i> <b>Sınır Sıcaklık (${sicaklik}°C):</b> Kovan açılması önerilmez.`); }
+                else { skorlar.hava = 95; iyiler.push(`<i class="fa-solid fa-sun"></i> <b>Bakım İçin Uygun Hava (${sicaklik}°C — ${bolgeAdi || 'Bölge'}).</b>`); }
+            })();
+            // MOD-10: KOVAN KATI
+            (function () {
+                const kati = sonBakim?.kovanKati != null ? Number(sonBakim.kovanKati) : null;
+                if (kati === null) { skorlar.kovanKati = 60; dikkats.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>Kovan Katı Bilgisi Girilmedi:</b> Bakım kaydında kovan katını seçerek daha doğru analiz yapın.`); return; }
+                if (kati === 1) {
+                    if (cerceve >= 7 && (MEVSIM === 'İlkbahar' || MEVSIM === 'Yaz')) { skorlar.kovanKati = 30; dikkats.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>Tek Katlı Kovan — Sıkışma Riski (${cerceve} çerçeve):</b> Ballık eklenmesi önerilir.`); eylemler.push('🟡 Ballık ekle (tek katlı güçlü kovan)'); }
+                    else { skorlar.kovanKati = 80; iyiler.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>Tek Katlı Kovan:</b> Mevcut koloni için uygun kapasite.`); }
+                } else if (kati === 2) { skorlar.kovanKati = 95; iyiler.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>İki Katlı Kovan (Kuluçkalık + Ballık):</b> Standart üretim yapılandırması.`); }
+                else if (kati >= 3) {
+                    if (cerceve >= 10) { skorlar.kovanKati = 100; iyiler.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>Çok Katlı Üretim Kovası (${kati} kat, ${cerceve} çerçeve):</b> Üst düzey üretim kapasitesi.`); }
+                    else { skorlar.kovanKati = 45; dikkats.push(`<i class="fa-solid fa-boxes-stacked"></i> <b>Fazla Kat — Koloni Küçük (${kati} kat, ${cerceve} çerçeve):</b> Gereksiz katları çıkarın.`); eylemler.push(`🟡 Kovan katını azalt — koloni küçük`); }
+                }
+            })();
+            // GENEL SKOR
+            const agirliklar = { koloni: 0.22, anaAri: 0.18, varroa: 0.18, yuksuk: 0.09, hasat: 0.09, hastalik: 0.08, beslenme: 0.07, kovanKati: 0.09 };
+            let toplamSkor = 0, toplamAgirlik = 0;
+            Object.entries(agirliklar).forEach(([k, a]) => { if (skorlar[k] !== undefined) { toplamSkor += skorlar[k] * a; toplamAgirlik += a; } });
+            const genelSkor = toplamAgirlik > 0 ? Math.round(toplamSkor / toplamAgirlik) : 0;
+            const [skorRenk, skorRozet, skorEmoji] = genelSkor >= 85 ? ['success', 'bg-success', '💎'] : genelSkor >= 65 ? ['success', 'bg-success', '🟢'] : genelSkor >= 40 ? ['warning', 'bg-warning text-dark', '🟡'] : ['danger', 'bg-danger', '🔴'];
+            const ozet2Satir = (arr, baslik, renk, ikon) => arr.length === 0 ? '' : `<div class="mb-3"><h6 class="fw-bold mb-2" style="color:var(--bs-${renk})"><i class="fa-solid ${ikon} me-2"></i>${baslik} (${arr.length})</h6>${arr.map(y => `<div class="alert alert-${renk} py-2 px-3 mb-2 small">${y}</div>`).join('')}</div>`;
+            rIcerik.innerHTML = `
+            <div class="text-center mb-4">
+                <div class="display-6 fw-bold">${skorEmoji} ${genelSkor}<small class="fs-5 text-muted">/100</small></div>
+                <div class="progress my-2" style="height:14px;border-radius:10px"><div class="progress-bar ${skorRozet} fw-bold" role="progressbar" style="width:${genelSkor}%;border-radius:10px">${genelSkor}%</div></div>
+                <span class="badge ${skorRozet} fs-6 px-3">${genelSkor >= 85 ? 'Mükemmel' : genelSkor >= 65 ? 'İyi' : genelSkor >= 40 ? 'Dikkat Gerekiyor' : 'Kritik'}</span>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6"><div class="p-2 border rounded small h-100">
+                    <div class="fw-bold text-muted mb-1"><i class="fa-solid fa-box me-1"></i>Kovan</div>
+                    <div>${irk} · ${tip}</div>
+                    <div class="text-muted">${cerceve} çerçeve (${cerceveKaynagi}) · ${koken}</div>
+                    ${anaIrk ? `<div class="text-muted">Ana: ${anaIrk}${anaYas !== null ? ` (${anaYas} yaş)` : ''}</div>` : '<div class="text-danger small">Ana arı kaydı yok</div>'}
+                </div></div>
+                <div class="col-6"><div class="p-2 border rounded small h-100">
+                    <div class="fw-bold text-muted mb-1"><i class="fa-solid fa-cloud-sun me-1"></i>Bölge / Hava</div>
+                    ${bolgeAdi ? `<div>${bolgeAdi}</div>` : '<div class="text-muted">Bölge tanımlı değil</div>'}
+                    ${sicaklik !== null ? `<div class="${sicaklik < 8 ? 'text-danger' : sicaklik < 14 ? 'text-warning' : 'text-success'} fw-bold">${sicaklik}°C</div>` : ''}
+                    <div class="text-muted">${MEVSIM} · ${now.toLocaleDateString('tr-TR')}</div>
+                    <div class="text-muted">${bakimlar.length} bakım · ${hastaliklar.length} hastalık · ${hasatlar.length} hasat</div>
+                </div></div>
+            </div>
+            
+            <div class="row g-2 mb-3 d-none" id="aiChartsRow">
+                <div class="col-12 col-md-6 d-none" id="aiCerceveCol">
+                    <div class="p-2 border rounded">
+                        <h6 class="fw-bold text-muted mb-2 small"><i class="fa-solid fa-chart-line me-2"></i>Çerçeve Gelişimi</h6>
+                        <div style="height: 160px;"><canvas id="aiCerceveChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 d-none" id="aiVarroaCol">
+                    <div class="p-2 border rounded">
+                        <h6 class="fw-bold text-muted mb-2 small"><i class="fa-solid fa-bug text-danger me-2"></i>Varroa Yükü</h6>
+                        <div style="height: 160px;"><canvas id="aiVarroaChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            ${ozet2Satir(kritikler, 'Kritik Bulgular', 'danger', 'fa-circle-xmark')}
+            ${ozet2Satir(dikkats, 'Dikkat Gerektiren', 'warning', 'fa-circle-exclamation')}
+            ${ozet2Satir(iyiler, 'Olumlu Göstergeler', 'success', 'fa-circle-check')}
+            ${eylemler.length > 0 ? `<div class="border rounded p-3 mt-2" style="border-color:#10B981!important"><h6 class="fw-bold mb-2" style="color:#059669"><i class="fa-solid fa-list-check me-2"></i>Önerilen Eylem Planı</h6><ul class="mb-0 ps-3">${eylemler.map(e => `<li class="small mb-1">${e}</li>`).join('')}</ul></div>` : ''}
+            <div class="text-center text-muted small mt-3 pt-2 border-top"><i class="fa-solid fa-robot me-1"></i>Bu rapor ${bakimlar.length} bakım, ${hastaliklar.length} hastalık ve ${hasatlar.length} hasat kaydı analiz edilerek oluşturulmuştur.</div>`;
+
+            // Grafik Verileri Hazırlama
+            const cerceveVerileri = [...bakimlar].reverse().filter(b => b.cerceveGuncelle !== undefined && b.cerceveGuncelle !== null && b.cerceveGuncelle !== '');
+            const varroaVerileri = [...bakimlar].reverse().filter(b => b.varroaYuk !== undefined && b.varroaYuk !== null && b.varroaYuk !== '');
+
+            let chartEklendi = false;
+
+            // Görünüm Kolon Sınıfı Ayarı (Eğer sadece biri varsa tam genişlik olsun)
+            if (cerceveVerileri.length >= 2 && varroaVerileri.length < 2) {
+                document.getElementById('aiCerceveCol').classList.replace('col-md-6', 'col-12');
+            } else if (varroaVerileri.length >= 2 && cerceveVerileri.length < 2) {
+                document.getElementById('aiVarroaCol').classList.replace('col-md-6', 'col-12');
+            }
+
+            // Çerçeve Grafiği
+            if (cerceveVerileri.length >= 2) {
+                chartEklendi = true;
+                document.getElementById('aiCerceveCol').classList.remove('d-none');
+                const ctx = document.getElementById('aiCerceveChart');
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: cerceveVerileri.map(b => new Date(b.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })),
+                            datasets: [{
+                                label: 'Çerçeve',
+                                data: cerceveVerileri.map(b => Number(b.cerceveGuncelle)),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: '#10B981'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, suggestedMax: 10, ticks: { stepSize: 1, precision: 0 } },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Varroa Grafiği
+            if (varroaVerileri.length >= 2) {
+                chartEklendi = true;
+                document.getElementById('aiVarroaCol').classList.remove('d-none');
+
+                const varroaMap = { 'Yok': 0, 'Az': 1, 'Orta': 2, 'Çok': 3 };
+                const varroaSayiMap = { 0: 'Yok', 1: 'Az', 2: 'Orta', 3: 'Çok' };
+
+                const ctx2 = document.getElementById('aiVarroaChart');
+                if (ctx2) {
+                    new Chart(ctx2, {
+                        type: 'line',
+                        data: {
+                            labels: varroaVerileri.map(b => new Date(b.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })),
+                            datasets: [{
+                                label: 'Varroa',
+                                data: varroaVerileri.map(b => varroaMap[b.varroaYuk] || 0),
+                                borderColor: '#EF4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: '#EF4444'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return 'Varroa: ' + (varroaSayiMap[context.raw] || 'Yok');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 3,
+                                    ticks: {
+                                        stepSize: 1,
+                                        callback: function (value) { return varroaSayiMap[value] || ''; }
+                                    }
+                                },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (chartEklendi) {
+                document.getElementById('aiChartsRow').classList.remove('d-none');
+            }
+        }
     </script>
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️
+                yabguhakan2025@gmail.com</a></small>
+    </footer>
 </body>
 
 </html>

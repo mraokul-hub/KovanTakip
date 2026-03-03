@@ -8,19 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            flex: 1;
-        }
-
         .kovan-card {
             transition: transform 0.2s;
             cursor: pointer;
@@ -38,201 +32,74 @@
             margin-right: 10px;
         }
 
-        .btn-pano {
-            background: linear-gradient(45deg, #ffc107, #fd7e14);
-            color: white !important;
-            border: none;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(253, 126, 20, 0.4);
-            animation: pulse-gold 2s infinite;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-pano:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(253, 126, 20, 0.6);
-        }
-
-        @keyframes pulse-gold {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-            }
-        }
-
-        /* Yeni Duyuru Animasyonları */
-        .btn-pano.has-new {
-            background: linear-gradient(45deg, #dc3545, #ff4d4d) !important;
-            animation: pulse-danger 1.5s infinite !important;
-        }
-
-        .btn-pano.has-new i {
-            animation: ring 1.5s infinite;
-            transform-origin: top center;
-        }
-
-        @keyframes pulse-danger {
-            0% {
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.8);
-            }
-
-            70% {
-                box-shadow: 0 0 0 15px rgba(220, 53, 69, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
-            }
-        }
-
-        @keyframes ring {
-            0% {
-                transform: rotate(0);
-            }
-
-            5% {
-                transform: rotate(30deg);
-            }
-
-            10% {
-                transform: rotate(-28deg);
-            }
-
-            15% {
-                transform: rotate(34deg);
-            }
-
-            20% {
-                transform: rotate(-32deg);
-            }
-
-            25% {
-                transform: rotate(30deg);
-            }
-
-            30% {
-                transform: rotate(-28deg);
-            }
-
-            35% {
-                transform: rotate(26deg);
-            }
-
-            40% {
-                transform: rotate(-24deg);
-            }
-
-            45% {
-                transform: rotate(22deg);
-            }
-
-            50% {
-                transform: rotate(-20deg);
-            }
-
-            55% {
-                transform: rotate(18deg);
-            }
-
-            60% {
-                transform: rotate(-16deg);
-            }
-
-            65% {
-                transform: rotate(14deg);
-            }
-
-            70% {
-                transform: rotate(-12deg);
-            }
-
-            75% {
-                transform: rotate(10deg);
-            }
-
-            80% {
-                transform: rotate(-8deg);
-            }
-
-            85% {
-                transform: rotate(6deg);
-            }
-
-            90% {
-                transform: rotate(-4deg);
-            }
-
-            95% {
-                transform: rotate(2deg);
-            }
-
-            100% {
-                transform: rotate(0);
-            }
-        }
-
         #reader {
             width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
         }
-
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
             padding: 20px;
             font-size: 0.85rem;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            margin-top: 40px;
-            background: #fff;
+            color: var(--bee-text-muted);
+            border-top: 1px solid var(--bee-border);
+            margin-top: auto;
+            background: var(--bee-card-bg);
         }
-
         .footer-signature a {
             text-decoration: none;
-        }
-    </style>
+        }    </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="kovanlarim.html"><i
-                    class="fa-solid fa-layer-group me-2 text-warning"></i>Kovan Takip</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                </ul>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="sonenKovanlar.html" class="btn btn-outline-light btn-sm" title="Eski Sönen Kovanlar">
-                        <img src="Sonmus.png" style="height: 20px; vertical-align: text-bottom;" alt="Sönen"> <span
-                            class="d-none d-md-inline">Sönen</span>
-                    </a>
-                    <a href="bosKovanlar.html" class="btn btn-outline-light btn-sm" title="Boş Kovanlar">
-                        <img src="Boskovan.png" style="height: 20px; vertical-align: text-bottom;" alt="Boş"> <span
-                            class="d-none d-md-inline">Boş</span>
-                    </a>
-                    <button class="btn btn-outline-light btn-sm" onclick="openScanner()"><img src="Designer.jpg"
-                            style="height: 20px; vertical-align: text-bottom;" alt="Tara"> <span
-                            class="d-none d-md-inline">Tara</span></button>
-                    <a href="pano.html" id="duyuruBtn" class="btn btn-pano btn-sm rounded-pill px-3"><i
-                            class="fa-solid fa-bullhorn"></i> <span class="d-none d-md-inline">Duyuru</span></a>
-                    <button id="logoutBtn" class="btn btn-danger btn-sm"><i
-                            class="fa-solid fa-right-from-bracket"></i></button>
-                </div>
+            <a class="navbar-brand fw-bold mb-0" href="kovanlarim.html">
+                <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Kovan Takip
+            </a> <!-- Masaüstü Sağ Menü (Mobilde Gizli) -->
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <a href="bosKovanlar.html" class="btn btn-nav-custom fw-bold" title="Boş Kovanlar">
+                    <img src="Boskovan.png" style="height: 20px; margin-right: 4px;" alt="Boş"> Boş
+                </a>
+                <a href="sonenKovanlar.html" class="btn btn-nav-custom fw-bold" title="Eski Sönen Kovanlar">
+                    <img src="Sonmus.png" style="height: 20px; margin-right: 4px;" alt="Sönen"> Sönen
+                </a>
+                <a href="gorevler.html" class="btn btn-nav-custom fw-bold" title="Görevler">
+                    <i class="fa-solid fa-calendar-check text-primary"></i> Görevler
+                </a>
+                <a href="envanter.html" class="btn btn-nav-custom fw-bold" title="Envanter">
+                    <i class="fa-solid fa-boxes-stacked text-success"></i> Envanter
+                </a>
+                <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
+                        class="fa-solid fa-bullhorn"></i> Duyuru</a>
+                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
+                        class="fa-solid fa-pencil"></i> Yönetim</a>
+                <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+
+
+
+            <!-- Mobil Üst Menü İkonları (Masaüstünde Gizli) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <button class="btn btn-nav-custom theme-toggle-btn p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button id="logoutBtnMobile"
+                    class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -268,17 +135,40 @@
         </div>
     </div>
 
-    <footer class="footer-signature">
-        <p class="mb-1 fw-bold text-dark">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a
-                href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️
-                yabguhakan2025@gmail.com</a></small>
-    </footer>
+    <nav class="bottom-nav">
+        <a href="bosKovanlar.html" class="bottom-nav-item ">
+            <img src="Boskovan.png" class="img-icon" alt="Boş">
+            <span>Boş Kutu</span>
+        </a>
+        <a href="sonenKovanlar.html" class="bottom-nav-item active">
+            <img src="Sonmus.png" class="img-icon" alt="Sönen">
+            <span>Sönen</span>
+        </a>
+        <a href="gorevler.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-calendar-check fs-5"></i>
+            <span>Görevler</span>
+        </a>
+        <a href="envanter.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-boxes-stacked fs-5"></i>
+            <span>Envanter</span>
+        </a>
+        <a href="pano.html" class="bottom-nav-item ">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
+    </nav>
+
+    <!-- FLOATING ACTION BUTTONS (Masaüstü ve Mobilde ekranın sağ altında sabit) -->
+    <div class="fab-container">
+        <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <span class="fab-text">Barkod<br>Tara</span>
+        </button>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAO7203PN7V8IBxYe0B13iRy0Ahwzm5sXY", authDomain: "kovan-takip-4c054.firebaseapp.com", projectId: "kovan-takip-4c054", storageBucket: "kovan-takip-4c054.appspot.com", messagingSenderId: "783431210365", appId: "1:783431210365:web:5810ec74c9ff3ba8d4a814" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(); const auth = firebase.auth();
         let html5QrcodeScanner = null; let currentUserUid = null;
         const hircinlikSozlugu = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
@@ -286,6 +176,7 @@
 
         auth.onAuthStateChanged(user => { if (user) { currentUserUid = user.uid; kovanlariYukle(user.uid); checkYeniDuyuru(); } else window.location.href = 'login.html'; });
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+        document.getElementById('logoutBtnMobile').addEventListener('click', () => auth.signOut());
 
         async function checkYeniDuyuru() {
             try {
@@ -307,23 +198,56 @@
             try {
                 const snap = await db.collection("kullanicilar").doc(uid).collection("sonenKovanlar").get();
                 div.innerHTML = '';
-                if (snap.empty) { div.innerHTML = '<div class="col-12"><div class="alert alert-info">Henüz kovanınız yok.</div></div>'; return; }
+                if (snap.empty) {
+                    div.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state-container text-center py-5">
+                            <svg width="100" height="100" viewBox="0 0 100 100" class="mb-3" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="50" r="40" fill="#FEE2E2" />
+                                <path d="M50 25 L50 60" stroke="#EF4444" stroke-width="6" stroke-linecap="round"/>
+                                <circle cx="50" cy="75" r="4" fill="#EF4444"/>
+                            </svg>
+                            <h5 class="fw-bold text-dark">Kayıt Bulunamadı</h5>
+                            <p class="text-muted mb-0">Henüz sönen / arşivlenen bir kovanınız bulunmamaktadır.</p>
+                        </div>
+                    </div>`;
+                    return;
+                }
                 const docs = []; snap.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
                 docs.sort((a, b) => (b.data.sonmeTarihi || '').localeCompare(a.data.sonmeTarihi || ''));
                 docs.forEach(({ id: docId, data: d }) => {
                     const hText = hircinlikSozlugu[d.hircinlik || 3] || "Bilinmiyor";
                     div.insertAdjacentHTML('beforeend', `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card kovan-card h-100 shadow-sm border-danger" onclick="window.location.href='sonenDetay.html?id=${docId}'">
-                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center pt-3 pb-2 border-bottom-0">
-                            <h5 class="mb-0 fw-bold">Kovan: ${d.no || '?'}</h5>
-                            <span class="badge bg-light text-dark border">${d.tip || '-'}</span>
-                        </div>
-                        <div class="card-body pt-0">
-                            <div class="small text-muted mb-2">${d.irk || '-'} &bull; ${d.cerceve || 0} Çerçeve &bull; ${hText}</div>
-                            <hr class="my-2">
-                            <div class="d-flex align-items-center text-danger small justify-content-between">
-                                <span><i class="fa-solid fa-calendar-xmark me-1"></i>Sönme Tarihi: <strong>${formatSonmeTarihi(d.sonmeTarihi)}</strong></span>
+                    <div class="card card-clickable border-danger h-100" onclick="window.location.href='sonenDetay.html?id=${docId}'">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0 text-danger"><img src="5.png" width="24" class="me-2">Kovan: ${d.no || '?'}</h5>
+                                <span class="badge bg-danger rounded-pill px-3 py-2">${d.tip || '-'}</span>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="small text-muted mb-1">Irk</div>
+                                        <div class="fw-bold">${d.irk || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="small text-muted mb-1">Çerçeve</div>
+                                        <div class="fw-bold">${d.cerceve || 0}</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <div class="small text-muted mb-1">Hırçınlık</div>
+                                        <div class="fw-bold">${hText}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background-color: var(--bs-danger-bg-subtle);">
+                            	<div class="text-danger fw-bold"><i class="fa-solid fa-calendar-xmark me-2"></i>Sönme Tarihi</div>
+                                <strong class="text-danger">${formatSonmeTarihi(d.sonmeTarihi)}</strong>
                             </div>
                         </div>
                     </div>
@@ -337,6 +261,11 @@
         async function onScanSuccess(txt) { if (html5QrcodeScanner) { await html5QrcodeScanner.clear(); html5QrcodeScanner = null; } document.getElementById('reader').innerHTML = ''; const r = document.getElementById('scanResult'); r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`; r.classList.remove('d-none'); try { const snap = await db.collection("kullanicilar").doc(currentUserUid).collection("kovanlar").where("barkod", "==", txt).get(); if (!snap.empty) { const id = snap.docs[0].id; const no = snap.docs[0].data().no; r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`; setTimeout(() => window.location.href = `detay.html?id=${id}`, 500); } else { r.innerHTML = `<div class="text-danger fw-bold">Bulunamadı!</div>`; } } catch (e) { console.error(e); } }
         document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () { stopScanner(); document.getElementById('scanResult').classList.add('d-none'); });
     </script>
+    <footer class="footer-signature">
+        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+    </footer>
 </body>
 
 </html>
+
