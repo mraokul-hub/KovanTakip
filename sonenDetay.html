@@ -39,6 +39,7 @@
         .record-img:hover {
             transform: scale(1.5);
         }
+
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
@@ -49,9 +50,11 @@
             margin-top: auto;
             background: var(--bee-card-bg);
         }
+
         .footer-signature a {
             text-decoration: none;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -113,8 +116,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <h3 id="pageTitle" class="mb-0 fw-bold text-danger"><i class="fa-solid fa-spinner fa-spin"></i></h3>
 
-            <div id="topActionButtons" class="btn-group">
-                <!-- Sönen kovan detayında işlem yapılamaz -->
+            <div id="topActionButtons">
+                <button class="btn btn-danger fw-bold" onclick="silSonenKovan()">
+                    <i class="fa-solid fa-trash me-1"></i> Kovânı Sil
+                </button>
             </div>
         </div>
 
@@ -323,14 +328,25 @@
                         });
                     });
                 }
+                async function silSonenKovan() {
+                    if (!confirm("DİKKAT: Bu sönen kovan kaydı kalıcı olarak silinecek! Devam etmek istiyor musunuz?")) return;
+                    try {
+                        await db.collection("kullanicilar").doc(currentUser.uid).collection("sonenKovanlar").doc(kovanId).delete();
+                        alert("Kovan başarıyla silindi.");
+                        window.location.href = "sonenKovanlar.html";
+                    } catch (err) {
+                        console.error("Silme hatası:", err);
+                        alert("Silme başarısız: " + (err.message || err));
+                    }
+                }
+
                 function guncelleGrafik(docs) { const chartCard = document.getElementById('grafikKarti'); if (!docs.length) { chartCard.style.display = 'none'; return; } chartCard.style.display = 'block'; const curY = new Date().getFullYear(); const past = {}; const curr = {}; docs.forEach(d => { if (!d._miktar) return; const y = parseInt(d._tarih.substring(0, 4)); const val = Number(d._miktar); if (y < curY) { past[y] = (past[y] || 0) + val; } else { curr[d._tarih] = (curr[d._tarih] || 0) + val; } }); const lbl = [], dat = [], bg = [], bd = []; Object.keys(past).sort().forEach(y => { lbl.push(`${y} (Top.)`); dat.push(past[y]); bg.push('rgba(108,117,125,0.6)'); bd.push('grey'); }); Object.keys(curr).sort().forEach(t => { const p = t.split('-'); lbl.push(`${p[2]}.${p[1]}`); dat.push(curr[t]); bg.push('rgba(255, 159, 64, 0.7)'); bd.push('rgba(255, 159, 64, 1)'); }); if (hasatChart) hasatChart.destroy(); const ctx = document.getElementById('balGrafigi').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)'); gradient.addColorStop(1, 'rgba(255, 205, 86, 0.2)'); hasatChart = new Chart(ctx, { type: 'bar', data: { labels: lbl, datasets: [{ label: 'Bal (KG)', data: dat, backgroundColor: gradient, borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, borderRadius: 4, barThickness: 'flex', maxBarThickness: 40 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
             </script>
-    <footer class="footer-signature">
-        <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
-    </footer>
+            <footer class="footer-signature">
+                <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
+                <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a
+                        href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+            </footer>
 </body>
 
 </html>
-
-
