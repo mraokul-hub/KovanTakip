@@ -361,16 +361,22 @@ body.dark-theme .btn-outline-danger:hover {
     0% {
         box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.8), 0 0 0 0 rgba(255, 0, 0, 0.4);
         transform: scale(1);
+        filter: blur(0);
+        opacity: 1;
     }
 
     50% {
         box-shadow: 0 0 0 20px rgba(255, 0, 0, 0), 0 0 0 35px rgba(255, 0, 0, 0);
-        transform: scale(1.1);
+        transform: scale(1.05);
+        filter: blur(2px);
+        opacity: 0.85;
     }
 
     100% {
         box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), 0 0 0 0 rgba(255, 0, 0, 0);
         transform: scale(1);
+        filter: blur(0);
+        opacity: 1;
     }
 }
 
@@ -401,8 +407,8 @@ body.dark-theme .btn-outline-danger:hover {
     position: relative;
     /* Badge için gerekli */
     z-index: 1;
-    border-radius: 15px !important;
-    /* Köşeleri daha ovalleştir */
+    border-radius: 50px !important;
+    /* Tam oval (pill) görünümü */
 }
 
 /* Alt menüde yanıp sönmenin daha belli olması için alan aç */
@@ -410,7 +416,7 @@ body.dark-theme .btn-outline-danger:hover {
     margin: 6px 10px;
     /* Biraz daha daraltarak vurguyu artır */
     height: calc(100% - 12px) !important;
-    border-radius: 15px !important;
+    border-radius: 50px !important;
 }
 
 .has-new i {
