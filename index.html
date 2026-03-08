@@ -26,6 +26,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
@@ -36,9 +37,11 @@
             margin-top: auto;
             background: var(--bee-card-bg);
         }
+
         .footer-signature a {
             text-decoration: none;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body class="bg-light pb-5">
@@ -67,8 +70,6 @@
                 </a>
                 <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
                         class="fa-solid fa-bullhorn"></i> Duyuru</a>
-                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
-                        class="fa-solid fa-pencil"></i> Yönetim</a>
                 <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
                         class="fa-solid fa-right-from-bracket"></i></button>
             </div>
@@ -95,8 +96,7 @@
         <!-- STOK UYARISI WIDGET -->
         <div class="row justify-content-center mb-4 d-none" id="stokUyariAlani">
             <div class="col-lg-10">
-                <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center mb-0"
-                    style="border-left: 5px solid #dc3545 !important;">
+                <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center mb-0 border-left-danger">
                     <i class="fa-solid fa-triangle-exclamation fs-2 me-3 text-danger"></i>
                     <div>
                         <h6 class="fw-bold mb-1 text-danger">Kritik Stok Uyarısı</h6>
@@ -112,8 +112,7 @@
         <!-- HAVA DURUMU VE AI TAKVİM WIDGET -->
         <div class="row justify-content-center mb-4">
             <div class="col-lg-10">
-                <div class="card card-modern border-0 shadow-sm"
-                    style="background: linear-gradient(135deg, #e0f7fa, #fff8e1)">
+                <div class="card card-modern border-0 shadow-sm bg-gradient-warm">
                     <div class="card-body p-4" id="havaDurumuKarti">
                         <div class="text-center py-3">
                             <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-cloud-sun me-2"></i>Bölge Seçimi
@@ -310,7 +309,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                            style="height: 24px; vertical-align: sub;" alt="Tara">Barkod Tara</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         onclick="stopScanner()"></button>
                 </div>
@@ -387,7 +386,7 @@
     <!-- FLOATING ACTION BUTTONS (Masaüstü ve Mobilde ekranın sağ altında sabit) -->
     <div class="fab-container">
         <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
-            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px;">
             <span class="fab-text">Barkod<br>Tara</span>
         </button>
     </div>
@@ -410,7 +409,7 @@
             <i class="fa-solid fa-boxes-stacked fs-5"></i>
             <span>Envanter</span>
         </a>
-        <a href="pano.html" class="bottom-nav-item ">
+        <a href="pano.html" class="bottom-nav-item duyuru-btn">
             <i class="fa-solid fa-bullhorn fs-5"></i>
             <span>Duyuru</span>
         </a>
@@ -426,6 +425,7 @@
                 currentUser = user;
                 checkStokUyarisi();
                 loadYaklasanGorevler();
+                checkYeniDuyuru(db);
             } else {
                 window.location.href = 'login.html';
             }
@@ -575,10 +575,9 @@
     </script>
     <footer class="footer-signature">
         <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️
+                yabguhakan2025@gmail.com</a></small>
     </footer>
 </body>
 
 </html>
-
-

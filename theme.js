@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateThemeToggleUI(isDark);
         });
     });
+
 });
 
 // Arayüzdeki (buton içindeki) ikonu güncelleyen fonksiyon
@@ -79,4 +80,10 @@ window.getAnaAriRenk = function (dogumTarihi, manuelRenk) {
 
     // HTML Dairesi Döndür
     return `<span class="ana-renk-nokta" style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color: ${cssRenk}; border:1px solid #777; vertical-align:middle; margin-right:4px;" title="${renkAdi} Ana"></span>`;
+};
+
+// Yeni Duyuru Kontrolü (Artık firebase-config.js içinde real-time olarak yapılıyor)
+window.checkYeniDuyuru = function (db) {
+    // Bu fonksiyon artık firebase-config.js içerisindeki onSnapshot tarafından otomatik yönetiliyor.
+    // HTML sayfalarındaki eski çağrılar hata vermesin diye boş bırakılmıştır.
 };

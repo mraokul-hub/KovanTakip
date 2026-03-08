@@ -24,6 +24,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
@@ -34,9 +35,11 @@
             margin-top: auto;
             background: var(--bee-card-bg);
         }
+
         .footer-signature a {
             text-decoration: none;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body class="bg-light pb-5">
@@ -78,6 +81,11 @@
                     style="width: 40px; height: 40px;">
                     <i class="theme-icon fa-solid fa-moon"></i>
                 </button>
+                <a href="admin_pano.html" id="adminBtnMobile"
+                    class="btn btn-warning p-2 d-none align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;" title="Yönetim Panelini Aç">
+                    <i class="fa-solid fa-pencil"></i>
+                </a>
                 <button id="logoutBtnMobile"
                     class="btn btn-outline-danger p-2 d-flex align-items-center justify-content-center"
                     style="width: 40px; height: 40px;">
@@ -108,7 +116,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                            style="height: 24px; vertical-align: sub;" alt="Tara">Barkod Tara</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         onclick="stopScanner()"></button>
                 </div>
@@ -125,7 +133,7 @@
     <!-- FLOATING ACTION BUTTONS (Masaüstü ve Mobilde ekranın sağ altında sabit) -->
     <div class="fab-container">
         <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
-            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px;">
             <span class="fab-text">Barkod<br>Tara</span>
         </button>
     </div>
@@ -148,7 +156,7 @@
             <i class="fa-solid fa-boxes-stacked fs-5"></i>
             <span>Envanter</span>
         </a>
-        <a href="pano.html" class="bottom-nav-item active">
+        <a href="pano.html" class="bottom-nav-item active duyuru-btn">
             <i class="fa-solid fa-bullhorn fs-5"></i>
             <span>Duyuru</span>
         </a>
@@ -165,10 +173,10 @@
                 if (user.email === "mremzi@gmail.com") {
                     document.getElementById('adminBtn').classList.remove('d-none');
                     document.getElementById('adminBtnMobile').classList.remove('d-none');
+                    document.getElementById('adminBtnMobile').classList.add('d-flex');
                 }
             } else {
-                document.getElementById('loginBtn').classList.remove('d-none');
-                document.getElementById('loginBtnMobile').classList.remove('d-none');
+                // Giriş yapılmamışsa login.html'e yönlendirilebilir veya butonlar gizli kalır
             }
         });
 
@@ -254,10 +262,9 @@
     </script>
     <footer class="footer-signature">
         <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️
+                yabguhakan2025@gmail.com</a></small>
     </footer>
 </body>
 
 </html>
-
-

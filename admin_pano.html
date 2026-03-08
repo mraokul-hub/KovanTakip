@@ -55,7 +55,7 @@
                     <a href="pano.html" class="btn btn-nav-custom btn-sm fw-bold">
                         <i class="fa-solid fa-arrow-left me-1"></i> Panoya Dön
                     </a>
-                    <button class="btn btn-outline-danger ms-2 logoutBtnClass" class="btn btn-danger btn-sm fw-bold">
+                    <button id="logoutBtn" class="btn btn-danger btn-sm fw-bold ms-2">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Çıkış
                     </button>
                 </div>
@@ -67,8 +67,8 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card card-modern mb-4 border-0 border-start border-4 border-success">
-                    <div
-                        class="card-header bg-transparent border-bottom-0 pb-0 pt-3 text-success fw-bold card-title-modern">
+                    <div class="card-header bg-transparent border-bottom-0 pb-0 pt-3 text-success fw-bold card-title-modern"
+                        id="formHeader">
                         <i class="fa-solid fa-plus-circle me-2"></i>Yeni Duyuru Yayınla
                     </div>
                     <div class="card-body">
@@ -83,10 +83,16 @@
                                     placeholder="Duyuru metnini buraya girin..." required></textarea>
                                 <label for="icerik" class="fw-bold">İçerik</label>
                             </div>
-                            <button type="submit"
-                                class="btn btn-success w-100 fw-bold py-3 rounded-pill btn-touch shadow-sm">
-                                <i class="fa-solid fa-paper-plane me-2"></i> Yayınla
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="submit" id="submitBtn"
+                                    class="btn btn-success flex-grow-1 fw-bold py-3 rounded-pill btn-touch shadow-sm">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Yayınla
+                                </button>
+                                <button type="button" id="cancelBtn" onclick="iptal()"
+                                    class="btn btn-outline-secondary fw-bold py-3 px-4 rounded-pill btn-touch d-none">
+                                    Sıfırla
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -116,33 +122,34 @@
         <small class="d-block mb-3 fw-bold text-dark">💡 Fikir ve önerileriniz için: <a
                 href="mailto:yabguhakan2025@gmail.com" style="color: #0d6efd; text-decoration: none;">✉️
                 yabguhakan2025@gmail.com</a></small>
-                        <nav class="bottom-nav">
-        <a href="bosKovanlar.html" class="bottom-nav-item ">
-            <img src="Boskovan.png" class="img-icon" alt="Boş">
-            <span>Boş Kovanlar</span>
-        </a>
-        <a href="sonenKovanlar.html" class="bottom-nav-item ">
-            <img src="Sonmus.png" class="img-icon" alt="Sönen">
-            <span>Sönen</span>
-        </a>
-        <a href="gorevler.html" class="bottom-nav-item ">
-            <i class="fa-solid fa-calendar-check fs-5"></i>
-            <span>Görevler</span>
-        </a>
-        <a href="envanter.html" class="bottom-nav-item ">
-            <i class="fa-solid fa-boxes-stacked fs-5"></i>
-            <span>Envanter</span>
-        </a>
-        <a href="pano.html" class="bottom-nav-item active">
-            <i class="fa-solid fa-bullhorn fs-5"></i>
-            <span>Duyuru</span>
-        </a>
-    </nav>
+        <nav class="bottom-nav">
+            <a href="bosKovanlar.html" class="bottom-nav-item ">
+                <img src="Boskovan.png" class="img-icon" alt="Boş">
+                <span>Boş Kovanlar</span>
+            </a>
+            <a href="sonenKovanlar.html" class="bottom-nav-item ">
+                <img src="Sonmus.png" class="img-icon" alt="Sönen">
+                <span>Sönen</span>
+            </a>
+            <a href="gorevler.html" class="bottom-nav-item ">
+                <i class="fa-solid fa-calendar-check fs-5"></i>
+                <span>Görevler</span>
+            </a>
+            <a href="envanter.html" class="bottom-nav-item ">
+                <i class="fa-solid fa-boxes-stacked fs-5"></i>
+                <span>Envanter</span>
+            </a>
+            <a href="pano.html" class="bottom-nav-item active">
+                <i class="fa-solid fa-bullhorn fs-5"></i>
+                <span>Duyuru</span>
+            </a>
+        </nav>
 
         <footer class="footer-signature">
 
             <script>
                 const db = firebase.firestore(); const auth = firebase.auth();
+                let editingId = null;
 
                 auth.onAuthStateChanged(user => {
                     if (!user || user.email !== "mremzi@gmail.com") {
@@ -159,24 +166,61 @@
 
                 document.getElementById('addForm').addEventListener('submit', e => {
                     e.preventDefault();
-                    const btn = e.target.querySelector('button');
+                    const btn = document.getElementById('submitBtn');
+                    const baslik = document.getElementById('baslik').value;
+                    const icerik = document.getElementById('icerik').value;
+
                     btn.disabled = true;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Yayınlanıyor...';
-                    db.collection("pano").add({
-                        baslik: document.getElementById('baslik').value,
-                        icerik: document.getElementById('icerik').value,
+                    btn.innerHTML = editingId ? '<i class="fa-solid fa-spinner fa-spin"></i> Güncelleniyor...' : '<i class="fa-solid fa-spinner fa-spin"></i> Yayınlanıyor...';
+
+                    const data = {
+                        baslik: baslik,
+                        icerik: icerik,
                         eklenmeTarihi: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => {
-                        alert("Duyuru başarıyla yayınlandı!");
-                        e.target.reset();
+                    };
+
+                    const promise = editingId
+                        ? db.collection("pano").doc(editingId).update(data)
+                        : db.collection("pano").add(data);
+
+                    promise.then(() => {
+                        alert(editingId ? "Duyuru başarıyla güncellendi!" : "Duyuru başarıyla yayınlandı!");
+                        iptal();
                         listele();
                     }).catch(err => {
                         alert("Hata: " + err.message);
                     }).finally(() => {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> Yayınla';
+                        btn.innerHTML = editingId ? '<i class="fa-solid fa-save me-2"></i> Güncelle' : '<i class="fa-solid fa-paper-plane me-2"></i> Yayınla';
                     });
                 });
+
+                function duzenle(id) {
+                    editingId = id;
+                    db.collection("pano").doc(id).get().then(doc => {
+                        if (doc.exists) {
+                            const d = doc.data();
+                            document.getElementById('baslik').value = d.baslik;
+                            document.getElementById('icerik').value = d.icerik;
+
+                            // Arayüzü güncelle
+                            document.getElementById('formHeader').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Duyuruyu Düzenle';
+                            document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-save me-2"></i> Güncelle';
+                            document.getElementById('submitBtn').classList.replace('btn-success', 'btn-primary');
+                            document.getElementById('cancelBtn').classList.remove('d-none');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    });
+                }
+
+                function iptal() {
+                    editingId = null;
+                    document.getElementById('addForm').reset();
+                    document.getElementById('formHeader').innerHTML = '<i class="fa-solid fa-plus-circle me-2"></i>Yeni Duyuru Yayınla';
+                    document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> Yayınla';
+                    document.getElementById('submitBtn').classList.replace('btn-primary', 'btn-success');
+                    document.getElementById('cancelBtn').classList.add('d-none');
+                }
 
                 function listele() {
                     db.collection("pano").orderBy("eklenmeTarihi", "desc").get().then(snap => {
@@ -201,9 +245,14 @@
                                     <small class="text-muted d-block mb-3 border-bottom pb-2"><i class="fa-regular fa-clock me-1"></i> ${tarihStr}</small>
                                     <p class="card-text text-secondary lh-lg mb-0" style="white-space: pre-line;">${d.icerik}</p>
                                 </div>
-                                <button onclick="sil('${doc.id}')" class="btn btn-outline-danger btn-sm btn-touch flex-shrink-0" title="Sil">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                                <div class="d-flex flex-column gap-2">
+                                    <button onclick="duzenle('${doc.id}')" class="btn btn-outline-primary btn-sm btn-touch flex-shrink-0" title="Düzenle">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button onclick="sil('${doc.id}')" class="btn btn-outline-danger btn-sm btn-touch flex-shrink-0" title="Sil">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -281,5 +330,3 @@
 </body>
 
 </html>
-
-

@@ -231,8 +231,6 @@
                 </a>
                 <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
                         class="fa-solid fa-bullhorn"></i> Duyuru</a>
-                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
-                        class="fa-solid fa-pencil"></i> Yönetim</a>
                 <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
                         class="fa-solid fa-right-from-bracket"></i></button>
             </div>
@@ -259,7 +257,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                            style="height: 24px; vertical-align: sub;" alt="Tara">Barkod Tara</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         onclick="stopScanner()"></button>
                 </div>
@@ -278,8 +276,7 @@
         <!-- HAVA DURUMU VE AI TAKVİM WIDGET -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card card-modern border-0 shadow-sm"
-                    style="background: linear-gradient(135deg, #e0f7fa, #fff8e1)">
+                <div class="card card-modern border-0 shadow-sm bg-gradient-warm">
                     <div class="card-body p-4" id="havaDurumuKarti">
                         <div class="text-center py-3">
                             <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-cloud-sun me-2"></i>Bölge Seçimi
@@ -380,7 +377,7 @@
             <i class="fa-solid fa-boxes-stacked fs-5"></i>
             <span>Envanter</span>
         </a>
-        <a href="pano.html" class="bottom-nav-item ">
+        <a href="pano.html" class="bottom-nav-item duyuru-btn">
             <i class="fa-solid fa-bullhorn fs-5"></i>
             <span>Duyuru</span>
         </a>
@@ -393,7 +390,7 @@
             <span class="fab-text">Yeni<br>Kovan</span>
         </a>
         <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
-            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px;">
             <span class="fab-text">Barkod<br>Tara</span>
         </button>
     </div>
@@ -559,20 +556,6 @@
             }
         }
 
-        async function checkYeniDuyuru() {
-            try {
-                const snap = await db.collection("pano").orderBy("eklenmeTarihi", "desc").limit(1).get();
-                if (!snap.empty) {
-                    const sonDuyuruZamani = snap.docs[0].data().eklenmeTarihi.toDate().getTime();
-                    const sonGorulenZaman = localStorage.getItem("sonDuyuruGormeZamani");
-                    if (!sonGorulenZaman || sonDuyuruZamani > parseInt(sonGorulenZaman)) {
-                        document.getElementById('duyuruBtn').classList.add('has-new');
-                    }
-                }
-            } catch (e) {
-                console.error("Duyuru kontrol hatası:", e);
-            }
-        }
 
         async function kovanlariYukle(uid) {
             const div = document.getElementById('kovan-listesi-container');
@@ -847,4 +830,3 @@
 </body>
 
 </html>
-

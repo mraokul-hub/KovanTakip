@@ -74,6 +74,7 @@
             color: #000 !important;
             border-color: var(--bee-primary) !important;
         }
+
         /* İMZA STİLİ */
         .footer-signature {
             text-align: center;
@@ -84,9 +85,11 @@
             margin-top: auto;
             background: var(--bee-card-bg);
         }
+
         .footer-signature a {
             text-decoration: none;
-        }    </style>
+        }
+    </style>
 </head>
 
 <body class="bg-light pb-5">
@@ -115,8 +118,6 @@
                 </a>
                 <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
                         class="fa-solid fa-bullhorn"></i> Duyuru</a>
-                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
-                        class="fa-solid fa-pencil"></i> Yönetim</a>
                 <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
                         class="fa-solid fa-right-from-bracket"></i></button>
             </div>
@@ -295,7 +296,7 @@
             <i class="fa-solid fa-boxes-stacked fs-5"></i>
             <span>Envanter</span>
         </a>
-        <a href="pano.html" class="bottom-nav-item ">
+        <a href="pano.html" class="bottom-nav-item duyuru-btn">
             <i class="fa-solid fa-bullhorn fs-5"></i>
             <span>Duyuru</span>
         </a>
@@ -305,7 +306,9 @@
     <script>
         const db = firebase.firestore();
         const auth = firebase.auth();
-        let currentUserUid = null;
+        checkYeniDuyuru(db);
+
+        let currentUser = null;
         let envModalInstance = null;
         let html5QrcodeScanner = null;
 
@@ -522,10 +525,9 @@
     </script>
     <footer class="footer-signature">
         <p class="mb-1 fw-bold">© 2025 Hakan Yabgu • Arı severler için özenle geliştirildi 🐝</p>
-        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️ yabguhakan2025@gmail.com</a></small>
+        <small class="d-block mb-3 fw-bold">💡 Fikir ve önerileriniz için: <a href="mailto:yabguhakan2025@gmail.com">✉️
+                yabguhakan2025@gmail.com</a></small>
     </footer>
 </body>
 
 </html>
-
-

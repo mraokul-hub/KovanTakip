@@ -15,4 +15,31 @@
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
+
+    // Global Yeni Duyuru Takibi (Tüm Sayfalar İçin)
+    const db = firebase.firestore();
+    db.collection("pano").orderBy("eklenmeTarihi", "desc").limit(1).onSnapshot(snap => {
+        if (!snap.empty) {
+            const docData = snap.docs[0].data();
+            if (!docData.eklenmeTarihi) return;
+
+            const sonDuyuruZamani = docData.eklenmeTarihi.toDate().getTime();
+            const sonGorulenZaman = localStorage.getItem("sonDuyuruGormeZamani");
+
+            const updateNotificationUI = () => {
+                const btns = document.querySelectorAll('#duyuruBtn, #duyuruBtnMobile, .duyuru-btn');
+                if (!sonGorulenZaman || sonDuyuruZamani > parseInt(sonGorulenZaman)) {
+                    btns.forEach(btn => btn.classList.add('has-new'));
+                } else {
+                    btns.forEach(btn => btn.classList.remove('has-new'));
+                }
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', updateNotificationUI);
+            } else {
+                updateNotificationUI();
+            }
+        }
+    });
 })();

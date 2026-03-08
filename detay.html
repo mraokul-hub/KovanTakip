@@ -166,8 +166,6 @@
                 </a>
                 <a href="pano.html" id="duyuruBtn" class="btn btn-outline-danger rounded-pill fw-bold px-3"><i
                         class="fa-solid fa-bullhorn"></i> Duyuru</a>
-                <a href="admin_pano.html" id="adminBtn" class="btn btn-warning d-none fw-bold"><i
-                        class="fa-solid fa-pencil"></i> Yönetim</a>
                 <button id="logoutBtn" class="btn btn-outline-danger ms-2" title="Çıkış"><i
                         class="fa-solid fa-right-from-bracket"></i></button>
             </div>
@@ -192,7 +190,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height: 24px; vertical-align: sub; border-radius: 4px;" alt="Tara">Barkod Tara</h5>
+                            style="height: 24px; vertical-align: sub;" alt="Tara">Barkod Tara</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         onclick="stopScanner()"></button>
                 </div>
@@ -347,7 +345,7 @@
                             <form id="editForm">
                                 <div class="row g-3">
                                     <div class="col-md-6 border-end">
-                                        <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="20"> Kovan
+                                        <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="28"> Kovan
                                             Özellikleri
                                         </h6>
                                         <div class="mb-2"><label class="small fw-bold">Barkod No</label><input
@@ -406,7 +404,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <h6 class="text-warning-emphasis border-bottom pb-2"><img src="1.png"
-                                                width="20"> Ana
+                                                width="28"> Ana
                                             Arı Bilgileri</h6>
                                         <div class="mb-2"><label class="small fw-bold">Doğum Tarihi</label><input
                                                 type="date" id="e_anaDogum" class="form-control form-control-sm"></div>
@@ -465,17 +463,17 @@
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="bakim-tab" data-bs-toggle="tab"
-                                data-bs-target="#bakimTab"><img src="3.png" width="20"> Bakım /
+                                data-bs-target="#bakimTab"><img src="3.png" width="32"> Bakım /
                                 Besleme</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="hastalik-tab" data-bs-toggle="tab"
-                                data-bs-target="#hastalikTab"><img src="4.png" width="20">
+                                data-bs-target="#hastalikTab"><img src="4.png" width="32">
                                 Hastalık / Tedavi</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="hasat-tab" data-bs-toggle="tab" data-bs-target="#hasatTab"><img
-                                    src="2.png" width="20"> Bal Hasadı</button>
+                                    src="2.png" width="32"> Bal Hasadı</button>
                         </li>
                     </ul>
                 </div>
@@ -626,7 +624,7 @@
     <div class="modal fade" id="raporModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header text-white" style="background: linear-gradient(135deg, #10B981, #059669);">
+                <div class="modal-header text-white bg-gradient-accent">
                     <h5 class="modal-title fw-bold"><i class="fa-solid fa-robot me-2"></i>Kovan Gelişim Raporu</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -645,12 +643,15 @@
                 class="fa-solid fa-calendar-check fs-5"></i><span>Görevler</span></a>
         <a href="envanter.html" class="bottom-nav-item"><i
                 class="fa-solid fa-boxes-stacked fs-5"></i><span>Envanter</span></a>
-        <a href="pano.html" class="bottom-nav-item"><i class="fa-solid fa-bullhorn fs-5"></i><span>Duyuru</span></a>
+        <a href="pano.html" class="bottom-nav-item duyuru-btn">
+            <i class="fa-solid fa-bullhorn fs-5"></i>
+            <span>Duyuru</span>
+        </a>
     </nav>
 
     <div class="fab-container">
         <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
-            <img src="Designer.jpg" alt="Tara" style="width: 24px; border-radius: 4px;">
+            <img src="Designer.jpg" alt="Tara" style="width: 24px;">
             <span class="fab-text">Barkod<br>Tara</span>
         </button>
     </div>
@@ -714,8 +715,8 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height:24px;vertical-align:sub;border-radius:4px;" alt="Tara">Barkod Tara</h5>
+                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2" style="height:24px;vertical-align:sub;"
+                            alt="Tara">Barkod Tara</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         onclick="stopScanner()"></button>
                 </div>
@@ -745,7 +746,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="weather.js"></script>
     <script>
-        const db = firebase.firestore(); const auth = firebase.auth();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        checkYeniDuyuru(db);
+
         const kovanId = new URLSearchParams(window.location.search).get('id');
         let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null; let kovanData = null;
         const hircinlikMap = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
@@ -924,7 +928,7 @@
                                 <button onclick="sil('${col}','${data.id}')" class="btn btn-touch btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
-                        <div class="view-div text-muted small mt-2 px-2" style="border-left:2px solid #ccc">${data.not || 'Not eklenmemiş.'}</div>
+                        <div class="view-div text-muted small mt-2 px-2 border-left-muted">${data.not || 'Not eklenmemiş.'}</div>
                         ${extraTags}<div class="view-div">${imgHtml}</div>${editHtml}
                     </div>`);
                 });
@@ -1207,7 +1211,7 @@
             rIcerik.innerHTML = `
             <div class="text-center mb-4">
                 <div class="display-6 fw-bold">${skorEmoji} ${genelSkor}<small class="fs-5 text-muted">/100</small></div>
-                <div class="progress my-2" style="height:14px;border-radius:10px"><div class="progress-bar ${skorRozet} fw-bold" role="progressbar" style="width:${genelSkor}%;border-radius:10px">${genelSkor}%</div></div>
+                <div class="progress my-2" style="height:14px;border-radius:4px !important"><div class="progress-bar ${skorRozet} fw-bold" role="progressbar" style="width:${genelSkor}%;border-radius:4px !important">${genelSkor}%</div></div>
                 <span class="badge ${skorRozet} fs-6 px-3">${genelSkor >= 85 ? 'Mükemmel' : genelSkor >= 65 ? 'İyi' : genelSkor >= 40 ? 'Dikkat Gerekiyor' : 'Kritik'}</span>
             </div>
             <div class="row g-2 mb-3">
