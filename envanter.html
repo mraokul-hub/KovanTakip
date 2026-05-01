@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -141,13 +141,24 @@
 
     <div class="container py-2 mb-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0" style="color: var(--bee-text-main)"><i
                     class="fa-solid fa-boxes-stacked me-2 text-warning"></i> Depo Durumu</h4>
-            <button class="btn btn-sm btn-bee-primary d-lg-none shadow-sm" data-bs-toggle="modal"
-                data-bs-target="#envanterModal" onclick="yeniEnvanter()">
-                <i class="fa-solid fa-plus"></i> Ekle
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-warning shadow-sm" data-bs-toggle="modal"
+                    data-bs-target="#depoYonetimModal">
+                    <i class="fa-solid fa-gear"></i> Depolar
+                </button>
+                <button class="btn btn-sm btn-bee-primary shadow-sm" data-bs-toggle="modal"
+                    data-bs-target="#envanterModal" onclick="yeniEnvanter()">
+                    <i class="fa-solid fa-plus"></i> Ekle
+                </button>
+            </div>
+        </div>
+
+        <!-- Depo Seçimi (Tab Görünümü) -->
+        <div id="depoSelector" class="nav nav-pills gap-2 mb-4 flex-nowrap overflow-auto pb-2" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+            <!-- Depolar buraya yüklenecek -->
         </div>
 
         <div id="loading" class="text-center py-5">
@@ -250,6 +261,13 @@
                             </div>
                         </div>
 
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="e_depo" required>
+                                <!-- Depolar buraya yüklenecek -->
+                            </select>
+                            <label for="e_depo">Bulunduğu Depo</label>
+                        </div>
+
                         <div class="form-floating mb-3 border border-danger rounded">
                             <input type="number" step="0.1"
                                 class="form-control text-danger fw-bold bg-danger bg-opacity-10" id="e_kritik"
@@ -278,6 +296,29 @@
         </div>
     </div>
 
+
+    <!-- Depo Yönetim Modalı -->
+    <div class="modal fade" id="depoYonetimModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content card-modern">
+                <div class="modal-header border-bottom border-warning">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-warehouse text-warning"></i> Depo Yönetimi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="p-3 border-bottom">
+                        <div class="input-group">
+                            <input type="text" id="yeniDepoAd" class="form-control" placeholder="Yeni Depo Adı">
+                            <button class="btn btn-warning fw-bold" onclick="depoEkle()">Ekle</button>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-flush" id="depoListesiYonetim">
+                        <!-- Depo listesi buraya gelecek -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <nav class="bottom-nav">
         <a href="bosKovanlar.html" class="bottom-nav-item ">
@@ -308,14 +349,16 @@
         const auth = firebase.auth();
         checkYeniDuyuru(db);
 
-        let currentUser = null;
+        let currentUserUid = null;
+        let seciliDepoId = localStorage.getItem('seciliDepoId') || null;
         let envModalInstance = null;
         let html5QrcodeScanner = null;
+        let depolar = [];
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserUid = user.uid;
-                envanterYukle(user.uid);
+                depolariYukle(user.uid);
             } else {
                 window.location.href = 'login.html';
             }
@@ -374,29 +417,131 @@
             } catch (e) { console.error(e); }
         }
 
+        // Depoları Yükle ve Dinle
+        function depolariYukle(uid) {
+            db.collection("kullanicilar").doc(uid).collection("depolar").orderBy("eklenmeTarihi").onSnapshot(snap => {
+                const selector = document.getElementById('depoSelector');
+                const formSelect = document.getElementById('e_depo');
+                const yonetimList = document.getElementById('depoListesiYonetim');
+                
+                selector.innerHTML = '';
+                formSelect.innerHTML = '';
+                yonetimList.innerHTML = '';
+                depolar = [];
+
+                if (snap.empty) {
+                    // Varsayılan depo oluştur
+                    db.collection("kullanicilar").doc(uid).collection("depolar").add({
+                        ad: "Depo 1",
+                        eklenmeTarihi: new Date().toISOString()
+                    });
+                    return;
+                }
+
+                snap.forEach(doc => depolar.push({ id: doc.id, ...doc.data() }));
+
+                // Geçerli bir seçili depo ID'si olup olmadığını kontrol et
+                const isValidSecili = depolar.some(d => d.id === seciliDepoId);
+                if (!isValidSecili && depolar.length > 0) {
+                    seciliDepoId = depolar[0].id;
+                    localStorage.setItem('seciliDepoId', seciliDepoId);
+                }
+
+                depolar.forEach(d => {
+                    // Selector (Tabs)
+                    const isActive = seciliDepoId === d.id;
+
+                    const btn = document.createElement('button');
+                    btn.className = `nav-link ${isActive ? 'active bg-warning text-dark' : 'bg-white text-muted border'}`;
+                    btn.style.whiteSpace = 'nowrap';
+                    btn.innerHTML = `<i class="fa-solid fa-warehouse me-1"></i> ${d.ad}`;
+                    btn.onclick = () => depoSec(d.id);
+                    selector.appendChild(btn);
+
+                    // Form Select
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = d.ad;
+                    formSelect.appendChild(opt);
+
+                    // Yonetim Listesi
+                    yonetimList.insertAdjacentHTML('beforeend', `
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold">${d.ad}</span>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="depoAdiDuzenle('${d.id}', '${d.ad}')"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn btn-outline-danger" onclick="depoSil('${d.id}', '${d.ad}')"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `);
+                });
+
+                envanterYukle(uid);
+            });
+        }
+
+        function depoSec(id) {
+            seciliDepoId = id;
+            localStorage.setItem('seciliDepoId', id);
+            depolariYukle(currentUserUid); // UI güncellemesi için tekrar tetikle
+        }
+
+        async function depoEkle() {
+            const ad = document.getElementById('yeniDepoAd').value.trim();
+            if (!ad) return;
+            try {
+                await db.collection("kullanicilar").doc(currentUserUid).collection("depolar").add({
+                    ad: ad,
+                    eklenmeTarihi: new Date().toISOString()
+                });
+                document.getElementById('yeniDepoAd').value = '';
+            } catch (e) { alert(e.message); }
+        }
+
+        async function depoAdiDuzenle(id, eskiAd) {
+            const yeniAd = prompt("Depo Adını Değiştir:", eskiAd);
+            if (yeniAd && yeniAd !== eskiAd) {
+                await db.collection("kullanicilar").doc(currentUserUid).collection("depolar").doc(id).update({ ad: yeniAd });
+            }
+        }
+
+        async function depoSil(id, ad) {
+            if (depolar.length <= 1) {
+                alert("En az bir depo bulunmalıdır.");
+                return;
+            }
+            if (confirm(`'${ad}' deposunu ve içindeki tüm envanteri silmek istediğinize emin misiniz?`)) {
+                // Not: Gerçek hayatta ürünleri başka depoya taşıma seçeneği de verilmeli
+                // Şimdilik sadece depoyu siliyoruz (ürünler boşa düşer veya filtrede çıkmaz)
+                await db.collection("kullanicilar").doc(currentUserUid).collection("depolar").doc(id).delete();
+                if (seciliDepoId === id) seciliDepoId = depolar.find(d => d.id !== id).id;
+            }
+        }
+
         // Hızlı form doldurma fonksiyonu
         function hizliDoldur(ad, birim) {
             document.getElementById('e_ad').value = ad;
             document.getElementById('e_birim').value = birim;
-            // Odaklanmayı değere çevir
             document.getElementById('e_miktar').focus();
         }
 
         function yeniEnvanter() {
             document.getElementById('envanterForm').reset();
             document.getElementById('e_id').value = '';
+            document.getElementById('e_depo').value = seciliDepoId;
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-box-open text-warning"></i> Yeni Ürün Ekle';
             document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-check me-1"></i> Kaydet';
             document.getElementById('e_kritik').value = 5;
         }
 
-        function duzenleEnvanter(id, ad, miktar, birim, kritik, skt) {
+        function duzenleEnvanter(id, ad, miktar, birim, kritik, skt, depoId) {
             document.getElementById('e_id').value = id;
             document.getElementById('e_ad').value = ad;
             document.getElementById('e_miktar').value = miktar;
             document.getElementById('e_birim').value = birim;
             document.getElementById('e_kritik').value = kritik;
             document.getElementById('e_skt').value = skt && skt !== 'undefined' ? skt : '';
+            document.getElementById('e_depo').value = (depoId && depoId !== 'undefined') ? depoId : seciliDepoId;
 
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-primary"></i> Ürünü Düzenle';
             document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-arrows-rotate me-1"></i> Güncelle';
@@ -427,6 +572,7 @@
                 ad: document.getElementById('e_ad').value,
                 miktar: parseFloat(document.getElementById('e_miktar').value),
                 birim: document.getElementById('e_birim').value,
+                depoId: document.getElementById('e_depo').value,
                 kritik: parseFloat(document.getElementById('e_kritik').value),
                 skt: document.getElementById('e_skt').value || null,
                 guncellemeTarihi: new Date().toISOString()
@@ -457,24 +603,33 @@
         }
 
         function envanterYukle(uid) {
+            if (!seciliDepoId) return;
             const div = document.getElementById('envanterListesi');
 
             db.collection("kullanicilar").doc(uid).collection("envanter").orderBy("ad").onSnapshot(snap => {
                 document.getElementById('loading').style.display = 'none';
                 div.innerHTML = '';
 
-                if (snap.empty) {
+                // Filtrele: Sadece seçili depodakileri göster (Veya depoId'si olmayanları varsayılan depoda göster)
+                const items = snap.docs.filter(doc => {
+                    const d = doc.data();
+                    // Eğer ürünün depoId'si yoksa ve seçili depo ilk depoysa göster (Geriye dönük uyumluluk)
+                    if (!d.depoId) return seciliDepoId === depolar[0]?.id;
+                    return d.depoId === seciliDepoId;
+                });
+
+                if (items.length === 0) {
                     div.innerHTML = `
                     <div class="col-12 py-5 text-center text-muted">
                         <i class="fa-solid fa-box-open fs-1 mb-3 text-secondary" style="opacity:0.5"></i>
-                        <h5>Deponuz boş</h5>
-                        <p>Henüz envanterinize bir ürün eklemediniz.</p>
+                        <h5>Bu depo boş</h5>
+                        <p>Henüz bu depoya bir ürün eklemediniz.</p>
                         <button class="btn btn-bee-primary mt-2" data-bs-toggle="modal" data-bs-target="#envanterModal" onclick="yeniEnvanter()">İlk Ürünü Ekle</button>
                     </div>`;
                     return;
                 }
 
-                snap.forEach(doc => {
+                items.forEach(doc => {
                     const d = doc.data();
                     const isCritical = d.miktar <= d.kritik;
                     const cardClass = isCritical ? 'critical' : '';
@@ -509,7 +664,7 @@
                                 <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                                     <span class="small text-muted">Kritik: ${d.kritik} ${d.birim}</span>
                                     <div>
-                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="duzenleEnvanter('${doc.id}', '${d.ad}', '${d.miktar}', '${d.birim}', '${d.kritik}', '${d.skt}')"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="duzenleEnvanter('${doc.id}', '${d.ad}', '${d.miktar}', '${d.birim}', '${d.kritik}', '${d.skt}', '${d.depoId || ''}')"><i class="fa-solid fa-pen"></i></button>
                                         <button class="btn btn-sm btn-outline-danger" onclick="silEnvanter('${doc.id}')"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </div>

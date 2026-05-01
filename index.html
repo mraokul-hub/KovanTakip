@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -229,6 +229,16 @@
                                                 Tuzaklı</label>
                                         </div>
                                     </div>
+                                    <div class="form-floating mb-3 mt-3 pt-3 border-top">
+                                        <select name="envanter_malzeme" class="form-select" id="envanterMalzeme">
+                                            <option value="">Seçilmedi (İsteğe Bağlı)</option>
+                                        </select>
+                                        <label for="envanterMalzeme"><i class="fa-solid fa-boxes-stacked text-success me-1"></i>Kullanılan Malzeme (Depodan Düş)</label>
+                                    </div>
+                                    <div class="form-floating mb-3 d-none" id="envanterMiktarDiv">
+                                        <input type="number" name="envanter_miktar" class="form-control" id="envanterMiktar" value="1" min="1">
+                                        <label for="envanterMiktar">Düşülecek Miktar</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -245,12 +255,14 @@
                                         <label for="anaDogum">Doğum Tarihi</label>
                                     </div>
                                     <div class="form-floating mb-3">
-                                        <select name="ana_irk" class="form-select" id="anaIrk">
+                                        <select name="ana_irk" class="form-select" id="anaIrk"
+                                            onchange="toggleAnaKovan()">
                                             <option>Melez</option>
                                             <option>Kafkas</option>
                                             <option>Karniyol</option>
                                             <option>İtalyan</option>
                                             <option>Anadolu</option>
+                                            <option>Kendi Ürettiğim</option>
                                         </select>
                                         <label for="anaIrk">Irkı</label>
                                     </div>
@@ -259,9 +271,16 @@
                                             <option>Damızlık (F0)</option>
                                             <option>Çiftleşmiş (F1)</option>
                                             <option>Çiftleşmemiş</option>
-                                            <option>Kendi Ürettiğim</option>
                                         </select>
                                         <label for="anaTur">Türü</label>
+                                    </div>
+                                    <div class="form-floating mb-3" id="uretilenKovanDiv" style="display: none;">
+                                        <select name="uretilen_kovan" class="form-select" id="uretilenKovan"
+                                            onchange="fetchKovanIrk()">
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                        <label for="uretilenKovan">Üretildiği Kovan (Ana Arı)</label>
+                                        <div id="fetchedIrkText" class="mt-1 small fw-bold text-success ms-1"></div>
                                     </div>
                                     <div class="form-floating mb-3">
                                         <select name="ana_renk" class="form-select" id="anaRenk">
@@ -426,10 +445,78 @@
                 checkStokUyarisi();
                 loadYaklasanGorevler();
                 checkYeniDuyuru(db);
+                loadKovanlarForSelect();
+                loadEnvanterForSelect();
             } else {
                 window.location.href = 'login.html';
             }
         });
+
+        let globalKovanlarList = [];
+
+        function toggleAnaKovan() {
+            const irk = document.getElementById('anaIrk').value;
+            const div = document.getElementById('uretilenKovanDiv');
+            if (irk === 'Kendi Ürettiğim') {
+                div.style.display = 'block';
+            } else {
+                div.style.display = 'none';
+                document.getElementById('uretilenKovan').value = "";
+                document.getElementById('fetchedIrkText').innerText = "";
+                delete document.getElementById('fetchedIrkText').dataset.irk;
+            }
+        }
+
+        async function loadKovanlarForSelect() {
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").orderBy("no", "asc").get();
+                const uretilenKovanSelect = document.getElementById('uretilenKovan');
+                globalKovanlarList = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    globalKovanlarList.push({ no: d.no, irk: d.irk, anaIrk: d.ana?.irk });
+                    const opt = document.createElement('option');
+                    opt.value = d.no;
+                    opt.textContent = d.no + " Nolu Kovan";
+                    uretilenKovanSelect.appendChild(opt);
+                });
+            } catch (e) { console.error("Kovanlar yüklenirken hata", e); }
+        }
+
+        async function loadEnvanterForSelect() {
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("envanter").orderBy("ad", "asc").get();
+                const sel = document.getElementById('envanterMalzeme');
+                if(!sel) return;
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = `${d.ad} (Stok: ${d.miktar} ${d.birim})`;
+                    sel.appendChild(opt);
+                });
+                
+                sel.addEventListener('change', (e) => {
+                    document.getElementById('envanterMiktarDiv').classList.toggle('d-none', !e.target.value);
+                });
+            } catch (e) { console.error("Envanter yüklenirken hata", e); }
+        }
+
+        function fetchKovanIrk() {
+            const val = document.getElementById('uretilenKovan').value;
+            const textObj = document.getElementById('fetchedIrkText');
+            if (!val) {
+                textObj.innerText = "";
+                delete textObj.dataset.irk;
+                return;
+            }
+            const kovan = globalKovanlarList.find(k => k.no === val);
+            if (kovan) {
+                const foundIrk = kovan.anaIrk || kovan.irk || "Bilinmiyor";
+                textObj.innerText = "Algılanan Irk: " + foundIrk;
+                textObj.dataset.irk = foundIrk;
+            }
+        }
 
         async function checkStokUyarisi() {
             try {
@@ -513,8 +600,28 @@
             if (!currentUser) return;
             const btn = document.getElementById('btnKaydet'); btn.disabled = true; btn.innerHTML = 'Kaydediliyor...';
             const f = new FormData(this);
-            const data = { sahip: currentUser.uid, no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'), cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')), taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked, ana: { dogum: f.get('ana_dogum'), irk: f.get('ana_irk'), tur: f.get('ana_tur'), renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim') }, guncelleme: new Date().toISOString().split('T')[0] };
-            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").add(data).then(() => window.location.href = "kovanlarim.html").catch(err => { alert(err.message); btn.disabled = false; });
+
+            let secilenAnaIrk = f.get('ana_irk');
+            if (secilenAnaIrk === 'Kendi Ürettiğim') {
+                const fetched = document.getElementById('fetchedIrkText').dataset.irk;
+                if (fetched) secilenAnaIrk = fetched;
+            }
+
+            const data = { sahip: currentUser.uid, no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'), cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')), taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked, ana: { dogum: f.get('ana_dogum'), irk: secilenAnaIrk, tur: f.get('ana_tur'), renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim'), uretildigi_kovan: f.get('uretilen_kovan') || "" }, guncelleme: new Date().toISOString().split('T')[0] };
+            
+            const secilenEnvanterId = document.getElementById('envanterMalzeme').value;
+            const secilenMiktar = Number(document.getElementById('envanterMiktar').value) || 1;
+
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").add(data).then(() => {
+                if(secilenEnvanterId) {
+                    db.collection("kullanicilar").doc(currentUser.uid).collection("envanter").doc(secilenEnvanterId)
+                      .update({ miktar: firebase.firestore.FieldValue.increment(-secilenMiktar) })
+                      .catch(e => console.error("Envanter düşülemedi", e))
+                      .finally(() => window.location.href = "kovanlarim.html");
+                } else {
+                    window.location.href = "kovanlarim.html";
+                }
+            }).catch(err => { alert(err.message); btn.disabled = false; });
         });
 
         let html5QrcodeScanner = null;

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -532,24 +532,40 @@
 
         async function istatistikleriYukle(uid) {
             try {
+                const aktifId = localStorage.getItem('kovan_aktif_grup_id');
+                const isTumu = !aktifId || aktifId === 'tumu';
+
                 // Aktif ve Toplam Çerçeve
                 const aktifSnap = await db.collection("kullanicilar").doc(uid).collection("kovanlar").get();
                 let aktifKovan = 0;
                 let toplamCerceve = 0;
                 aktifSnap.forEach(doc => {
-                    aktifKovan++;
-                    toplamCerceve += doc.data().cerceve || 0;
+                    const d = doc.data();
+                    if (isTumu || d.bolgeGrupId === aktifId) {
+                        aktifKovan++;
+                        toplamCerceve += d.cerceve || 0;
+                    }
                 });
                 document.getElementById('stat-aktif').innerText = aktifKovan;
                 document.getElementById('stat-cerceve').innerText = toplamCerceve;
 
                 // Boş Kovan
                 const bosSnap = await db.collection("kullanicilar").doc(uid).collection("bosKovanlar").get();
-                document.getElementById('stat-bos').innerText = bosSnap.size;
+                let bosCount = 0;
+                bosSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (isTumu || d.bolgeGrupId === aktifId) bosCount++;
+                });
+                document.getElementById('stat-bos').innerText = bosCount;
 
                 // Sönen Kovan
                 const sonenSnap = await db.collection("kullanicilar").doc(uid).collection("sonenKovanlar").get();
-                document.getElementById('stat-sonen').innerText = sonenSnap.size;
+                let sonenCount = 0;
+                sonenSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (isTumu || d.bolgeGrupId === aktifId) sonenCount++;
+                });
+                document.getElementById('stat-sonen').innerText = sonenCount;
 
             } catch (e) {
                 console.error("İstatistik yükleme hatası:", e);
@@ -587,7 +603,15 @@
 
                 // Numaraya göre sırala
                 let kovanlar = [];
-                snap.forEach(doc => kovanlar.push({ id: doc.id, data: doc.data() }));
+                const aktifId = localStorage.getItem('kovan_aktif_grup_id');
+                const isTumu = !aktifId || aktifId === 'tumu';
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if (isTumu || d.bolgeGrupId === aktifId) {
+                        kovanlar.push({ id: doc.id, data: d });
+                    }
+                });
                 kovanlar.sort((a, b) => (a.data.no || '').localeCompare(b.data.no || '', undefined, { numeric: true, sensitivity: 'base' }));
 
                 kovanlar.forEach(item => {

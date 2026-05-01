@@ -17,6 +17,11 @@
     }
 
     const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Global nesneler (Diğer sayfalarda kolay erişim için)
+    window.db = db;
+    window.auth = auth;
 
     // Çevrimdışı Veri Kaydetme Özelliğini Etkinleştir
     db.enablePersistence({ synchronizeTabs: true })
@@ -28,7 +33,45 @@
             }
         });
 
-    // Global Yeni Duyuru Takibi (Tüm Sayfalar İçin)
+    // Global Auth Monitor & Kullanıcı Onay Kontrolü
+    auth.onAuthStateChanged(user => {
+        const path = window.location.pathname;
+        const page = path.split("/").pop() || "index.html";
+        const isAuthPage = page === "login.html" || page === "register.html" || page === "giris.html";
+
+        if (user) {
+            window.currentUser = user;
+            window.isAdmin = user.email === "mremzi@gmail.com";
+
+            // Kullanıcı dokümanını dinle (Onay durumu için)
+            db.collection("kullanicilar").doc(user.uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    // Onaylı değilse ve admin değilse çıkış yaptır
+                    if (data.onayli === false && !window.isAdmin) {
+                        alert("Hesabınız henüz bir yönetici tarafından onaylanmamıştır.");
+                        auth.signOut().then(() => {
+                            window.location.href = "login.html";
+                        });
+                    }
+                }
+            }, err => {
+                console.warn("Kullanıcı verisi okunurken hata:", err);
+            });
+
+            // Eğer login sayfasındaysa anasayfaya yönlendir
+            if (isAuthPage) {
+                window.location.href = "kovanlarim.html";
+            }
+        } else {
+            // Giriş yapılmamışsa ve auth sayfası değilse login'e at
+            if (!isAuthPage) {
+                window.location.href = "login.html";
+            }
+        }
+    });
+
+    // Global Yeni Duyuru Takibi
     db.collection("pano").orderBy("eklenmeTarihi", "desc").limit(1).onSnapshot(snap => {
         if (!snap.empty) {
             const docData = snap.docs[0].data();
@@ -53,7 +96,7 @@
             }
         }
     }, err => {
-        console.log("Duyuru takibi çevrimdışıyken duraklatıldı veya hata oluştu.");
+        console.log("Duyuru takibi çevrimdışıyken duraklatıldı.");
     });
 
     // İnternet Bağlantı Durumu Takibi ve Bildirim UI
@@ -106,8 +149,8 @@
         const showNotification = (isOnline) => {
             notifyEl.className = `offline-notification show ${isOnline ? 'online' : 'offline'}`;
             notifyEl.innerHTML = isOnline 
-                ? '<i class="fa-solid fa-cloud-arrow-up"></i> İnternet Geldi! Veriler Aktarılıyor...'
-                : '<i class="fa-solid fa-cloud-slash"></i> İnternet Yok. Kayıtlar Cihaza Yapılacak.';
+                ? '<i class="fa-solid fa-cloud-arrow-up"></i> İnternet Geldi! Kayıtlar eşitleniyor...'
+                : '<i class="fa-solid fa-cloud-slash"></i> İnternet Kesildi. Çevrimdışı mod aktif.';
             
             if (isOnline) {
                 setTimeout(() => {
@@ -119,7 +162,6 @@
         window.addEventListener('online', () => showNotification(true));
         window.addEventListener('offline', () => showNotification(false));
 
-        // Başlangıç kontrolü
         if (!navigator.onLine) {
             showNotification(false);
         }

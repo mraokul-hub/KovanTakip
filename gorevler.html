@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -165,9 +165,9 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold mb-0" style="color: var(--bee-text-main)"><i
                     class="fa-regular fa-calendar-check me-2 text-primary"></i> Yapılacaklar</h4>
-            <button class="btn btn-sm btn-bee-primary d-lg-none shadow-sm" data-bs-toggle="modal"
+            <button class="btn btn-sm btn-bee-primary shadow-sm" data-bs-toggle="modal"
                 data-bs-target="#gorevModal" onclick="yeniGorev()">
-                <i class="fa-solid fa-plus"></i> Ekle
+                <i class="fa-solid fa-plus"></i> Görev Ekle
             </button>
         </div>
 
@@ -285,6 +285,14 @@
                             <label for="g_onem">Öncelik Derecesi</label>
                         </div>
 
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="g_ilgiliKovan">
+                                <option value="">İlişkili Kovan Yok</option>
+                                <!-- Kovanlar JS ile yüklenecek -->
+                            </select>
+                            <label for="g_ilgiliKovan"><i class="fa-solid fa-box"></i> İlgili Kovan (İsteğe Bağlı)</label>
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="submitBtn">
                             <i class="fa-solid fa-save me-1"></i> Kaydet
                         </button>
@@ -332,6 +340,7 @@
             if (user) {
                 currentUserUid = user.uid;
                 gorevleriYukle(user.uid);
+                kovanlariYukleForSelect(user.uid);
             } else {
                 window.location.href = 'login.html';
             }
@@ -347,6 +356,23 @@
                 document.getElementById('scanResult').classList.add('d-none');
             });
         });
+
+        async function kovanlariYukleForSelect(uid) {
+            try {
+                const snap = await db.collection("kullanicilar").doc(uid).collection("kovanlar").orderBy("no", "asc").get();
+                const sel = document.getElementById('g_ilgiliKovan');
+                sel.innerHTML = '<option value="">İlişkili Kovan Yok</option>';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = `${d.no} Nolu Kovan`;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                console.error("Kovan listesi çekilemedi", e);
+            }
+        }
 
         function openScanner() {
             if (!currentUserUid) {
@@ -445,12 +471,13 @@
             document.getElementById('g_tarih').value = today;
         }
 
-        function duzenleGorev(id, baslik, detay, tarih, onem) {
+        function duzenleGorev(id, baslik, detay, tarih, onem, ilgiliKovanId) {
             document.getElementById('g_id').value = id;
             document.getElementById('g_baslik').value = baslik;
             document.getElementById('g_detay').value = detay !== 'undefined' ? detay : '';
             document.getElementById('g_tarih').value = tarih;
             document.getElementById('g_onem').value = onem;
+            document.getElementById('g_ilgiliKovan').value = ilgiliKovanId !== 'undefined' ? ilgiliKovanId : '';
 
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-warning"></i> Görevi Düzenle';
             gorevModalInstance.show();
@@ -479,11 +506,17 @@
 
             if (!baslik || !tarih) return;
 
+            const targetSelect = document.getElementById('g_ilgiliKovan');
+            const ilgiliKovanId = targetSelect.value;
+            const ilgiliKovanNo = targetSelect.options[targetSelect.selectedIndex]?.text || '';
+
             const data = {
                 baslik: baslik,
                 detay: document.getElementById('g_detay').value.trim(),
                 tarih: tarih,
                 onem: document.getElementById('g_onem').value,
+                ilgiliKovanId: ilgiliKovanId,
+                ilgiliKovanNo: ilgiliKovanId ? ilgiliKovanNo : '',
                 guncellemeTarihi: new Date().toISOString()
             };
 
@@ -547,13 +580,15 @@
                     if (d.onem === 'Yüksek') onemHtml = '<i class="fa-solid fa-fire text-danger" title="Yüksek Öncelik"></i>';
                     else if (d.onem === 'Düşük') onemHtml = '<i class="fa-solid fa-arrow-down text-secondary" title="Düşük Öncelik"></i>';
 
+                    const hiveBadge = d.ilgiliKovanId ? `<span class="badge bg-warning text-dark border ms-2"><i class="fa-solid fa-box"></i> ${d.ilgiliKovanNo}</span>` : '';
+
                     const actionBtns = `
                         <div class="dropdown">
                             <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                <li><a class="dropdown-item py-2" href="#" onclick="duzenleGorev('${doc.id}', '${d.baslik.replace(/'/g, "\\'")}', '${(d.detay || '').replace(/'/g, "\\'")}', '${d.tarih}', '${d.onem}')"><i class="fa-solid fa-pen text-primary me-2"></i> Düzenle</a></li>
+                                <li><a class="dropdown-item py-2" href="#" onclick="duzenleGorev('${doc.id}', '${d.baslik.replace(/'/g, "\\'")}', '${(d.detay || '').replace(/'/g, "\\'")}', '${d.tarih}', '${d.onem}', '${d.ilgiliKovanId || ''}')"><i class="fa-solid fa-pen text-primary me-2"></i> Düzenle</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger py-2" href="#" onclick="silGorev('${doc.id}')"><i class="fa-solid fa-trash me-2"></i> Sil</a></li>
                             </ul>
@@ -572,7 +607,7 @@
                                         <input class="form-check-input task-checkbox border-2" type="checkbox" ${durum ? 'checked' : ''} onchange="toggleDurum('${doc.id}', ${durum})" title="Tamamlandı olarak işaretle">
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="fw-bold mb-1 task-title text-dark" style="color: var(--bee-text-main)">${onemHtml} ${d.baslik}</h6>
+                                        <h6 class="fw-bold mb-1 task-title text-dark" style="color: var(--bee-text-main)">${onemHtml} ${d.baslik} ${hiveBadge}</h6>
                                         ${d.detay ? `<div class="small text-muted mb-2 text-truncate" style="max-width: 80%;">${d.detay}</div>` : ''}
                                         <div class="d-flex align-items-center gap-2 mt-1">
                                             ${dateBadgeHtml}
@@ -597,7 +632,7 @@
 
                 badgeBekleyen.innerText = bekleyenSayisi;
                 if (bekleyenSayisi === 0) {
-                    listBekleyen.innerHTML = `<div class="col-12 py-4 text-center text-muted"><i class="fa-solid fa-champagne-glasses fs-2 mb-2"></i><br>Harika! Bekleyen hiçbir göreviniz yok.</div>`;
+                    listBekleyen.innerHTML = `<div class="col-12 py-4 text-center text-muted"><i class="fa-solid fa-champagne-glasses fs-2 mb-2"></i><br>Harika! Bekleyen hiçbir göreviniz yok.<br><button class="btn btn-sm btn-bee-primary mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#gorevModal" onclick="yeniGorev()"><i class="fa-solid fa-plus"></i> Yeni Görev Ekle</button></div>`;
                 }
                 if (tamamlananSayisi === 0) {
                     listTamamlanan.innerHTML = `<div class="col-12 py-4 text-center text-muted">Henüz tamamlanmış bir görev yok.</div>`;

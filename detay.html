@@ -1,4 +1,25 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="5.jpg" type="image/jpeg">
+    <title>Kovan Detayı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- KovanTakip Özel Tasarım Stilleri ve Tema Yönetimi -->
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <!-- Include Varroa UI module -->
+    <script type="module" src="varroa-ui.js"></script>
+</head>
 <html lang="tr">
 
 <head>
@@ -267,6 +288,13 @@
                             onmouseout="this.style.backgroundColor='#10B981'" onclick="raporOlustur()">
                             <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Yapay Zeka Raporu
                         </button>
+                        <button class="btn btn-touch text-white fw-bold w-100 mb-1 shadow-sm"
+                            style="background-color: #8B5E34; border-color: #6F4A2A;"
+                            onmouseover="this.style.backgroundColor='#6F4A2A'"
+                            onmouseout="this.style.backgroundColor='#8B5E34'" onclick="openVarroaModal()">
+                            <i class="fa-solid fa-spider me-1"></i> Varroa Analizi (AI)
+                        </button>
+
                         <button class="btn btn-touch btn-outline-danger rounded-pill fw-bold w-100"
                             onclick="kovanSondu()">
                             <img src="Sonmus.png" style="height:20px; margin-right:5px;"> Kovan Söndü
@@ -274,6 +302,18 @@
                         <button class="btn btn-touch btn-danger fw-bold w-100" onclick="silKovan()">
                             <i class="fa-solid fa-trash me-1"></i> Kovânı Sil
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BEKLEYEN GÖREVLER -->
+            <div id="kovanGorevleriKapsayici" class="d-none mb-4">
+                <div class="card shadow-sm border-0"
+                    style="background-color: #fff8e1; border-left: 5px solid #ffc107 !important;">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold text-dark border-bottom border-warning pb-2 mb-3"><i
+                                class="fa-solid fa-thumbtack text-warning me-2"></i>Bu Kovan İçin Bekleyen Görevler</h6>
+                        <div id="kovanGorevleriListesi" class="d-flex flex-column gap-2"></div>
                     </div>
                 </div>
             </div>
@@ -348,6 +388,8 @@
                                         <h6 class="text-primary border-bottom pb-2"><img src="5.png" width="28"> Kovan
                                             Özellikleri
                                         </h6>
+                                        <div class="mb-2"><label class="small fw-bold">Kovan İsmi</label><input
+                                                type="text" id="e_no" class="form-control form-control-sm"></div>
                                         <div class="mb-2"><label class="small fw-bold">Barkod No</label><input
                                                 type="text" id="e_barkod" class="form-control form-control-sm"></div>
                                         <div class="row">
@@ -410,20 +452,32 @@
                                                 type="date" id="e_anaDogum" class="form-control form-control-sm"></div>
                                         <div class="row">
                                             <div class="col-6 mb-2"><label class="small fw-bold">Ana Irkı</label><select
-                                                    id="e_anaIrk" class="form-select form-select-sm">
+                                                    id="e_anaIrk" class="form-select form-select-sm"
+                                                    onchange="toggleAnaKovan()">
                                                     <option>Melez</option>
                                                     <option>Kafkas</option>
                                                     <option>Karniyol</option>
                                                     <option>İtalyan</option>
                                                     <option>Anadolu</option>
+                                                    <option>Kendi Ürettiğim</option>
                                                 </select></div>
                                             <div class="col-6 mb-2"><label class="small fw-bold">Türü</label><select
                                                     id="e_anaTur" class="form-select form-select-sm">
                                                     <option>Damızlık (F0)</option>
                                                     <option>Çiftleşmiş (F1)</option>
                                                     <option>Çiftleşmemiş</option>
-                                                    <option>Kendi Ürettiğim</option>
                                                 </select></div>
+                                        </div>
+                                        <div class="mb-2 d-none" id="e_uretilenKovanDiv">
+                                            <label class="small fw-bold text-primary"><i
+                                                    class="fa-solid fa-box me-1"></i>Üretildiği Kovan (Ana Arı)</label>
+                                            <select id="e_uretilenKovan"
+                                                class="form-select form-select-sm border-primary"
+                                                onchange="fetchEfethedIrk()">
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                            <div id="e_fetchedIrkText" class="mt-1 small fw-bold text-success ms-1">
+                                            </div>
                                         </div>
                                         <div class="mb-2"><label class="small fw-bold">Rengi</label><select
                                                 id="e_anaRenk" class="form-select form-select-sm">
@@ -548,6 +602,16 @@
                                         </select>
                                     </div>
 
+                                    <div class="col-md-6 mt-2 pt-2 border-top">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text"><i class="fa-solid fa-boxes-stacked text-success me-1"></i>Envanterden Düş</span>
+                                            <select name="envanter_malzeme" class="form-select envanter-select">
+                                                <option value="">Seçilmedi</option>
+                                            </select>
+                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;">
+                                        </div>
+                                    </div>
+
                                     <div class="col-12 d-flex align-items-center gap-2 mt-2">
                                         <label class="btn btn-outline-secondary btn-sm"><i
                                                 class="fa-solid fa-camera"></i> Foto
@@ -575,6 +639,15 @@
                                             placeholder="İlaç" list="ilacList"></div>
                                     <div class="col-md-3"><input type="text" name="not" class="form-control"
                                             placeholder="Notlar"></div>
+                                    <div class="col-md-8 mt-2 pt-2 border-top">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text"><i class="fa-solid fa-boxes-stacked text-danger me-1"></i>Envanterden Düş</span>
+                                            <select name="envanter_malzeme" class="form-select envanter-select">
+                                                <option value="">Seçilmedi</option>
+                                            </select>
+                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;">
+                                        </div>
+                                    </div>
                                     <div class="col-12 d-flex align-items-center gap-2 mt-2"><label
                                             class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-camera"></i>
                                             Foto
@@ -618,6 +691,199 @@
     </div>
 
     </div>
+    </div>
+
+    <!-- VARROA AI ANALİZ MODAL -->
+    <div class="modal fade" id="varroaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #8B5E34, #6F4A2A);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-spider me-2"></i>Varroa Akar Analizi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div id="varroaUploadStep">
+
+                        <!-- BİLGİ KARTI: Araştırma Notları -->
+                        <div class="accordion mb-3" id="varroaInfoAccordion">
+                            <div class="accordion-item border-0 shadow-sm rounded overflow-hidden">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold py-2 px-3" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#varroaInfoBody"
+                                        style="background: linear-gradient(90deg,#fff8f2,#fdf3e7); color:#6F4A2A; font-size:0.92rem;">
+                                        <i class="fa-solid fa-circle-info text-warning me-2"></i>
+                                        Analiz Nasıl Çalışır? — Fotoğraf Rehberi &amp; Önemli Notlar
+                                    </button>
+                                </h2>
+                                <div id="varroaInfoBody" class="accordion-collapse collapse">
+                                    <div class="accordion-body py-3 px-3"
+                                        style="font-size:0.85rem; background:#fffdf8;">
+
+                                        <!-- YÖNTEM -->
+                                        <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">
+                                            <i class="fa-solid fa-microscope text-warning me-1"></i> Kullanılan Tespit
+                                            Yöntemi
+                                        </h6>
+                                        <p class="mb-2 text-muted">
+                                            Bu analiz, <strong>RGB renk tabanlı piksel sınıflandırması</strong>
+                                            kullanır.
+                                            Varroa akarları kendine özgü <em>kızıl-kahverengi</em> (R:80-160, G:30-90,
+                                            B&lt;70)
+                                            tonlarıyla tanınır. Her piksel bu renk aralığına düşüyor mu diye kontrol
+                                            edilir;
+                                            birbirine yakın noktalar kümelendirilir ve her küme ayrı bir akar olarak
+                                            sayılır.
+                                        </p>
+
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-4">
+                                                <div
+                                                    class="p-2 rounded border border-warning-subtle bg-warning bg-opacity-10 text-center">
+                                                    <i class="fa-solid fa-palette text-warning mb-1 d-block fs-5"></i>
+                                                    <strong>RGB Renk Analizi</strong><br>
+                                                    <small class="text-muted">Piksel düzeyinde kızıl-kahve ton
+                                                        tespiti</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div
+                                                    class="p-2 rounded border border-info-subtle bg-info bg-opacity-10 text-center">
+                                                    <i class="fa-solid fa-object-group text-info mb-1 d-block fs-5"></i>
+                                                    <strong>Kümeleme (Clustering)</strong><br>
+                                                    <small class="text-muted">Yakın pikseller tek akar olarak
+                                                        gruplanır</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div
+                                                    class="p-2 rounded border border-success-subtle bg-success bg-opacity-10 text-center">
+                                                    <i
+                                                        class="fa-solid fa-shield-halved text-success mb-1 d-block fs-5"></i>
+                                                    <strong>Skor Eşleme</strong><br>
+                                                    <small class="text-muted">Akar sayısı → Yok / Az / Orta /
+                                                        Çok</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="alert alert-secondary py-2 px-3 small mb-3">
+                                            <i class="fa-solid fa-flask me-1"></i>
+                                            <strong>Bilimsel bağlam:</strong> Akademik çalışmalar (VarroDetector, YOLO
+                                            tabanlı sistemler)
+                                            daha doğru sonuçlar için derin öğrenme (CNN/YOLO) + özel eğitim verisi
+                                            gerektirir.
+                                            Bu araç <em>yapay zeka destekli bir tahmin</em> sunar; kesin tanı için
+                                            oksalik asit yıkama
+                                            (alkol yıkama) testini kullanın.
+                                        </div>
+
+                                        <!-- FOTOĞRAF REHBERİ -->
+                                        <h6 class="fw-bold text-dark border-bottom pb-1 mb-2 mt-2">
+                                            <i class="fa-solid fa-camera text-primary me-1"></i> Nasıl Fotoğraf
+                                            Çekilmeli?
+                                        </h6>
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12 col-md-6">
+                                                <ul class="mb-0 ps-3" style="line-height:1.8;">
+                                                    <li><strong>Yüzey:</strong> Temiz beyaz bir zemine konan arılar en
+                                                        iyi sonucu verir</li>
+                                                    <li><strong>Mesafe:</strong> Tabletten en fazla 30–50 cm uzaktan
+                                                        çekin</li>
+                                                    <li><strong>Işık:</strong> Dolaylı, yumuşak ışık (bulutlu gün veya
+                                                        gölge) — parlak direkt güneş yansıma yaratır</li>
+                                                    <li><strong>Netleme:</strong> Telefonun makro modunu kullanın,
+                                                        ekrana dokunarak odaklayın</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <ul class="mb-0 ps-3" style="line-height:1.8;">
+                                                    <li><strong>Titreme:</strong> Telefonu düz bir yüzeye yaslanarak
+                                                        tutun ya da tripod kullanın</li>
+                                                    <li><strong>Arka plan:</strong> Açık, tek renkli, mat zemin tercih
+                                                        edin (bej, beyaz)</li>
+                                                    <li><strong>Çözünürlük:</strong> Kameranın en yüksek çözünürlük
+                                                        ayarını kullanın</li>
+                                                    <li><strong>Kirlilik:</strong> Balmumu artıkları, propolis, arı
+                                                        vücudu parçaları yanlış tespit yaratabilir</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- UYARILAR -->
+                                        <div class="alert alert-warning py-2 px-3 small mb-0 mt-2">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                            <strong>Önemli sınırlamalar:</strong>
+                                            Görüntü tabanlı sayım yalnızca <em>phoretik</em> (arı üzerinde ya da tahtada
+                                            görünen) akarları tespit eder.
+                                            Kapalı yavru gözlerindeki akarlar görüntüde yer almaz — bunlar toplam
+                                            popülasyonun %70–85'ini oluşturabilir.
+                                            Alkol/oksalik asit yıkama testi daha kesin sonuç verir.
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- YÜKLEME ALANI -->
+                        <div class="upload-container text-center border-dashed p-4 rounded bg-white">
+                            <i class="fa-solid fa-cloud-arrow-up display-4 text-muted mb-3"></i>
+                            <h5>Çerçeve Fotoğrafı Yükleyin</h5>
+                            <p class="text-muted small">En iyi sonuç için: Beyaz zemin üzerinde, net, yakın, iyi
+                                aydınlatılmış, 30 cm uzaklıktan çekilmiş düz yüzey fotoğrafı kullanın.</p>
+                            <label class="btn btn-bee-primary px-4 py-2 mt-2">
+                                <i class="fa-solid fa-camera me-1"></i> Fotoğraf Seç
+                                <input type="file" accept="image/*" hidden onchange="handleVarroaPhoto(this)">
+                            </label>
+                        </div>
+                    </div>
+
+
+                    <div id="varroaProcessingStep" class="d-none text-center py-5">
+                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                        <h4 class="mt-3">Yapay Zeka Analiz Ediyor...</h4>
+                        <p class="text-muted">Varroa akarları tespit ediliyor, lütfen bekleyin.</p>
+                    </div>
+
+                    <div id="varroaResultStep" class="d-none">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="position-relative border rounded overflow-hidden shadow-sm"
+                                    style="background: #000;">
+                                    <canvas id="varroaCanvas"
+                                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;"></canvas>
+                                    <div class="position-absolute top-0 end-0 m-2 badge bg-dark opacity-75">AI Tespit
+                                        Görünümü</div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="fw-bold mb-3">Analiz Sonucu</h5>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Tespit Edilen Akar:</span>
+                                            <span class="fs-4 fw-bold text-danger" id="varroaCount">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <span>Risk Seviyesi:</span>
+                                            <span class="badge" id="varroaRisk">-</span>
+                                        </div>
+                                        <div class="alert alert-info small mb-4" id="varroaRecommendation"></div>
+
+                                        <button class="btn btn-success w-100 fw-bold mb-2" onclick="saveVarroaResult()">
+                                            <i class="fa-solid fa-file-export me-1"></i> Kayıtlara Ekle
+                                        </button>
+                                        <button class="btn btn-outline-secondary w-100 btn-sm"
+                                            onclick="resetVarroaAnalysis()">
+                                            <i class="fa-solid fa-rotate me-1"></i> Yeniden Dene
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- YAPAY ZEKA RAPOR MODAL -->
@@ -745,6 +1011,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="weather.js"></script>
+    <script src="varroa-analiz.js"></script>
     <script>
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -762,32 +1029,157 @@
         });
 
         if (!kovanId) window.location.href = "kovanlarim.html";
-        auth.onAuthStateChanged(user => { if (user) { currentUser = user; yukle(); navigasyonuKur(); } else window.location.href = 'login.html'; });
+        auth.onAuthStateChanged(user => { if (user) { currentUser = user; yukle(); navigasyonuKur(); loadKovanlarForAnaSelect(); loadEnvanterForSelect(); } else window.location.href = 'login.html'; });
 
-        async function navigasyonuKur() {
+        async function loadEnvanterForSelect() {
             try {
-                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").get();
-                if (snap.empty) return;
-                let kovanlar = [];
-                snap.forEach(doc => kovanlar.push({ id: doc.id, no: doc.data().no || "" }));
-                kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' }));
-                const idx = kovanlar.findIndex(k => k.id === kovanId);
-                const btnPrev = document.getElementById('btnPrev');
-                const btnNext = document.getElementById('btnNext');
-                if (idx > 0) {
-                    btnPrev.classList.remove('disabled'); btnPrev.removeAttribute('disabled');
-                    btnPrev.innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx - 1].no})`;
-                    btnPrev.addEventListener('click', () => window.location.href = `detay.html?id=${kovanlar[idx - 1].id}`);
-                }
-                if (idx < kovanlar.length - 1) {
-                    btnNext.classList.remove('disabled'); btnNext.removeAttribute('disabled');
-                    btnNext.innerHTML = `Sonraki (${kovanlar[idx + 1].no}) <i class="fa-solid fa-chevron-right"></i>`;
-                    btnNext.addEventListener('click', () => window.location.href = `detay.html?id=${kovanlar[idx + 1].id}`);
-                }
-            } catch (e) { console.error("Nav hata:", e); }
+                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("envanter").orderBy("ad", "asc").get();
+                const selects = document.querySelectorAll('.envanter-select');
+                if(selects.length === 0) return;
+                let optionsHtml = '<option value="">Seçilmedi</option>';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    optionsHtml += `<option value="${doc.id}">${d.ad} (Stok: ${d.miktar} ${d.birim})</option>`;
+                });
+                selects.forEach(sel => sel.innerHTML = optionsHtml);
+            } catch (e) { console.error("Envanter yüklenirken hata", e); }
         }
 
-        function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
+        function navigasyonuKur() {
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").onSnapshot(snap => {
+                try {
+                    const btnPrev = document.getElementById('btnPrev');
+                    const btnNext = document.getElementById('btnNext');
+
+                    if (snap.empty) {
+                        btnPrev.classList.add('disabled'); btnPrev.setAttribute('disabled', 'true');
+                        btnNext.classList.add('disabled'); btnNext.setAttribute('disabled', 'true');
+                        return;
+                    }
+
+                    let kovanlar = [];
+                    snap.forEach(doc => {
+                        let kovanNo = doc.data().no;
+                        if (kovanNo === undefined || kovanNo === null) kovanNo = "";
+                        kovanlar.push({ id: doc.id, no: String(kovanNo) });
+                    });
+
+                    kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' }));
+                    const idx = kovanlar.findIndex(k => k.id === kovanId);
+
+                    if (idx > 0) {
+                        btnPrev.classList.remove('disabled'); btnPrev.removeAttribute('disabled');
+                        btnPrev.innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki (${kovanlar[idx - 1].no})`;
+                        btnPrev.onclick = () => window.location.href = `detay.html?id=${kovanlar[idx - 1].id}`;
+                    } else {
+                        btnPrev.classList.add('disabled'); btnPrev.setAttribute('disabled', 'true');
+                        btnPrev.innerHTML = `<i class="fa-solid fa-chevron-left"></i> Önceki`;
+                        btnPrev.onclick = null;
+                    }
+
+                    if (idx !== -1 && idx < kovanlar.length - 1) {
+                        btnNext.classList.remove('disabled'); btnNext.removeAttribute('disabled');
+                        btnNext.innerHTML = `Sonraki (${kovanlar[idx + 1].no}) <i class="fa-solid fa-chevron-right"></i>`;
+                        btnNext.onclick = () => window.location.href = `detay.html?id=${kovanlar[idx + 1].id}`;
+                    } else {
+                        btnNext.classList.add('disabled'); btnNext.setAttribute('disabled', 'true');
+                        btnNext.innerHTML = `Sonraki <i class="fa-solid fa-chevron-right"></i>`;
+                        btnNext.onclick = null;
+                    }
+                } catch (e) { console.error("Nav hata:", e); }
+            }, err => {
+                console.error("Navigasyon onSnapshot hatası:", err);
+            });
+        }
+
+        function checkDateStatusGorev(isoString) {
+            if (!isoString) return { class: 'badge bg-secondary', text: 'Tarih Yok', overdue: false };
+            const taskDate = new Date(isoString + "T00:00:00");
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffTime = taskDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let info = { overdue: false };
+            if (diffDays < 0) {
+                info.class = 'badge bg-danger text-white border border-danger shadow-sm';
+                info.icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                info.text = `${Math.abs(diffDays)} GÜN GECİKTİ`;
+                info.overdue = true;
+            } else if (diffDays === 0) {
+                info.class = 'badge bg-warning text-dark border border-warning shadow-sm';
+                info.icon = '<i class="fa-solid fa-clock"></i>';
+                info.text = `BUGÜN YAPILACAK`;
+            } else if (diffDays <= 3) {
+                info.class = 'badge bg-info text-dark border border-info shadow-sm';
+                info.icon = '<i class="fa-regular fa-calendar"></i>';
+                info.text = `${diffDays} GÜN KALDI`;
+            } else {
+                info.class = 'badge bg-light text-dark border shadow-sm';
+                info.icon = '<i class="fa-regular fa-calendar"></i>';
+                info.text = new Date(isoString).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+            return info;
+        }
+
+        async function toggleGorev(id, currentDurum) {
+            try {
+                await db.collection("kullanicilar").doc(currentUser.uid).collection("gorevler").doc(id).update({
+                    tamamlandi: !currentDurum,
+                    tamamlanmaTarihi: !currentDurum ? new Date().toISOString() : null
+                });
+            } catch (e) {
+                console.error("Görev güncellenemedi", e);
+            }
+        }
+
+        function gorevleriGetir() {
+            db.collection("kullanicilar").doc(currentUser.uid).collection("gorevler")
+                .where("ilgiliKovanId", "==", kovanId)
+                .where("tamamlandi", "==", false)
+                .onSnapshot(snap => {
+                    const container = document.getElementById('kovanGorevleriKapsayici');
+                    const mList = document.getElementById('kovanGorevleriListesi');
+                    mList.innerHTML = '';
+
+                    if (snap.empty) {
+                        container.classList.add('d-none');
+                        return;
+                    }
+
+                    container.classList.remove('d-none');
+                    let gorevler = [];
+                    snap.forEach(doc => gorevler.push({ id: doc.id, ...doc.data() }));
+                    gorevler.sort((a, b) => a.tarih.localeCompare(b.tarih));
+
+                    gorevler.forEach(d => {
+                        const durum = d.tamamlandi || false;
+                        const ds = checkDateStatusGorev(d.tarih);
+
+                        let onemHtml = '';
+                        if (d.onem === 'Yüksek') onemHtml = '<i class="fa-solid fa-fire text-danger" title="Yüksek Öncelik"></i> ';
+                        else if (d.onem === 'Düşük') onemHtml = '<i class="fa-solid fa-arrow-down text-secondary" title="Düşük Öncelik"></i> ';
+
+                        const cardHtml = `
+                        <div class="bg-white p-2 rounded border shadow-sm d-flex align-items-center">
+                            <div class="me-3 ms-1">
+                                <input class="form-check-input border-secondary" type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" ${durum ? 'checked' : ''} onchange="toggleGorev('${d.id}', ${durum})" title="Tamamlandı olarak işaretle">
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold mb-1" style="font-size: 0.95rem;">${onemHtml}${d.baslik}</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="${ds.class}" style="font-size: 0.75rem;">${ds.icon} ${ds.text}</span>
+                                    ${d.detay ? `<span class="text-muted small text-truncate" style="max-width: 150px; display: inline-block;">${d.detay}</span>` : ''}
+                                </div>
+                            </div>
+                            <a href="gorevler.html" class="btn btn-sm btn-outline-secondary ms-2" title="Görevi Düzenle"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        </div>`;
+                        mList.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+                });
+        }
+
+        function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); gorevleriGetir(); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
         function formatDate(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0].slice(2)}` : iso; }
 
         function renderView(d) {
@@ -815,6 +1207,7 @@
                 else soyCont.classList.add('d-none');
             }
             if (document.getElementById('v-guncelleme')) document.getElementById('v-guncelleme').innerText = d.guncelleme ? formatDate(d.guncelleme) : '-';
+            document.getElementById('e_no').value = d.no || '';
             document.getElementById('e_barkod').value = d.barkod || '';
             document.getElementById('e_tip').value = d.tip || '';
             document.getElementById('e_irk').value = d.irk || '';
@@ -827,10 +1220,12 @@
             document.getElementById('e_anaDogum').value = d.ana?.dogum || '';
             document.getElementById('e_anaIrk').value = d.ana?.irk || '';
             document.getElementById('e_anaTur').value = d.ana?.tur || '';
+            document.getElementById('e_uretilenKovan').value = d.ana?.uretildigi_kovan || '';
             document.getElementById('e_anaRenk').value = d.ana?.renk || '';
             document.getElementById('e_anaPerf').value = d.ana?.perf || '';
             document.getElementById('e_anaDegisim').value = d.ana?.degisim || '';
             toggleSoy();
+            toggleAnaKovan();
         }
 
         function toggleSoy() {
@@ -840,11 +1235,100 @@
             else { c.classList.add('d-none'); document.getElementById('e_soy').value = ''; }
         }
 
-        document.getElementById('editForm').addEventListener('submit', e => { e.preventDefault(); const ud = { barkod: document.getElementById('e_barkod').value, tip: document.getElementById('e_tip').value, irk: document.getElementById('e_irk').value, cerceve: Number(document.getElementById('e_cerceve').value), koken: document.getElementById('e_koken').value, soy: document.getElementById('e_soy').value, hircinlik: Number(document.getElementById('e_hircinlik').value), taban: document.getElementById('e_taban').checked, polen: document.getElementById('e_polen').checked, ana: { dogum: document.getElementById('e_anaDogum').value, irk: document.getElementById('e_anaIrk').value, tur: document.getElementById('e_anaTur').value, renk: document.getElementById('e_anaRenk').value, perf: document.getElementById('e_anaPerf').value, degisim: document.getElementById('e_anaDegisim').value }, guncelleme: new Date().toISOString().split('T')[0] }; db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(() => { const md = bootstrap.Modal.getInstance(document.getElementById('editModal')); if (md) md.hide(); }); });
+        let globalKovanlarListForAna = [];
+
+        function toggleAnaKovan() {
+            const t = document.getElementById('e_anaIrk').value;
+            const c = document.getElementById('e_uretilenKovanDiv');
+            if (t === 'Kendi Ürettiğim') {
+                c.classList.remove('d-none');
+            } else {
+                c.classList.add('d-none');
+                document.getElementById('e_uretilenKovan').value = '';
+                document.getElementById('e_fetchedIrkText').innerText = '';
+                delete document.getElementById('e_fetchedIrkText').dataset.irk;
+            }
+        }
+
+        async function loadKovanlarForAnaSelect() {
+            try {
+                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").orderBy("no", "asc").get();
+                const sel = document.getElementById('e_uretilenKovan');
+                sel.innerHTML = '<option value="">Seçiniz...</option>';
+                globalKovanlarListForAna = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    globalKovanlarListForAna.push({ no: d.no, irk: d.irk, anaIrk: d.ana?.irk });
+                    const opt = document.createElement('option');
+                    opt.value = d.no;
+                    opt.textContent = d.no + " Nolu Kovan";
+                    sel.appendChild(opt);
+                });
+            } catch (e) { console.error("Kovanlar (Ana Arı) listesi çekilemedi", e); }
+        }
+
+        function fetchEfethedIrk() {
+            const val = document.getElementById('e_uretilenKovan').value;
+            const textObj = document.getElementById('e_fetchedIrkText');
+            if (!val) {
+                textObj.innerText = "";
+                delete textObj.dataset.irk;
+                return;
+            }
+            const kovan = globalKovanlarListForAna.find(k => k.no === val);
+            if (kovan) {
+                const foundIrk = kovan.anaIrk || kovan.irk || "Bilinmiyor";
+                textObj.innerText = "Algılanan Irk: " + foundIrk;
+                textObj.dataset.irk = foundIrk;
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', e => {
+            e.preventDefault();
+
+            let secilenAnaIrk = document.getElementById('e_anaIrk').value;
+            if (secilenAnaIrk === 'Kendi Ürettiğim') {
+                const fetched = document.getElementById('e_fetchedIrkText').dataset.irk;
+                if (fetched) secilenAnaIrk = fetched;
+            }
+
+            const ud = {
+                no: document.getElementById('e_no').value,
+                barkod: document.getElementById('e_barkod').value,
+                tip: document.getElementById('e_tip').value,
+                irk: document.getElementById('e_irk').value,
+                cerceve: Number(document.getElementById('e_cerceve').value),
+                koken: document.getElementById('e_koken').value,
+                soy: document.getElementById('e_soy').value,
+                hircinlik: Number(document.getElementById('e_hircinlik').value),
+                taban: document.getElementById('e_taban').checked,
+                polen: document.getElementById('e_polen').checked,
+                ana: {
+                    dogum: document.getElementById('e_anaDogum').value,
+                    irk: secilenAnaIrk,
+                    tur: document.getElementById('e_anaTur').value,
+                    uretildigi_kovan: document.getElementById('e_uretilenKovan').value || "",
+                    renk: document.getElementById('e_anaRenk').value,
+                    perf: document.getElementById('e_anaPerf').value,
+                    degisim: document.getElementById('e_anaDegisim').value
+                },
+                guncelleme: new Date().toISOString().split('T')[0]
+            };
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update(ud).then(() => {
+                const md = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                if (md) md.hide();
+            });
+        });
         function handlePhoto(input, imgId, hiddenId) { if (input.files[0]) { const r = new FileReader(); r.onload = function (e) { const img = new Image(); img.onload = function () { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = img.width; let h = img.height; if (w > 800) { h *= 800 / w; w = 800; } c.width = w; c.height = h; ctx.drawImage(img, 0, 0, w, h); document.getElementById(imgId).src = c.toDataURL('image/jpeg', 0.7); document.getElementById(imgId).style.display = 'block'; document.getElementById(hiddenId).value = c.toDataURL('image/jpeg', 0.7); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); } }
         function kayitEkle(e, col) {
             e.preventDefault();
             const d = Object.fromEntries(new FormData(e.target));
+            
+            const secilenEnvanterId = d.envanter_malzeme;
+            const secilenMiktar = Number(d.envanter_miktar) || 1;
+            delete d.envanter_malzeme;
+            delete d.envanter_miktar;
+
             if (!d.tarih) d.tarih = new Date().toISOString().split('T')[0];
             if (col === 'hasatKayitlari') d.miktar = Number(d.miktar);
             if (col === 'bakimKayitlari') {
@@ -859,6 +1343,11 @@
             }
             if (col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value;
             db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(() => {
+                if(secilenEnvanterId) {
+                    db.collection("kullanicilar").doc(currentUser.uid).collection("envanter").doc(secilenEnvanterId)
+                      .update({ miktar: firebase.firestore.FieldValue.increment(-secilenMiktar) })
+                      .catch(err => console.error("Envanter düşülemedi", err));
+                }
                 e.target.reset();
                 document.querySelectorAll('.img-preview').forEach(i => i.style.display = 'none');
                 document.querySelectorAll('input[type=hidden]').forEach(i => i.value = '');
@@ -876,7 +1365,26 @@
                 snap.forEach(d => { let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); });
                 docs.sort((a, b) => b._tarih.localeCompare(a._tarih));
                 if (col === 'hasatKayitlari') { guncelleGrafik(docs); let toplamHasat = docs.reduce((s, d) => s + (Number(d.miktar) || 0), 0); const repHasat = document.getElementById('rep-hasat'); if (repHasat) repHasat.innerText = toplamHasat.toFixed(1) + ' kg'; }
-                if (col === 'bakimKayitlari') { const buYil = String(new Date().getFullYear()); let yilBakim = docs.filter(d => (d.tarih || '').startsWith(buYil)).length; const repBakim = document.getElementById('rep-bakim'); if (repBakim) repBakim.innerText = yilBakim; }
+                if (col === 'bakimKayitlari') {
+                    const buYil = String(new Date().getFullYear());
+                    let yilBakim = docs.filter(d => (d.tarih || '').startsWith(buYil)).length;
+                    const repBakim = document.getElementById('rep-bakim');
+                    if (repBakim) repBakim.innerText = yilBakim;
+
+                    const sonCerceveliBakim = docs.find(d => d.cerceveGuncelle != null && d.cerceveGuncelle !== '');
+                    if (sonCerceveliBakim) {
+                        const sonCerceve = Number(sonCerceveliBakim.cerceveGuncelle);
+                        const vCerceve = document.getElementById('v-cerceve');
+                        if (vCerceve) vCerceve.innerText = sonCerceve;
+
+                        let guc = '-';
+                        if (sonCerceve >= 7) guc = 'Güçlü <i class="fa-solid fa-arrow-trend-up text-success"></i>';
+                        else if (sonCerceve >= 4) guc = 'Normal <i class="fa-solid fa-equals text-warning"></i>';
+                        else if (sonCerceve > 0) guc = 'Zayıf <i class="fa-solid fa-arrow-trend-down text-danger"></i>';
+                        const vGuc = document.getElementById('v-guc');
+                        if (vGuc) vGuc.innerHTML = `Güç: ${guc}`;
+                    }
+                }
                 if (docs.length > 0) { let latest = docs[0]._tarih; const repSon = document.getElementById('rep-sonislem'); if (repSon) { let cur = repSon.getAttribute('data-date') || ""; if (latest > cur) { repSon.setAttribute('data-date', latest); repSon.innerText = formatDate(latest); } } }
                 docs.forEach(data => {
                     const rowId = `row-${data.id}`;
@@ -1072,8 +1580,9 @@
                 haSnap.forEach(doc => hasatlar.push({ id: doc.id, ...doc.data() }));
             } catch (e) { console.error('Rapor veri hatası:', e); }
             const sonBakim = bakimlar[0] || null;
-            // Çerçeve: önce son bakım kaydından, yoksa kovan özelliklerinden
-            const cerceveHam = sonBakim?.cerceveGuncelle ?? null;
+            // Çerçeve: önce son girilen çerçeveli bakım kaydından, yoksa kovan özelliklerinden
+            const sonCerceveliBakim = bakimlar.find(b => b.cerceveGuncelle != null && b.cerceveGuncelle !== '');
+            const cerceveHam = sonCerceveliBakim ? sonCerceveliBakim.cerceveGuncelle : null;
             const cerceve = (cerceveHam !== null && cerceveHam !== '' && !isNaN(cerceveHam)) ? Number(cerceveHam) : (d.cerceve || 0);
             const cerceveKaynagi = (cerceveHam !== null && cerceveHam !== '' && !isNaN(cerceveHam)) ? 'son bakım kaydı' : 'kovan özellikleri';
             const irk = d.irk || 'Bilinmiyor'; const tip = d.tip || 'Bilinmiyor'; const hircinlik = d.hircinlik || 3; const koken = d.koken || 'Bilinmiyor';
@@ -1123,16 +1632,23 @@
                 if (hircinlik >= 4) { s = Math.max(0, s - 15); dikkats.push(`<i class="fa-solid fa-face-angry"></i> <b>Agresif Koloni (${hircinlik}/5):</b> Sessiz ırk ana tercih edilmeli.`); }
                 skorlar.anaAri = s;
             })();
-            // MOD-3: VARROA
+            // MOD-3: VARROA (manuel + AI analiz kayıtları)
             (function () {
-                const vk = bakimlar.map(b => b.varroaYuk).filter(Boolean);
+                // Manuel bakım girişlerindeki varroaYuk değerleri
+                const vkManuel = bakimlar.filter(b => b.varroaYuk).map(b => b.varroaYuk);
+                // Varroa Analizi (AI) kaydı olanlar — islem alanına bakıyoruz
+                const vkAI = bakimlar.filter(b => b.islem === 'Varroa Analizi (AI)' && b.varroaYuk).map(b => b.varroaYuk);
+                // İkisini birleştir, önce tarihe göre en yeniler zaten başta (orderBy desc)
+                const vk = [...new Set([...vkManuel, ...vkAI])].filter(Boolean);
                 const sv = { 'Yok': 0, 'Az': 1, 'Orta': 2, 'Çok': 3 };
                 const son3 = vk.slice(0, 3); const maxSon3 = son3.reduce((m, v) => Math.max(m, sv[v] || 0), 0);
                 const artanTrend = son3.length >= 2 && (sv[son3[0]] > sv[son3[1]]);
-                if (maxSon3 >= 3) { skorlar.varroa = 10; kritikler.push(`<i class="fa-solid fa-bug"></i> <b>Kritik Varroa Yükü:</b> Oksalik/formik asit ile acil müdahale gerekli.`); eylemler.push('🔴 Varroa tedavisini başlat'); }
-                else if (maxSon3 >= 2 || artanTrend) { skorlar.varroa = 45; dikkats.push(`<i class="fa-solid fa-bug"></i> <b>Yükselen Varroa Trendi:</b> Taban sayımı yapın.`); eylemler.push('🟡 Varroa taban sayımı yap'); }
-                else if (maxSon3 === 1) { skorlar.varroa = 75; iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Düşük Varroa Baskısı:</b> Rutin takip sürdürülmeli.`); }
-                else { skorlar.varroa = vk.length > 0 ? 95 : 70; if (vk.length > 0) iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Varroa Yok/Çok Az:</b> İzlemeye devam edin.`); }
+                // AI kaydına özel not
+                const aiNot = vkAI.length > 0 ? ` <span class="badge bg-secondary ms-1">Son AI: ${vkAI[0]}</span>` : '';
+                if (maxSon3 >= 3) { skorlar.varroa = 10; kritikler.push(`<i class="fa-solid fa-bug"></i> <b>Kritik Varroa Yükü${aiNot}:</b> Oksalik/formik asit ile acil müdahale gerekli.`); eylemler.push('🔴 Varroa tedavisini başlat'); }
+                else if (maxSon3 >= 2 || artanTrend) { skorlar.varroa = 45; dikkats.push(`<i class="fa-solid fa-bug"></i> <b>Yükselen Varroa Trendi${aiNot}:</b> Taban sayımı yapın.`); eylemler.push('🟡 Varroa taban sayımı yap'); }
+                else if (maxSon3 === 1) { skorlar.varroa = 75; iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Düşük Varroa Baskısı${aiNot}:</b> Rutin takip sürdürülmeli.`); }
+                else { skorlar.varroa = vk.length > 0 ? 95 : 70; if (vk.length > 0) iyiler.push(`<i class="fa-solid fa-shield-halved"></i> <b>Varroa Yok/Çok Az${aiNot}:</b> İzlemeye devam edin.`); }
             })();
             // MOD-4: YÜKSÜK
             (function () {
@@ -1354,6 +1870,89 @@
 
             if (chartEklendi) {
                 document.getElementById('aiChartsRow').classList.remove('d-none');
+            }
+        }
+
+        // --- VARROA AI ANALİZ MANTIK ---
+        const varroaAI = new VarroaAnaliz();
+        let currentVarroaResult = null;
+
+        function openVarroaModal() {
+            resetVarroaAnalysis();
+            new bootstrap.Modal(document.getElementById('varroaModal')).show();
+        }
+
+        function resetVarroaAnalysis() {
+            document.getElementById('varroaUploadStep').classList.remove('d-none');
+            document.getElementById('varroaProcessingStep').classList.add('d-none');
+            document.getElementById('varroaResultStep').classList.add('d-none');
+            currentVarroaResult = null;
+        }
+
+        function handleVarroaPhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = async function () {
+                        document.getElementById('varroaUploadStep').classList.add('d-none');
+                        document.getElementById('varroaProcessingStep').classList.remove('d-none');
+
+                        // Give UI time to update
+                        setTimeout(async () => {
+                            const result = await varroaAI.analyzeFrame(img, document.getElementById('varroaCanvas'));
+                            displayVarroaResult(result);
+                        }, 500);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function displayVarroaResult(result) {
+            currentVarroaResult = result;
+            document.getElementById('varroaProcessingStep').classList.add('d-none');
+            document.getElementById('varroaResultStep').classList.remove('d-none');
+
+            document.getElementById('varroaCount').innerText = result.count;
+            document.getElementById('varroaRisk').innerText = result.risk;
+
+            const riskBadge = document.getElementById('varroaRisk');
+            riskBadge.className = 'badge';
+            if (result.risk === 'Sağlıklı') riskBadge.classList.add('bg-success');
+            else if (result.risk === 'Düşük Risk') riskBadge.classList.add('bg-info');
+            else if (result.risk === 'Orta Risk') riskBadge.classList.add('bg-warning', 'text-dark');
+            else riskBadge.classList.add('bg-danger');
+
+            document.getElementById('varroaRecommendation').innerText = result.recommendation;
+        }
+
+        async function saveVarroaResult() {
+            if (!currentVarroaResult) return;
+
+            // Varroa sayısını bakım kaydı varroaYuk alanıyla uyumlu 4 seviyeye dönüştür
+            let varroaYuk = 'Yok';
+            if (currentVarroaResult.count >= 15) varroaYuk = 'Çok';
+            else if (currentVarroaResult.count >= 5) varroaYuk = 'Orta';
+            else if (currentVarroaResult.count >= 1) varroaYuk = 'Az';
+
+            const data = {
+                tarih: new Date().toISOString().split('T')[0],
+                islem: 'Varroa Analizi (AI)',
+                not: `AI tespiti: ${currentVarroaResult.count} akar — ${currentVarroaResult.risk}. ${currentVarroaResult.recommendation}`,
+                varroaYuk: varroaYuk
+                // Fotoğraf kaydedilmiyor
+            };
+
+            try {
+                await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection('bakimKayitlari').add(data);
+                alert('Varroa analiz sonucu Bakım / Besleme kayıtlarına eklendi.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('varroaModal'));
+                if (modal) modal.hide();
+            } catch (e) {
+                console.error("Kaydetme hatası:", e);
+                alert('Kayıt eklenemedi.');
             }
         }
     </script>
