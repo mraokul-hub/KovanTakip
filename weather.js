@@ -1,5 +1,54 @@
 // weather.js
 
+// Firebase Background Synchronization for Regions
+async function syncBolgelerToFirebase(gruplar, aktifId) {
+    const uid = firebase.auth()?.currentUser?.uid || localStorage.getItem('kovan_uid');
+    if (!uid) return;
+    try {
+        await firebase.firestore().collection("kullanicilar").doc(uid).collection("ayarlar").doc("bolgeGruplari").set({
+            gruplar: gruplar,
+            aktifId: aktifId
+        }, { merge: true });
+    } catch(e) { console.error("Firebase bölge senkronizasyon hatası:", e); }
+}
+
+window.initBolgeSync = async function() {
+    const uid = firebase.auth()?.currentUser?.uid || localStorage.getItem('kovan_uid');
+    if (!uid) return;
+    
+    try {
+        const doc = await firebase.firestore().collection("kullanicilar").doc(uid).collection("ayarlar").doc("bolgeGruplari").get();
+        if (doc.exists) {
+            const data = doc.data();
+            let changed = false;
+            
+            if (data.gruplar && JSON.stringify(data.gruplar) !== localStorage.getItem('kovan_gruplari')) {
+                localStorage.setItem('kovan_gruplari', JSON.stringify(data.gruplar));
+                changed = true;
+            }
+            if (data.aktifId && data.aktifId !== localStorage.getItem('kovan_aktif_grup_id')) {
+                localStorage.setItem('kovan_aktif_grup_id', data.aktifId);
+                changed = true;
+            }
+            
+            if (changed && typeof loadHavaDurumu === 'function' && document.getElementById('havaDurumuKarti')) {
+                loadHavaDurumu();
+                // Kovan listesini ve istatistikleri de yenile
+                if (typeof kovanlariYukle === 'function') kovanlariYukle(uid);
+                if (typeof istatistikleriYukle === 'function') istatistikleriYukle(uid);
+            }
+        } else {
+            // Firebase empty, sync local -> Firebase (Background)
+            const localGruplar = getKovanGruplari();
+            const localAktif = getAktifGrupId();
+            if (localGruplar.length > 0) {
+                syncBolgelerToFirebase(localGruplar, localAktif);
+            }
+        }
+    } catch(e) { console.error("Bölge getirme hatası:", e); }
+};
+
+// Existing synchronous getters/setters with backup logic
 function getKovanGruplari() {
     try {
         const data = localStorage.getItem('kovan_gruplari');
@@ -9,6 +58,7 @@ function getKovanGruplari() {
 
 function saveKovanGruplari(arr) {
     localStorage.setItem('kovan_gruplari', JSON.stringify(arr));
+    syncBolgelerToFirebase(arr, getAktifGrupId());
 }
 
 function getAktifGrupId() {
@@ -17,14 +67,40 @@ function getAktifGrupId() {
 
 function setAktifGrupId(id) {
     localStorage.setItem('kovan_aktif_grup_id', id);
+    syncBolgelerToFirebase(getKovanGruplari(), id);
 }
 
-function showBolgeModal() {
+// Global listener for auth state to trigger sync
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        window.initBolgeSync();
+    }
+});
+
+function showBolgeModal(editId = null) {
+    document.getElementById('editBolgeId').value = editId || '';
+    const title = document.querySelector('#bolgeModal .modal-title');
+    
+    if (editId) {
+        title.innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Bölge Düzenle';
+        const gruplar = getKovanGruplari();
+        const g = gruplar.find(x => x.id === editId);
+        if (g) {
+            document.getElementById('secGrupAdi').value = g.grupAdi || '';
+            document.getElementById('secBolge').value = g.bolge || 'Marmara';
+            document.getElementById('secSehir').value = g.sehir || '';
+        }
+    } else {
+        title.innerHTML = '<i class="fa-solid fa-map-location-dot me-2"></i>Yeni Bölge Ekle';
+        document.getElementById('secGrupAdi').value = '';
+        document.getElementById('secSehir').value = '';
+    }
+    
     new bootstrap.Modal(document.getElementById('bolgeModal')).show();
-    setTimeout(populateBolgeModalKovanlar, 300);
+    setTimeout(() => populateBolgeModalKovanlar(editId), 300);
 }
 
-async function populateBolgeModalKovanlar() {
+async function populateBolgeModalKovanlar(editId = null) {
     const listElement = document.getElementById('bolgeModalKovanListesi');
     if (!listElement) return;
 
@@ -47,13 +123,14 @@ async function populateBolgeModalKovanlar() {
 
         let html = '';
         kovanlar.forEach(k => {
+            const isChecked = editId && k.data.bolgeGrupId === editId;
             html += `
             <div class="form-check mb-2 border-bottom pb-2">
-                <input class="form-check-input bolge-kovan-cb cursor-pointer" type="checkbox" value="${k.id}" id="cb_bolge_${k.id}">
+                <input class="form-check-input bolge-kovan-cb cursor-pointer" type="checkbox" value="${k.id}" id="cb_bolge_${k.id}" ${isChecked ? 'checked' : ''}>
                 <label class="form-check-label ms-2 cursor-pointer w-100" for="cb_bolge_${k.id}">
                     <span class="fw-bold text-dark">Kovan: ${k.data.no || '?'}</span> 
                     <span class="text-muted small ms-2">${k.data.tip || ''} ${k.data.irk || ''}</span>
-                    ${k.data.bolgeGrupAdi ? `<span class="badge bg-secondary ms-2 small">Şu an: ${k.data.bolgeGrupAdi}</span>` : ''}
+                    ${k.data.bolgeGrupAdi && k.data.bolgeGrupId !== editId ? `<span class="badge bg-secondary ms-2 small">Şu an: ${k.data.bolgeGrupAdi}</span>` : ''}
                 </label>
             </div>`;
         });
@@ -65,6 +142,7 @@ async function populateBolgeModalKovanlar() {
 }
 
 async function kaydetVeGetir() {
+    const editId = document.getElementById('editBolgeId').value;
     const grupAdiEl = document.getElementById('secGrupAdi');
     const grupAdi = (grupAdiEl ? grupAdiEl.value.trim() : '') || 'Ana Arılık';
     const bolge = document.getElementById('secBolge').value;
@@ -91,53 +169,69 @@ async function kaydetVeGetir() {
         const eSehir = geoData.results[0].name;
 
         let gruplar = getKovanGruplari();
-        const newId = Date.now().toString();
+        let targetId = editId;
 
-        gruplar.push({
-            id: newId,
-            grupAdi: grupAdi,
-            sehir: eSehir,
-            bolge: bolge,
-            lat: lat,
-            lon: lon
-        });
+        if (editId) {
+            // Mevcut grubu güncelle
+            const idx = gruplar.findIndex(g => g.id === editId);
+            if (idx !== -1) {
+                gruplar[idx] = { ...gruplar[idx], grupAdi, sehir: eSehir, bolge, lat, lon };
+            }
+        } else {
+            // Yeni grup ekle
+            targetId = Date.now().toString();
+            gruplar.push({ id: targetId, grupAdi, sehir: eSehir, bolge, lat, lon });
+        }
 
         saveKovanGruplari(gruplar);
-        setAktifGrupId(newId);
+        setAktifGrupId(targetId);
 
-        // Firebase kovanlarını güncelle
+        // Firestore kovanlarını güncelle
         const uid = firebase.auth()?.currentUser?.uid;
         const selectedKovanIds = Array.from(document.querySelectorAll('.bolge-kovan-cb:checked')).map(cb => cb.value);
 
-        if (uid && selectedKovanIds.length > 0) {
+        if (uid) {
             const db = firebase.firestore();
             const batch = db.batch();
+            
+            // Eğer düzenleme yapılıyorsa, önce bu gruptaki TÜM kovanları bulup temizlemeliyiz 
+            // (Çünkü bazıları çıkarılmış olabilir)
+            if (editId) {
+                const oldKovanSnap = await db.collection("kullanicilar").doc(uid).collection("kovanlar").where("bolgeGrupId", "==", editId).get();
+                oldKovanSnap.forEach(doc => {
+                    batch.update(doc.ref, {
+                        bolgeGrupId: firebase.firestore.FieldValue.delete(),
+                        bolgeGrupAdi: firebase.firestore.FieldValue.delete()
+                    });
+                });
+            }
+
+            // Seçili olanları (yeniden) ata
             selectedKovanIds.forEach(kId => {
                 const ref = db.collection("kullanicilar").doc(uid).collection("kovanlar").doc(kId);
                 batch.update(ref, {
-                    bolgeGrupId: newId,
+                    bolgeGrupId: targetId,
                     bolgeGrupAdi: grupAdi
                 });
             });
+            
             await batch.commit();
-            console.log("Kovanlar güncellendi.");
+            console.log("Kovan bölge atamaları güncellendi.");
         }
 
         bootstrap.Modal.getInstance(document.getElementById('bolgeModal')).hide();
         loadHavaDurumu();
 
-        // Ana sayfadaysak veya Kovanlarım sayfasındaysak kovanları yeniden yükle
-        if (typeof kovanlariYukle === 'function' && uid) {
-            kovanlariYukle(uid);
-        }
+        if (typeof kovanlariYukle === 'function' && uid) kovanlariYukle(uid);
+        if (typeof istatistikleriYukle === 'function' && uid) istatistikleriYukle(uid);
 
-        // Formu temizle
         if (grupAdiEl) grupAdiEl.value = '';
         document.getElementById('secSehir').value = '';
 
         btn.innerHTML = oldText; btn.disabled = false;
     } catch (e) {
-        alert("Bağlantı hatası: " + e.message);
+        console.error(e);
+        alert("Hata oluştu: " + e.message);
         btn.innerHTML = oldText; btn.disabled = false;
     }
 }
@@ -145,11 +239,17 @@ async function kaydetVeGetir() {
 function grupDegistir(selectEl) {
     const newVal = selectEl.value;
     if (newVal === 'yeni_ekle') {
-        selectEl.value = getAktifGrupId();
+        selectEl.value = getAktifGrupId() || 'tumu';
         showBolgeModal();
     } else {
         setAktifGrupId(newVal);
         loadHavaDurumu();
+        
+        const uid = firebase.auth()?.currentUser?.uid;
+        if (uid && typeof kovanlariYukle === 'function') {
+            kovanlariYukle(uid);
+            if (typeof istatistikleriYukle === 'function') istatistikleriYukle(uid);
+        }
     }
 }
 
@@ -197,12 +297,45 @@ async function loadHavaDurumu() {
     }
 
     let aktifId = getAktifGrupId();
+    if (!aktifId) {
+        aktifId = 'tumu';
+        setAktifGrupId('tumu');
+    }
+    
     let aktifGrup = gruplar.find(g => g.id === aktifId);
 
-    if (!aktifGrup) {
-        aktifGrup = gruplar[0]; // fallback
-        setAktifGrupId(aktifGrup.id);
-        aktifId = aktifGrup.id;
+    // "Tüm Kovanlar" seçili ise veya grup bulunamadıysa (boş kovanlar dahil)
+    if (aktifId === 'tumu' || !aktifGrup) {
+        let optionsHtml = `<option value="tumu" ${aktifId === 'tumu' ? 'selected' : ''}>Tüm Kovanlar</option>`;
+        optionsHtml += gruplar.map(g => `<option value="${g.id}" ${g.id === aktifId ? 'selected' : ''}>${g.grupAdi} (${g.sehir})</option>`).join('');
+        optionsHtml += `<option value="yeni_ekle">+ Yeni Bölge Ekle...</option>`;
+
+        kart.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <i class="fa-solid fa-location-dot text-danger me-2 fs-5"></i>
+                    <select class="form-select border-0 bg-transparent fw-bold text-dark fs-5 p-0 pe-4 shadow-none cursor-pointer" style="cursor: pointer; text-overflow: ellipsis; max-width: 100%;" onchange="grupDegistir(this)">
+                        ${optionsHtml}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center py-2 border-top">
+                <p class="text-muted small mb-0"><i class="fa-solid fa-circle-info me-1"></i> Hava durumu ve yapay zeka tavsiyeleri için lütfen bir <b>bölge seçin</b>.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Seçili bir grup varsa hava durumunu getir
+    // Önbellek kontrolü (30 dakika)
+    const cacheKey = `weather_cache_${aktifId}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+        const cacheData = JSON.parse(cached);
+        if (Date.now() - cacheData.time < 30 * 60 * 1000) {
+            renderWeatherData(cacheData.data, aktifId, gruplar);
+            return;
+        }
     }
 
     kart.innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary"></div><div class="mt-2 fw-bold text-muted">${aktifGrup.sehir} hava durumu alınıyor...</div></div>`;
@@ -210,61 +343,69 @@ async function loadHavaDurumu() {
     try {
         const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${aktifGrup.lat}&longitude=${aktifGrup.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,windspeed_10m_max&timezone=auto`);
         const wData = await wRes.json();
-
-        let optionsHtml = gruplar.map(g => `<option value="${g.id}" ${g.id === aktifId ? 'selected' : ''}>${g.grupAdi} (${g.sehir})</option>`).join('');
-        optionsHtml += `<option value="yeni_ekle">+ Yeni Grup Ekle...</option>`;
-
-        let html = `<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        <div class="d-flex align-items-center flex-grow-1">
-                            <i class="fa-solid fa-location-dot text-danger me-2 fs-5"></i>
-                            <select class="form-select border-0 bg-transparent fw-bold text-dark fs-5 p-0 pe-4 shadow-none cursor-pointer" style="cursor: pointer; text-overflow: ellipsis; max-width: 100%;" onchange="grupDegistir(this)">
-                                ${optionsHtml}
-                            </select>
-                        </div>
-                        <div class="d-flex gap-1 justify-content-end">
-                            <button class="btn btn-sm btn-outline-primary fw-bold" onclick="showAITakvim()"><i class="fa-solid fa-brain me-1"></i>AI Takvim</button>
-                            <button class="btn btn-sm btn-light" onclick="grupSil()"><i class="fa-solid fa-trash text-danger"></i></button>
-                        </div>
-                    </div><div class="row row-cols-2 row-cols-md-5 g-2">`;
-
-        const d = wData.daily;
-        const today = new Date();
-
-        for (let i = 0; i < 5; i++) {
-            const dateStr = d.time[i]; // YYYY-MM-DD
-            const [y, m, day] = dateStr.split('-');
-            const tDate = new Date(y, m - 1, day);
-            const isToday = i === 0;
-            const dayName = tDate.toLocaleDateString('tr-TR', { weekday: 'short' });
-            const tMax = Math.round(d.temperature_2m_max[i]);
-            const tMin = Math.round(d.temperature_2m_min[i]);
-            const wind = Math.round(d.windspeed_10m_max[i]);
-
-            // Kapak açmaya uygunluk: Max sıcaklık 15+ üstü, Rüzgar 25km/h altı
-            const uygun = tMax >= 15 && wind < 25;
-            const bColor = uygun ? 'border-success' : 'border-danger';
-            const iconColor = uygun ? 'text-success' : 'text-danger';
-            const durumText = uygun ? 'Uygun' : 'Uygun Değil';
-
-            html += `
-            <div class="col">
-                <div class="card h-100 ${bColor} shadow-sm text-center" style="border-width: 2px;">
-                    <div class="card-header p-1 bg-transparent fw-bold small ${isToday ? 'text-primary' : ''}">${isToday ? 'Bugün' : dayName}</div>
-                    <div class="card-body p-2">
-                        <h4 class="fw-bold mb-0 ${iconColor}">${tMax}°</h4>
-                        <div class="small text-muted mb-1">${tMin}° / <i class="fa-solid fa-wind"></i> ${wind}</div>
-                        <span class="badge ${uygun ? 'bg-success' : 'bg-danger'} w-100" style="font-size: 0.7rem;">${durumText}</span>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        html += `</div>`;
-        kart.innerHTML = html;
-
+        
+        // Önbelleğe kaydet
+        localStorage.setItem(cacheKey, JSON.stringify({ time: Date.now(), data: wData }));
+        renderWeatherData(wData, aktifId, gruplar);
     } catch (e) {
-        kart.innerHTML = `<div class="text-center text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>Hava durumu alınamadı. İnternet bağ. kontrol edin. <button class="btn btn-sm btn-outline-danger ms-2" onclick="loadHavaDurumu()">Tekrar Dene</button></div>`;
+        kart.innerHTML = `<div class="text-center text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>Hava durumu alınamadı. <button class="btn btn-sm btn-outline-danger ms-2" onclick="loadHavaDurumu()">Tekrar Dene</button></div>`;
     }
+}
+
+function renderWeatherData(wData, aktifId, gruplar) {
+    const kart = document.getElementById('havaDurumuKarti');
+    const aktifGrup = gruplar.find(g => g.id === aktifId);
+    if (!kart || !aktifGrup) return;
+    
+    let optionsHtml = `<option value="tumu" ${aktifId === 'tumu' ? 'selected' : ''}>Tüm Kovanlar</option>`;
+    optionsHtml += gruplar.map(g => `<option value="${g.id}" ${g.id === aktifId ? 'selected' : ''}>${g.grupAdi} (${g.sehir})</option>`).join('');
+    optionsHtml += `<option value="yeni_ekle">+ Yeni Bölge Ekle...</option>`;
+
+    let html = `<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <i class="fa-solid fa-location-dot text-danger me-2 fs-5"></i>
+                        <select class="form-select border-0 bg-transparent fw-bold text-dark fs-5 p-0 pe-4 shadow-none cursor-pointer" style="cursor: pointer; text-overflow: ellipsis; max-width: 100%;" onchange="grupDegistir(this)">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button class="btn btn-sm btn-outline-primary fw-bold" onclick="showAITakvim()"><i class="fa-solid fa-brain me-1"></i>AI Takvim</button>
+                        <button class="btn btn-sm btn-light" onclick="showBolgeModal('${aktifId}')" title="Düzenle"><i class="fa-solid fa-pencil text-primary"></i></button>
+                        <button class="btn btn-sm btn-light" onclick="grupSil()"><i class="fa-solid fa-trash text-danger"></i></button>
+                    </div>
+                </div><div class="row row-cols-2 row-cols-md-5 g-2">`;
+
+    const d = wData.daily;
+    for (let i = 0; i < 5; i++) {
+        const dateStr = d.time[i]; 
+        const [y, m, day] = dateStr.split('-');
+        const tDate = new Date(y, m - 1, day);
+        const isToday = i === 0;
+        const dayName = tDate.toLocaleDateString('tr-TR', { weekday: 'short' });
+        const tMax = Math.round(d.temperature_2m_max[i]);
+        const tMin = Math.round(d.temperature_2m_min[i]);
+        const wind = Math.round(d.windspeed_10m_max[i]);
+
+        const uygun = tMax >= 15 && wind < 25;
+        const bColor = uygun ? 'border-success' : 'border-danger';
+        const iconColor = uygun ? 'text-success' : 'text-danger';
+        const durumText = uygun ? 'Uygun' : 'Uygun Değil';
+
+        html += `
+        <div class="col">
+            <div class="card h-100 ${bColor} shadow-sm text-center" style="border-width: 2px;">
+                <div class="card-header p-1 bg-transparent fw-bold small ${isToday ? 'text-primary' : ''}">${isToday ? 'Bugün' : dayName}</div>
+                <div class="card-body p-2">
+                    <h4 class="fw-bold mb-0 ${iconColor}">${tMax}°</h4>
+                    <div class="small text-muted mb-1">${tMin}° / <i class="fa-solid fa-wind"></i> ${wind}</div>
+                    <span class="badge ${uygun ? 'bg-success' : 'bg-danger'} w-100" style="font-size: 0.7rem;">${durumText}</span>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    html += `</div>`;
+    kart.innerHTML = html;
 }
 
 function grupSil() {

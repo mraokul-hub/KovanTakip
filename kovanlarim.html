@@ -12,6 +12,10 @@
     <!-- KovanTakip Özel Tasarım Stilleri ve Tema Yönetimi -->
     <link rel="stylesheet" href="style.css">
     <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="ai-takvim.js"></script>
     <script src="weather.js"></script>
 
@@ -199,10 +203,6 @@
             text-decoration: none;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
 </head>
 
 <body>
@@ -278,13 +278,9 @@
             <div class="col-12">
                 <div class="card card-modern border-0 shadow-sm bg-gradient-warm">
                     <div class="card-body p-4" id="havaDurumuKarti">
-                        <div class="text-center py-3">
-                            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-cloud-sun me-2"></i>Bölge Seçimi
-                                ve Hava Durumu</h5>
-                            <p class="text-muted small">Kovanlığınızın bulunduğu bölgeyi seçerek size özel 5 günlük
-                                arıcılık hava durumu ve yapay zeka takvimini aktive edin.</p>
-                            <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="showBolgeModal()">Bölge
-                                ve Şehir Seç</button>
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary opacity-50" role="status"></div>
+                            <div class="mt-2 text-muted small">Bölge ve hava durumu yükleniyor...</div>
                         </div>
                     </div>
                 </div>
@@ -462,6 +458,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="editBolgeId">
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="secGrupAdi" placeholder="Örn: 1-2-7. Kovanlar">
                         <label>Grup Adı (Örn: Ana Arılık vb.)</label>
@@ -532,8 +529,11 @@
 
         async function istatistikleriYukle(uid) {
             try {
+                const gruplarStr = localStorage.getItem('kovan_gruplari');
+                const gruplar = gruplarStr ? JSON.parse(gruplarStr) : [];
                 const aktifId = localStorage.getItem('kovan_aktif_grup_id');
-                const isTumu = !aktifId || aktifId === 'tumu';
+                // Eğer grup yoksa veya 'tumu' seçiliyse veya aktifId henüz ayarlanmamışsa tümünü göster
+                const isTumu = gruplar.length === 0 || !aktifId || aktifId === 'tumu';
 
                 // Aktif ve Toplam Çerçeve
                 const aktifSnap = await db.collection("kullanicilar").doc(uid).collection("kovanlar").get();
@@ -543,7 +543,7 @@
                     const d = doc.data();
                     if (isTumu || d.bolgeGrupId === aktifId) {
                         aktifKovan++;
-                        toplamCerceve += d.cerceve || 0;
+                        toplamCerceve += Number(d.cerceve) || 0;
                     }
                 });
                 document.getElementById('stat-aktif').innerText = aktifKovan;
@@ -566,12 +566,10 @@
                     if (isTumu || d.bolgeGrupId === aktifId) sonenCount++;
                 });
                 document.getElementById('stat-sonen').innerText = sonenCount;
-
             } catch (e) {
                 console.error("İstatistik yükleme hatası:", e);
             }
         }
-
 
         async function kovanlariYukle(uid) {
             const div = document.getElementById('kovan-listesi-container');
@@ -603,8 +601,10 @@
 
                 // Numaraya göre sırala
                 let kovanlar = [];
+                const gruplarStr = localStorage.getItem('kovan_gruplari');
+                const gruplar = gruplarStr ? JSON.parse(gruplarStr) : [];
                 const aktifId = localStorage.getItem('kovan_aktif_grup_id');
-                const isTumu = !aktifId || aktifId === 'tumu';
+                const isTumu = gruplar.length === 0 || !aktifId || aktifId === 'tumu';
 
                 snap.forEach(doc => {
                     const d = doc.data();
@@ -636,7 +636,7 @@
                             
                             <div class="row g-2 mt-2">
                                 <div class="col-6 small text-muted"><i class="fa-solid fa-dna w-15px text-center me-1"></i> ${d.irk || '-'}</div>
-                                <div class="col-6 small ${statusClass ? 'text-danger fw-bold' : 'text-muted'}"><img src="Designer.jpg" style="height:14px; margin-right:4px;"> ${d.cerceve || 0} Çerçeve</div>
+                                <div class="col-6 small ${statusClass ? 'text-danger fw-bold' : 'text-muted'}"><i class="fa-solid fa-layer-group w-15px text-center me-1"></i> ${d.cerceve || 0} Çerçeve</div>
                                 <div class="col-6 small text-muted"><i class="fa-solid fa-face-smile w-15px text-center me-1"></i> ${hText}</div>
                                 <div class="col-6 small text-muted"><i class="fa-solid fa-location-dot w-15px text-center me-1"></i> ${d.koken || '-'}</div>
                             </div>
@@ -743,6 +743,11 @@
                         </select>
                         <label>Bakım Türü</label>
                     </div>
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="bulkCerceve" placeholder="Mevcut Çerçeve" min="0">
+                        <label>Güncel Çerçeve Sayısı (Opsiyonel)</label>
+                        <div class="form-text text-muted small px-2">Eğer girerseniz, seçili tüm kovanların çerçeve sayıları bu rakama güncellenir.</div>
+                    </div>
                 `;
             } else if (type === 'hastalik') {
                 title.innerHTML = '<i class="fa-solid fa-bug text-danger"></i> Toplu Hastalık ve İlaç Kaydı';
@@ -812,6 +817,10 @@
 
                     if (actionType === 'bakim') {
                         data.tur = document.getElementById('bulkBakimTuru').value;
+                        const frameCount = document.getElementById('bulkCerceve').value;
+                        if (frameCount !== "") {
+                            data.cerceveGuncelle = parseInt(frameCount);
+                        }
                     } else if (actionType === 'hastalik') {
                         data.hastalik = document.getElementById('bulkHastalikTuru').value;
                         data.ilac = document.getElementById('bulkKullanilanIlac').value || "";
@@ -823,9 +832,14 @@
                     batch.set(newRef, data);
 
                     // Güncelleme geçmişi / son işlem tarihi de güncellenebilir
-                    batch.update(baseRef.doc(id), {
+                    let updateData = {
                         sonIslemTarihi: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    };
+                    if (actionType === 'bakim' && data.cerceveGuncelle != null) {
+                        updateData.cerceve = data.cerceveGuncelle;
+                    }
+
+                    batch.update(baseRef.doc(id), updateData);
                 });
 
                 await batch.commit();

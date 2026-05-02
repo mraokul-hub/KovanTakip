@@ -398,6 +398,7 @@
                                                     <option>Langstroth</option>
                                                     <option>Dadant</option>
                                                     <option>Karakovan</option>
+                                                    <option>Ruşet Kovan</option>
                                                     <option>Diğer</option>
                                                 </select></div>
                                             <div class="col-6 mb-2"><label class="small fw-bold">Irk</label><select
@@ -1324,8 +1325,67 @@
             e.preventDefault();
             const d = Object.fromEntries(new FormData(e.target));
             
-            const secilenEnvanterId = d.envanter_malzeme;
-            const secilenMiktar = Number(d.envanter_miktar) || 1;
+            let secilenEnvanterId = d.envanter_malzeme;
+            let secilenMiktar = Number(d.envanter_miktar) || 1;
+            
+            // Çerçeve Sayısı Artışı Tespiti (Çıta / Çerçeve Eklendiğinde)
+            if (!secilenEnvanterId && col === 'bakimKayitlari' && d.cerceveGuncelle) {
+                const yeniCerceve = parseInt(d.cerceveGuncelle);
+                if (kovanData && kovanData.cerceve !== undefined && yeniCerceve > kovanData.cerceve) {
+                    const fark = yeniCerceve - kovanData.cerceve;
+                    const sel = e.target.querySelector('.envanter-select');
+                    if (sel) {
+                        for (let i = 1; i < sel.options.length; i++) {
+                            const opt = sel.options[i];
+                            const itemLower = opt.textContent.toLowerCase();
+                            if (itemLower.includes("çerçeve") || itemLower.includes("çıta")) {
+                                const itemName = opt.textContent.split('(')[0].trim();
+                                if (confirm(`Kovana ${fark} adet yeni çerçeve/çıta eklediğinizi tespit ettik. Depodaki '${itemName}' malzemesinden ${fark} birim düşelim mi?`)) {
+                                    secilenEnvanterId = opt.value;
+                                    secilenMiktar = fark;
+                                    const miktarInput = e.target.querySelector('.envanter-miktar');
+                                    if (miktarInput) miktarInput.value = fark;
+                                    sel.value = secilenEnvanterId;
+                                }
+                                break; // İlk çerçeve/çıta eşleşmesini sor
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Otomatik Envanter Tespiti (Metin İçeriğinden)
+            if (!secilenEnvanterId) {
+                const inputText = ((d.islem || '') + " " + (d.not || '') + " " + (d.ilac || '')).toLowerCase();
+                const sel = e.target.querySelector('.envanter-select');
+                if (sel) {
+                    for (let i = 1; i < sel.options.length; i++) {
+                        const opt = sel.options[i];
+                        const itemNameMatch = opt.textContent.match(/^(.*?)\s*\(/);
+                        const itemName = itemNameMatch ? itemNameMatch[1].trim() : opt.textContent.trim();
+                        const itemLower = itemName.toLowerCase();
+                        
+                        // Tam eşleşme veya kelime bazlı eşleşme (örn: "ahşap çıta" içinden "çıta" kelimesi geçerse)
+                        let isMatch = inputText.includes(itemLower);
+                        if (!isMatch) {
+                            const words = itemLower.split(/\s+/).filter(w => w.length > 2);
+                            isMatch = words.some(w => inputText.includes(w));
+                        }
+
+                        if (itemName.length > 2 && isMatch) {
+                            if (confirm(`'${itemName}' ile ilgili bir kayıt girdiniz. Bu malzemeden 1 birim envanterden düşmek ister misiniz?`)) {
+                                secilenEnvanterId = opt.value;
+                                secilenMiktar = 1;
+                                const miktarInput = e.target.querySelector('.envanter-miktar');
+                                if (miktarInput) miktarInput.value = 1;
+                                sel.value = secilenEnvanterId;
+                            }
+                            break; // Sadece ilk eşleşeni sor
+                        }
+                    }
+                }
+            }
+
             delete d.envanter_malzeme;
             delete d.envanter_miktar;
 
@@ -1343,6 +1403,14 @@
             }
             if (col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value;
             db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(() => {
+                // Kovanın ana çerçeve sayısını güncelle (Eğer bakım kaydında girildiyse)
+                if (col === 'bakimKayitlari' && d.cerceveGuncelle != null) {
+                    db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update({
+                        cerceve: d.cerceveGuncelle,
+                        guncelleme: d.tarih
+                    }).catch(err => console.error("Kovan ana bilgisi güncellenemedi:", err));
+                }
+
                 if(secilenEnvanterId) {
                     db.collection("kullanicilar").doc(currentUser.uid).collection("envanter").doc(secilenEnvanterId)
                       .update({ miktar: firebase.firestore.FieldValue.increment(-secilenMiktar) })
@@ -1444,7 +1512,7 @@
         }
 
         function toggleRowEdit(rowId, show) { const row = document.getElementById(rowId); row.querySelectorAll('.view-div').forEach(e => e.classList.toggle('d-none', show)); row.querySelector('.edit-row').classList.toggle('d-none', !show); }
-        function saveRow(col, id, rowId) {
+        async function saveRow(col, id, rowId) {
             const row = document.getElementById(rowId);
             const tarih = row.querySelector('.edit-date').value;
             const val = row.querySelector('.edit-val').value;
@@ -1463,10 +1531,37 @@
                 const ep = row.querySelector('.edit-polen'); if (ep && ep.value !== '') updateData.polenTuzak = parseInt(ep.value); else updateData.polenTuzak = firebase.firestore.FieldValue.delete();
                 const ek = row.querySelector('.edit-kovanKati'); if (ek && ek.value !== '') updateData.kovanKati = parseInt(ek.value); else updateData.kovanKati = firebase.firestore.FieldValue.delete();
             }
-            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData).then(() => toggleRowEdit(rowId, false));
+            try {
+                await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).update(updateData);
+                toggleRowEdit(rowId, false);
+                // Eğer bakım kaydı güncellendiyse, ana kovan bilgisini de tazele
+                if (col === 'bakimKayitlari') await syncKovanCerceve();
+            } catch (e) { alert("Güncelleme hatası: " + e.message); }
         }
+
+        async function syncKovanCerceve() {
+            // En son bakım kaydındaki çerçeve sayısını bul ve kovanın ana alanına yaz
+            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection("bakimKayitlari").orderBy("tarih", "desc").limit(1).get();
+            if (!snap.empty) {
+                const latestData = snap.docs[0].data();
+                if (latestData.cerceveGuncelle != null) {
+                    await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update({
+                        cerceve: latestData.cerceveGuncelle
+                    });
+                }
+            }
+        }
+
         function guncelleGrafik(docs) { const chartCard = document.getElementById('grafikKarti'); if (!docs.length) { chartCard.style.display = 'none'; return; } chartCard.style.display = 'block'; const curY = new Date().getFullYear(); const past = {}; const curr = {}; docs.forEach(d => { if (!d._miktar) return; const y = parseInt(d._tarih.substring(0, 4)); const val = Number(d._miktar); if (y < curY) { past[y] = (past[y] || 0) + val; } else { curr[d._tarih] = (curr[d._tarih] || 0) + val; } }); const lbl = [], dat = [], bg = [], bd = []; Object.keys(past).sort().forEach(y => { lbl.push(`${y} (Top.)`); dat.push(past[y]); bg.push('rgba(108,117,125,0.6)'); bd.push('grey'); }); Object.keys(curr).sort().forEach(t => { const p = t.split('-'); lbl.push(`${p[2]}.${p[1]}`); dat.push(curr[t]); bg.push('rgba(255, 159, 64, 0.7)'); bd.push('rgba(255, 159, 64, 1)'); }); if (hasatChart) hasatChart.destroy(); const ctx = document.getElementById('balGrafigi').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)'); gradient.addColorStop(1, 'rgba(255, 205, 86, 0.2)'); hasatChart = new Chart(ctx, { type: 'bar', data: { labels: lbl, datasets: [{ label: 'Bal (KG)', data: dat, backgroundColor: gradient, borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, borderRadius: 4, barThickness: 'flex', maxBarThickness: 40 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
-        function sil(col, id) { if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).delete(); }
+        
+        async function sil(col, id) { 
+            if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
+            try {
+                await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).doc(id).delete();
+                // Eğer bakım kaydı silindiyse, ana kovan bilgisini bir önceki kayda göre güncelle
+                if (col === 'bakimKayitlari') await syncKovanCerceve();
+            } catch (e) { alert("Silme hatası: " + e.message); }
+        }
 
         async function silKovan() {
             if (!confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) return;

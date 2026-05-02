@@ -74,8 +74,8 @@ export async function detectVarroaInImage(imageElement) {
   const filtered = detections[0]
     .filter(d => d[4] >= MIN_CONFIDENCE)
     .map(d => ({
-      x: d[0] * imageElement.naturalWidth,
-      y: d[1] * imageElement.naturalHeight,
+      x: (d[0] - d[2] / 2) * imageElement.naturalWidth,
+      y: (d[1] - d[3] / 2) * imageElement.naturalHeight,
       width: d[2] * imageElement.naturalWidth,
       height: d[3] * imageElement.naturalHeight,
       score: d[4],

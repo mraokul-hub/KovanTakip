@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -176,6 +176,7 @@
                                 <option value="Langstroth" selected>Langstroth</option>
                                 <option value="Dadant">Dadant</option>
                                 <option value="Karakovan">Karakovan</option>
+                                <option value="Ruşet Kovan">Ruşet Kovan</option>
                                 <option value="Diğer">Diğer</option>
                             </select>
                             <label for="actTip">Kovan Tipi</label>
@@ -204,8 +205,12 @@
 
                         <div class="form-floating mb-3" id="actSoyContainer">
                             <input type="text" class="form-control" id="actSoy" placeholder="Örn: 5 No'lu Kovan">
-                            <label for="actSoy"><i class="fa-solid fa-tree text-primary me-1"></i> Ana Kovan (Soy
-                                Ağacı)</label>
+                            <label for="actSoy"><i class="fa-solid fa-tree text-primary me-1"></i> Ana Kovan (Soy Ağacı)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="actCerceve" placeholder="0" min="0">
+                            <label for="actCerceve"><i class="fa-solid fa-layer-group text-primary me-1"></i> Mevcut Çerçeve Sayısı</label>
                         </div>
 
                         <div class="alert alert-info small mb-3">
@@ -277,6 +282,9 @@
                                     <button class="btn btn-sm btn-touch btn-outline-danger" onclick="bosKovaniSil('${doc.id}', event)"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
+                            <div class="mb-3 p-2 bg-light rounded text-center small text-muted fw-bold">
+                                <i class="fa-solid fa-layer-group me-1 text-primary"></i> ${d.cerceve || 0} Çerçeve
+                            </div>
                             <div class="p-3 bg-light rounded text-center mb-2">
                                 <div class="text-muted small"><i class="fa-solid fa-barcode"></i> Barkod</div>
                                 <div><strong>${d.barkod || 'Yok'}</strong></div>
@@ -300,9 +308,18 @@
             }
         }
 
-        function openActivationModal(id, event) {
+        async function openActivationModal(id, event) {
             event.stopPropagation();
             document.getElementById('actKovanId').value = id;
+            
+            // Mevcut çerçeve sayısını al ve doldur
+            try {
+                const doc = await db.collection("kullanicilar").doc(currentUserUid).collection("bosKovanlar").doc(id).get();
+                if (doc.exists) {
+                    document.getElementById('actCerceve').value = doc.data().cerceve || 0;
+                }
+            } catch (e) { console.error("Çerçeve bilgisi alınamadı", e); }
+
             if (!actModalInstance) {
                 actModalInstance = new bootstrap.Modal(document.getElementById('activationModal'));
             }
@@ -321,6 +338,7 @@
             const irk = document.getElementById('actIrk').value;
             const koken = document.getElementById('actKoken').value;
             const soy = document.getElementById('actSoy').value;
+            const cerceve = Number(document.getElementById('actCerceve').value) || 0;
 
             try {
                 const bosKovanRef = db.collection("kullanicilar").doc(currentUserUid).collection("bosKovanlar").doc(id);
@@ -336,7 +354,7 @@
                         barkod: data.barkod || "",
                         tip: tip,
                         irk: irk,
-                        cerceve: 0,
+                        cerceve: cerceve,
                         koken: koken,
                         soy: soy,
                         hircinlik: 3,
