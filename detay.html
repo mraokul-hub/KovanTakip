@@ -19,28 +19,6 @@
     <script src="firebase-config.js"></script>
     <!-- Include Varroa UI module -->
     <script type="module" src="varroa-ui.js"></script>
-</head>
-<html lang="tr">
-
-<head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="5.jpg" type="image/jpeg">
-    <title>Kovan Detayı</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <!-- KovanTakip Özel Tasarım Stilleri ve Tema Yönetimi -->
-    <link rel="stylesheet" href="style.css">
-    <script src="theme.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-
     <style>
         /* DETAY SAYFASI ÖZEL STİLLERİ */
         .highlight-data {
@@ -977,25 +955,7 @@
         </div>
     </div>
 
-    <!-- BARKOD TARAYICI MODAL -->
-    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2" style="height:24px;vertical-align:sub;"
-                            alt="Tara">Barkod Tara</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        onclick="stopScanner()"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div id="reader"></div>
-                    <div id="scanResult" class="text-center p-3 d-none">
-                        <div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <datalist id="hastalikList">
         <option value="Varroa">
@@ -1012,14 +972,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="weather.js"></script>
-    <script src="varroa-analiz.js"></script>
     <script>
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const auth = window.auth || firebase.auth();
+        const db = window.db || firebase.firestore();
         checkYeniDuyuru(db);
 
         const kovanId = new URLSearchParams(window.location.search).get('id');
-        let currentUser = null; let hasatChart = null; let html5QrcodeScanner = null; let kovanData = null;
+        let currentUser = window.currentUser; 
+        let hasatChart = null; let html5QrcodeScanner = null; let kovanData = null;
         const hircinlikMap = { 1: "Çok Sakin", 2: "Sakin", 3: "Normal", 4: "Hırçın", 5: "Çok Hırçın" };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1065,7 +1025,11 @@
                         kovanlar.push({ id: doc.id, no: String(kovanNo) });
                     });
 
-                    kovanlar.sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' }));
+                    kovanlar.sort((a, b) => {
+                        if (!a.no) return 1;
+                        if (!b.no) return -1;
+                        return a.no.localeCompare(b.no, undefined, { numeric: true, sensitivity: 'base' });
+                    });
                     const idx = kovanlar.findIndex(k => k.id === kovanId);
 
                     if (idx > 0) {
@@ -1134,8 +1098,10 @@
             }
         }
 
+        let unsubscribeGorevler = null;
         function gorevleriGetir() {
-            db.collection("kullanicilar").doc(currentUser.uid).collection("gorevler")
+            if (unsubscribeGorevler) unsubscribeGorevler();
+            unsubscribeGorevler = db.collection("kullanicilar").doc(currentUser.uid).collection("gorevler")
                 .where("ilgiliKovanId", "==", kovanId)
                 .where("tamamlandi", "==", false)
                 .onSnapshot(snap => {
@@ -1180,7 +1146,21 @@
                 });
         }
 
-        function yukle() { db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { if (doc.exists) { renderView(doc.data()); altYukle('bakimKayitlari', 'bakimListesi'); altYukle('hastalikKayitlari', 'hastalikListesi'); altYukle('hasatKayitlari', 'hasatListesi'); gorevleriGetir(); } else { document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; } }); }
+        let unsubscribeKovan = null;
+        function yukle() { 
+            if (unsubscribeKovan) unsubscribeKovan();
+            unsubscribeKovan = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).onSnapshot(doc => { 
+                if (doc.exists) { 
+                    renderView(doc.data()); 
+                    altYukle('bakimKayitlari', 'bakimListesi'); 
+                    altYukle('hastalikKayitlari', 'hastalikListesi'); 
+                    altYukle('hasatKayitlari', 'hasatListesi'); 
+                    gorevleriGetir(); 
+                } else { 
+                    document.body.innerHTML = '<div class="alert alert-danger m-5">Kovan bulunamadı.</div>'; 
+                } 
+            }); 
+        }
         function formatDate(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0].slice(2)}` : iso; }
 
         function renderView(d) {
@@ -1321,7 +1301,7 @@
             });
         });
         function handlePhoto(input, imgId, hiddenId) { if (input.files[0]) { const r = new FileReader(); r.onload = function (e) { const img = new Image(); img.onload = function () { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = img.width; let h = img.height; if (w > 800) { h *= 800 / w; w = 800; } c.width = w; c.height = h; ctx.drawImage(img, 0, 0, w, h); document.getElementById(imgId).src = c.toDataURL('image/jpeg', 0.7); document.getElementById(imgId).style.display = 'block'; document.getElementById(hiddenId).value = c.toDataURL('image/jpeg', 0.7); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); } }
-        function kayitEkle(e, col) {
+        async function kayitEkle(e, col) {
             e.preventDefault();
             const d = Object.fromEntries(new FormData(e.target));
             
@@ -1389,26 +1369,40 @@
             delete d.envanter_malzeme;
             delete d.envanter_miktar;
 
+            // --- TİP DOĞRULAMA VE GÜVENLİK (FAZ 3) ---
             if (!d.tarih) d.tarih = new Date().toISOString().split('T')[0];
-            if (col === 'hasatKayitlari') d.miktar = Number(d.miktar);
+            
+            if (col === 'hasatKayitlari') {
+                d.miktar = window.validateNumber(d.miktar);
+            }
+            
             if (col === 'bakimKayitlari') {
                 d.foto = document.getElementById('bakimBase64').value;
-                if (d.cerceveGuncelle !== '') d.cerceveGuncelle = parseInt(d.cerceveGuncelle); else delete d.cerceveGuncelle;
-                if (d.kapaliYavru !== '') d.kapaliYavru = parseInt(d.kapaliYavru); else d.kapaliYavru = null;
-                if (d.balliCerceve !== '') d.balliCerceve = parseInt(d.balliCerceve); else d.balliCerceve = null;
+                // Sayısal alanları doğrula
+                if (d.cerceveGuncelle !== '') d.cerceveGuncelle = window.validateNumber(d.cerceveGuncelle); else delete d.cerceveGuncelle;
+                if (d.kapaliYavru !== '') d.kapaliYavru = window.validateNumber(d.kapaliYavru, null); else d.kapaliYavru = null;
+                if (d.balliCerceve !== '') d.balliCerceve = window.validateNumber(d.balliCerceve, null); else d.balliCerceve = null;
+                
                 const sayiVal = document.getElementById('yuksukSayi').value;
-                d.yuksuk = sayiVal !== '' ? Number(sayiVal) : 0;
-                if (d.kovanKati !== '') d.kovanKati = parseInt(d.kovanKati); else delete d.kovanKati;
-                if (d.polenTuzak !== '') d.polenTuzak = parseInt(d.polenTuzak); else delete d.polenTuzak;
+                d.yuksuk = window.validateNumber(sayiVal, 0);
+                
+                if (d.kovanKati !== '') d.kovanKati = window.validateNumber(d.kovanKati); else delete d.kovanKati;
+                if (d.polenTuzak !== '') d.polenTuzak = window.validateNumber(d.polenTuzak); else delete d.polenTuzak;
             }
-            if (col === 'hastalikKayitlari') d.foto = document.getElementById('hastalikBase64').value;
-            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(() => {
-                // Kovanın ana çerçeve sayısını güncelle (Eğer bakım kaydında girildiyse)
-                if (col === 'bakimKayitlari' && d.cerceveGuncelle != null) {
-                    db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update({
-                        cerceve: d.cerceveGuncelle,
-                        guncelleme: d.tarih
-                    }).catch(err => console.error("Kovan ana bilgisi güncellenemedi:", err));
+            
+            if (col === 'hastalikKayitlari') {
+                d.foto = document.getElementById('hastalikBase64').value;
+            }
+
+            // Metin alanlarını XSS'e karşı temizle (Sadece kaydederken yapıyoruz, görüntülemede de yapılabilir)
+            if (d.islem) d.islem = window.escapeHTML(d.islem);
+            if (d.not) d.not = window.escapeHTML(d.not);
+            if (d.hastalik) d.hastalik = window.escapeHTML(d.hastalik);
+            if (d.ilac) d.ilac = window.escapeHTML(d.ilac);
+            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).add(d).then(async () => {
+                // Kovanın ana çerçeve sayısını en güncel bakım kaydına göre senkronize et
+                if (col === 'bakimKayitlari') {
+                    await syncKovanCerceve();
                 }
 
                 if(secilenEnvanterId) {
@@ -1425,9 +1419,11 @@
             });
         }
 
+        let unsubscribes = {};
         function altYukle(col, divId) {
+            if (unsubscribes[col]) unsubscribes[col]();
             const el = document.getElementById(divId);
-            db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => {
+            unsubscribes[col] = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection(col).onSnapshot(snap => {
                 el.innerHTML = '';
                 let docs = [];
                 snap.forEach(d => { let dt = d.data(); dt.id = d.id; dt._tarih = dt.tarih; dt._baslik = dt.islem || dt.hastalik || dt.baslik; dt._miktar = dt.miktar; docs.push(dt); });
@@ -1438,20 +1434,6 @@
                     let yilBakim = docs.filter(d => (d.tarih || '').startsWith(buYil)).length;
                     const repBakim = document.getElementById('rep-bakim');
                     if (repBakim) repBakim.innerText = yilBakim;
-
-                    const sonCerceveliBakim = docs.find(d => d.cerceveGuncelle != null && d.cerceveGuncelle !== '');
-                    if (sonCerceveliBakim) {
-                        const sonCerceve = Number(sonCerceveliBakim.cerceveGuncelle);
-                        const vCerceve = document.getElementById('v-cerceve');
-                        if (vCerceve) vCerceve.innerText = sonCerceve;
-
-                        let guc = '-';
-                        if (sonCerceve >= 7) guc = 'Güçlü <i class="fa-solid fa-arrow-trend-up text-success"></i>';
-                        else if (sonCerceve >= 4) guc = 'Normal <i class="fa-solid fa-equals text-warning"></i>';
-                        else if (sonCerceve > 0) guc = 'Zayıf <i class="fa-solid fa-arrow-trend-down text-danger"></i>';
-                        const vGuc = document.getElementById('v-guc');
-                        if (vGuc) vGuc.innerHTML = `Güç: ${guc}`;
-                    }
                 }
                 if (docs.length > 0) { let latest = docs[0]._tarih; const repSon = document.getElementById('rep-sonislem'); if (repSon) { let cur = repSon.getAttribute('data-date') || ""; if (latest > cur) { repSon.setAttribute('data-date', latest); repSon.innerText = formatDate(latest); } } }
                 docs.forEach(data => {
@@ -1540,13 +1522,19 @@
         }
 
         async function syncKovanCerceve() {
-            // En son bakım kaydındaki çerçeve sayısını bul ve kovanın ana alanına yaz
-            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection("bakimKayitlari").orderBy("tarih", "desc").limit(1).get();
+            // Tüm bakım kayıtlarını tarihe göre yeniden eskiye çek ve en güncel çerçeve bilgisini kovan belgesine yaz
+            const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection("bakimKayitlari").orderBy("tarih", "desc").get();
             if (!snap.empty) {
-                const latestData = snap.docs[0].data();
-                if (latestData.cerceveGuncelle != null) {
+                const docs = [];
+                snap.forEach(d => docs.push(d.data()));
+                
+                // Çerçeve sayısı girilmiş olan en güncel tarihli kaydı bul
+                const sonCerceveliBakim = docs.find(d => d.cerceveGuncelle != null && d.cerceveGuncelle !== '');
+                
+                if (sonCerceveliBakim) {
                     await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).update({
-                        cerceve: latestData.cerceveGuncelle
+                        cerceve: Number(sonCerceveliBakim.cerceveGuncelle),
+                        guncelleme: sonCerceveliBakim.tarih
                     });
                 }
             }
@@ -1567,15 +1555,44 @@
             if (!confirm("DİKKAT: Bu kovan ve tüm geçmiş kayıtları silinecek!")) return;
             try {
                 const kovanRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
-                for (const col of ['bakimKayitlari', 'hastalikKayitlari', 'hasatKayitlari']) {
+                
+                // 1. Alt Koleksiyonları Sil (Bakım, Hastalık, Hasat)
+                const collections = ['bakimKayitlari', 'hastalikKayitlari', 'hasatKayitlari'];
+                for (const col of collections) {
                     const snap = await kovanRef.collection(col).get();
-                    const batch = db.batch();
-                    snap.forEach(doc => batch.delete(doc.ref));
-                    if (!snap.empty) await batch.commit();
+                    if (!snap.empty) {
+                        // Firestore limit: 500 işlem. Parçalı silme yapıyoruz.
+                        const docs = snap.docs;
+                        for (let i = 0; i < docs.length; i += 500) {
+                            const batch = db.batch();
+                            const chunk = docs.slice(i, i + 500);
+                            chunk.forEach(doc => batch.delete(doc.ref));
+                            await batch.commit();
+                        }
+                    }
                 }
+
+                // 2. İlişkili Görevleri Sil
+                const gorevSnap = await db.collection("kullanicilar").doc(currentUser.uid).collection("gorevler")
+                                     .where("ilgiliKovanId", "==", kovanId).get();
+                if (!gorevSnap.empty) {
+                    const gorevDocs = gorevSnap.docs;
+                    for (let i = 0; i < gorevDocs.length; i += 500) {
+                        const batch = db.batch();
+                        const chunk = gorevDocs.slice(i, i + 500);
+                        chunk.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                }
+
+                // 3. Ana Kovan Belgesini Sil
                 await kovanRef.delete();
+                
                 window.location.href = "kovanlarim.html";
-            } catch (err) { console.error("Silme hatası:", err); alert("Silme başarısız: " + err.message); }
+            } catch (err) { 
+                console.error("Silme hatası:", err); 
+                alert("Silme işlemi sırasında bir hata oluştu: " + err.message); 
+            }
         }
 
         async function kovanSondu() {
@@ -1968,87 +1985,9 @@
             }
         }
 
-        // --- VARROA AI ANALİZ MANTIK ---
-        const varroaAI = new VarroaAnaliz();
-        let currentVarroaResult = null;
-
         function openVarroaModal() {
-            resetVarroaAnalysis();
-            new bootstrap.Modal(document.getElementById('varroaModal')).show();
-        }
-
-        function resetVarroaAnalysis() {
-            document.getElementById('varroaUploadStep').classList.remove('d-none');
-            document.getElementById('varroaProcessingStep').classList.add('d-none');
-            document.getElementById('varroaResultStep').classList.add('d-none');
-            currentVarroaResult = null;
-        }
-
-        function handleVarroaPhoto(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = async function () {
-                        document.getElementById('varroaUploadStep').classList.add('d-none');
-                        document.getElementById('varroaProcessingStep').classList.remove('d-none');
-
-                        // Give UI time to update
-                        setTimeout(async () => {
-                            const result = await varroaAI.analyzeFrame(img, document.getElementById('varroaCanvas'));
-                            displayVarroaResult(result);
-                        }, 500);
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function displayVarroaResult(result) {
-            currentVarroaResult = result;
-            document.getElementById('varroaProcessingStep').classList.add('d-none');
-            document.getElementById('varroaResultStep').classList.remove('d-none');
-
-            document.getElementById('varroaCount').innerText = result.count;
-            document.getElementById('varroaRisk').innerText = result.risk;
-
-            const riskBadge = document.getElementById('varroaRisk');
-            riskBadge.className = 'badge';
-            if (result.risk === 'Sağlıklı') riskBadge.classList.add('bg-success');
-            else if (result.risk === 'Düşük Risk') riskBadge.classList.add('bg-info');
-            else if (result.risk === 'Orta Risk') riskBadge.classList.add('bg-warning', 'text-dark');
-            else riskBadge.classList.add('bg-danger');
-
-            document.getElementById('varroaRecommendation').innerText = result.recommendation;
-        }
-
-        async function saveVarroaResult() {
-            if (!currentVarroaResult) return;
-
-            // Varroa sayısını bakım kaydı varroaYuk alanıyla uyumlu 4 seviyeye dönüştür
-            let varroaYuk = 'Yok';
-            if (currentVarroaResult.count >= 15) varroaYuk = 'Çok';
-            else if (currentVarroaResult.count >= 5) varroaYuk = 'Orta';
-            else if (currentVarroaResult.count >= 1) varroaYuk = 'Az';
-
-            const data = {
-                tarih: new Date().toISOString().split('T')[0],
-                islem: 'Varroa Analizi (AI)',
-                not: `AI tespiti: ${currentVarroaResult.count} akar — ${currentVarroaResult.risk}. ${currentVarroaResult.recommendation}`,
-                varroaYuk: varroaYuk
-                // Fotoğraf kaydedilmiyor
-            };
-
-            try {
-                await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection('bakimKayitlari').add(data);
-                alert('Varroa analiz sonucu Bakım / Besleme kayıtlarına eklendi.');
-                const modal = bootstrap.Modal.getInstance(document.getElementById('varroaModal'));
-                if (modal) modal.hide();
-            } catch (e) {
-                console.error("Kaydetme hatası:", e);
-                alert('Kayıt eklenemedi.');
-            }
+            const m = new bootstrap.Modal(document.getElementById('varroaModal'));
+            m.show();
         }
     </script>
     <footer class="footer-signature">

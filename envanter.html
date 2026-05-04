@@ -157,7 +157,8 @@
         </div>
 
         <!-- Depo Seçimi (Tab Görünümü) -->
-        <div id="depoSelector" class="nav nav-pills gap-2 mb-4 flex-nowrap overflow-auto pb-2" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+        <div id="depoSelector" class="nav nav-pills gap-2 mb-4 flex-nowrap overflow-auto pb-2"
+            style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
             <!-- Depolar buraya yüklenecek -->
         </div>
 
@@ -304,7 +305,8 @@
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content card-modern">
                 <div class="modal-header border-bottom border-warning">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-warehouse text-warning"></i> Depo Yönetimi</h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-warehouse text-warning"></i> Depo Yönetimi
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -317,6 +319,14 @@
                     <ul class="list-group list-group-flush" id="depoListesiYonetim">
                         <!-- Depo listesi buraya gelecek -->
                     </ul>
+                    <div class="p-3 border-top bg-light">
+                        <p class="small text-muted mb-2"><i class="fa-solid fa-circle-info me-1"></i> Malzemeler
+                            görünmüyorsa:</p>
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100 fw-bold"
+                            onclick="veriTabaniOnar()">
+                            <i class="fa-solid fa-wrench me-1"></i> Verileri Onar ve Senkronize Et
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -419,13 +429,18 @@
             } catch (e) { console.error(e); }
         }
 
+        let unsubscribeDepolar = null;
+        let unsubscribeEnvanter = null;
+
         // Depoları Yükle ve Dinle
         function depolariYukle(uid) {
-            db.collection("kullanicilar").doc(uid).collection("depolar").orderBy("eklenmeTarihi").onSnapshot(snap => {
+            if (unsubscribeDepolar) unsubscribeDepolar();
+
+            unsubscribeDepolar = db.collection("kullanicilar").doc(uid).collection("depolar").orderBy("eklenmeTarihi").onSnapshot(snap => {
                 const selector = document.getElementById('depoSelector');
                 const formSelect = document.getElementById('e_depo');
                 const yonetimList = document.getElementById('depoListesiYonetim');
-                
+
                 selector.innerHTML = '';
                 formSelect.innerHTML = '';
                 yonetimList.innerHTML = '';
@@ -485,7 +500,10 @@
         function depoSec(id) {
             seciliDepoId = id;
             localStorage.setItem('seciliDepoId', id);
-            depolariYukle(currentUserUid); // UI güncellemesi için tekrar tetikle
+            // Dinleyiciyi yeniden başlatmak yerine sadece seçimi güncellemek yeterli olabilir 
+            // ama mevcut yapı listener içinde filtering yaptığı için tetiklemek gerekiyor.
+            // Bellek sızıntısını önlemek için yukarıda unsubscribe ekledik.
+            depolariYukle(currentUserUid);
         }
 
         async function depoEkle() {
@@ -543,7 +561,23 @@
             document.getElementById('e_birim').value = birim;
             document.getElementById('e_kritik').value = kritik;
             document.getElementById('e_skt').value = skt && skt !== 'undefined' ? skt : '';
-            document.getElementById('e_depo').value = (depoId && depoId !== 'undefined') ? depoId : seciliDepoId;
+
+            // Depo seçimini ayarla (ID veya isim ile eşleşme kontrolü)
+            const formSelect = document.getElementById('e_depo');
+            if (depoId && depoId !== 'undefined') {
+                // Önce ID ile eşleşen var mı bak
+                let found = false;
+                for (let i = 0; i < formSelect.options.length; i++) {
+                    if (formSelect.options[i].value === depoId || formSelect.options[i].textContent === depoId) {
+                        formSelect.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) formSelect.value = seciliDepoId;
+            } else {
+                formSelect.value = seciliDepoId;
+            }
 
             document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-primary"></i> Ürünü Düzenle';
             document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-arrows-rotate me-1"></i> Güncelle';
@@ -571,11 +605,11 @@
             e.preventDefault();
             const id = document.getElementById('e_id').value;
             const data = {
-                ad: document.getElementById('e_ad').value,
-                miktar: parseFloat(document.getElementById('e_miktar').value),
-                birim: document.getElementById('e_birim').value,
+                ad: window.escapeHTML(document.getElementById('e_ad').value),
+                miktar: window.validateNumber(document.getElementById('e_miktar').value),
+                birim: window.escapeHTML(document.getElementById('e_birim').value),
                 depoId: document.getElementById('e_depo').value,
-                kritik: parseFloat(document.getElementById('e_kritik').value),
+                kritik: window.validateNumber(document.getElementById('e_kritik').value, 5),
                 skt: document.getElementById('e_skt').value || null,
                 guncellemeTarihi: new Date().toISOString()
             };
@@ -604,20 +638,119 @@
             return date.toLocaleDateString('tr-TR');
         }
 
+        async function veriTabaniOnar() {
+            if (!confirm("Bu işlem tüm envanter verilerini tarayacak, eksik isimleri düzeltecek ve alt koleksiyonlardaki (Deep Scan) kayıp verileri kurtaracaktır. Devam edilsin mi?")) return;
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Derin Tarama Yapılıyor...';
+
+            try {
+                // 1. Güncel depoları çek
+                const depoSnap = await db.collection("kullanicilar").doc(currentUserUid).collection("depolar").get();
+                const mevcutDepolar = [];
+                depoSnap.forEach(doc => mevcutDepolar.push({ id: doc.id, ...doc.data() }));
+
+                if (mevcutDepolar.length === 0) {
+                    alert("Önce bir depo oluşturmalısınız.");
+                    return;
+                }
+
+                const varsayilanDepoId = mevcutDepolar[0].id;
+                const batch = db.batch();
+                let onarilanSayisi = 0;
+
+                // --- BÖLÜM A: MEVCUT ENVANTERİ DÜZELT (İsim ve Depo Bağlantıları) ---
+                const envSnap = await db.collection("kullanicilar").doc(currentUserUid).collection("envanter").get();
+                envSnap.forEach(doc => {
+                    const d = doc.data();
+                    let guncelle = false;
+                    let guncelVeri = {};
+
+                    if (!d.ad) {
+                        guncelVeri.ad = "Kurtarılan Ürün (" + doc.id.substring(0, 5) + ")";
+                        guncelle = true;
+                    }
+
+                    if (!d.depoId) {
+                        guncelVeri.depoId = varsayilanDepoId;
+                        guncelle = true;
+                    } else {
+                        const idEslesti = mevcutDepolar.some(w => w.id === d.depoId);
+                        if (!idEslesti) {
+                            const isimleEslesti = mevcutDepolar.find(w => w.ad === d.depoId);
+                            guncelVeri.depoId = isimleEslesti ? isimleEslesti.id : varsayilanDepoId;
+                            guncelle = true;
+                        }
+                    }
+
+                    if (guncelle) {
+                        batch.update(doc.ref, guncelVeri);
+                        onarilanSayisi++;
+                    }
+                });
+
+                // --- BÖLÜM B: DEEP SCAN (Alt koleksiyonlardaki verileri kurtar) ---
+                for (const depo of mevcutDepolar) {
+                    const altEnvSnap = await db.collection("kullanicilar").doc(currentUserUid).collection("depolar").doc(depo.id).collection("envanter").get();
+                    if (!altEnvSnap.empty) {
+                        altEnvSnap.forEach(altDoc => {
+                            const altData = altDoc.data();
+                            // Ana envantere taşı
+                            const yeniRef = db.collection("kullanicilar").doc(currentUserUid).collection("envanter").doc();
+                            batch.set(yeniRef, {
+                                ...altData,
+                                ad: altData.ad || "Kurtarılan (" + altDoc.id.substring(0, 5) + ")",
+                                depoId: depo.id
+                            });
+                            // Alt koleksiyondan sil
+                            batch.delete(altDoc.ref);
+                            onarilanSayisi++;
+                        });
+                    }
+                }
+
+                if (onarilanSayisi > 0) {
+                    await batch.commit();
+                    alert(`${onarilanSayisi} işlem başarıyla tamamlandı. Verileriniz kurtarıldı ve normalize edildi.`);
+                    location.reload();
+                } else {
+                    alert("Taramada herhangi bir sorun veya kayıp veri bulunamadı. Veritabanınız sağlıklı.");
+                }
+            } catch (e) {
+                console.error("Onarım Hatası:", e);
+                alert("Hata: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
         function envanterYukle(uid) {
             if (!seciliDepoId) return;
-            const div = document.getElementById('envanterListesi');
+            if (unsubscribeEnvanter) unsubscribeEnvanter();
 
-            db.collection("kullanicilar").doc(uid).collection("envanter").orderBy("ad").onSnapshot(snap => {
+            const div = document.getElementById('envanterListesi');
+            const selectedDepo = depolar.find(d => d.id === seciliDepoId);
+            const selectedDepoName = selectedDepo ? selectedDepo.ad : null;
+
+            unsubscribeEnvanter = db.collection("kullanicilar").doc(uid).collection("envanter").onSnapshot(snap => {
                 document.getElementById('loading').style.display = 'none';
                 div.innerHTML = '';
 
-                // Filtrele: Sadece seçili depodakileri göster (Veya depoId'si olmayanları varsayılan depoda göster)
-                const items = snap.docs.filter(doc => {
-                    const d = doc.data();
-                    // Eğer ürünün depoId'si yoksa ve seçili depo ilk depoysa göster (Geriye dönük uyumluluk)
+                // Verileri al ve isimlerine göre JS tarafında sırala (Eksik isimli verilerin kaybolmaması için)
+                let allDocs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allDocs.sort((a, b) => (a.ad || '').localeCompare(b.ad || ''));
+
+                // Filtrele: Sadece seçili depodakileri göster
+                const items = allDocs.filter(d => {
+
+                    // Geriye dönük uyumluluk: depoId alanı boşsa ilk depoda göster
                     if (!d.depoId) return seciliDepoId === depolar[0]?.id;
-                    return d.depoId === seciliDepoId;
+
+                    // Hem ID hem de isim eşleşmesi kontrolü
+                    return d.depoId === seciliDepoId || (selectedDepoName && d.depoId === selectedDepoName);
                 });
 
                 if (items.length === 0) {
@@ -631,9 +764,9 @@
                     return;
                 }
 
-                items.forEach(doc => {
-                    const d = doc.data();
-                    const isCritical = d.miktar <= d.kritik;
+                items.forEach(d => {
+                    const docId = d.id;
+                    const isCritical = d.miktar < d.kritik;
                     const cardClass = isCritical ? 'critical' : '';
                     const badgeHtml = isCritical ? `<span class="badge bg-danger critical-badge"><i class="fa-solid fa-triangle-exclamation"></i> Azaldı</span>` : '<span class="badge bg-success">Yeterli</span>';
 
@@ -651,23 +784,23 @@
                         <div class="card card-modern inventory-card ${cardClass} h-100">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="fw-bold mb-0 text-dark" style="color: var(--bee-text-main)"><i class="fa-solid fa-box text-secondary me-2"></i>${d.ad}</h5>
+                                    <h5 class="fw-bold mb-0 text-dark" style="color: var(--bee-text-main)"><i class="fa-solid fa-box text-secondary me-2"></i>${d.ad || 'Adsız Ürün'}</h5>
                                     ${badgeHtml}
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between my-3 px-2 py-3 bg-light rounded border">
-                                    <button class="btn btn-outline-danger btn-sm" onclick="hizliGuncelle('${doc.id}', ${d.miktar}, -1)"><i class="fa-solid fa-minus"></i></button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="hizliGuncelle('${docId}', ${d.miktar}, -1)"><i class="fa-solid fa-minus"></i></button>
                                     <div class="text-center">
                                         <span class="fs-4 fw-bold ${isCritical ? 'text-danger' : 'text-dark'}">${d.miktar}</span>
-                                        <span class="text-muted fw-bold ms-1">${d.birim}</span>
+                                        <span class="text-muted fw-bold ms-1">${d.birim || ''}</span>
                                     </div>
-                                    <button class="btn btn-outline-success btn-sm" onclick="hizliGuncelle('${doc.id}', ${d.miktar}, 1)"><i class="fa-solid fa-plus"></i></button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="hizliGuncelle('${docId}', ${d.miktar}, 1)"><i class="fa-solid fa-plus"></i></button>
                                 </div>
                                 ${sktHtml}
                                 <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                                    <span class="small text-muted">Kritik: ${d.kritik} ${d.birim}</span>
+                                    <span class="small text-muted">Kritik: ${d.kritik || 0} ${d.birim || ''}</span>
                                     <div>
-                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="duzenleEnvanter('${doc.id}', '${d.ad}', '${d.miktar}', '${d.birim}', '${d.kritik}', '${d.skt}', '${d.depoId || ''}')"><i class="fa-solid fa-pen"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="silEnvanter('${doc.id}')"><i class="fa-solid fa-trash"></i></button>
+                                        <button class="btn btn-sm btn-outline-primary me-1" onclick="duzenleEnvanter('${docId}', '${d.ad || ''}', '${d.miktar}', '${d.birim || ''}', '${d.kritik || 0}', '${d.skt || ''}', '${d.depoId || ''}')"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="silEnvanter('${docId}')"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </div>
                             </div>

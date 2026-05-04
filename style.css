@@ -42,6 +42,8 @@ body.dark-theme {
     /* Mevcut renklere dark mode uyumu */
     --bee-primary: #FBBF24;
     --bee-primary-hover: #F59E0B;
+    
+    color-scheme: dark;
 
     /* ── Bootstrap CSS Değişkeni Override'ları ──────────────────
        Bootstrap kendi --bs-* değişkenlerini kullanır. Dark modda
@@ -104,10 +106,15 @@ body.dark-theme {
     --bs-dropdown-border-color: #44403C;
     --bs-dropdown-link-color: #FAFAF9;
     --bs-dropdown-link-hover-bg: #44403C;
+
+    /* Custom scrollbar for dark mode */
+    scrollbar-color: #44403C #1C1917;
 }
 
 
-/* Genel Yapı */
+/* ==========================================================
+   Genel Yapı ve Temel Stiller
+   ========================================================== */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bee-bg);
@@ -115,72 +122,61 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-bottom: 70px;
-    /* Mobilde Bottom Navigation bar için yer aç */
+    padding-bottom: 70px; /* Mobilde Bottom Navigation bar için yer aç */
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Koyu Tema Bootstrap Geçerli Kılmaları */
-body.dark-theme,
-body.dark-theme.bg-white,
-body.dark-theme.bg-light,
-body.dark-theme .bg-white,
+/* Koyu Tema Geçerli Kılmaları - Daha Modern ve Temiz Yaklaşım */
+body.dark-theme {
+    /* Bootstrap BG helper'larını geçersiz kıl */
+    --bs-body-bg: var(--bee-bg);
+    --bs-body-color: var(--bee-text-main);
+    --bs-tertiary-bg: var(--bee-bg);
+    --bs-secondary-bg: var(--bee-card-bg);
+    
+    /* internal style'ların (login/register) ezmemesi için */
+    background: var(--bee-bg) !important;
+}
+
+body.dark-theme .bg-white, 
 body.dark-theme .bg-light {
     background-color: var(--bee-bg) !important;
-}
-
-body.dark-theme .card,
-body.dark-theme .card-modern,
-body.dark-theme .modal-content,
-body.dark-theme .bg-white:not(body),
-body.dark-theme .bg-light:not(body) {
-    background-color: var(--bee-card-bg) !important;
-}
-
-body.dark-theme .text-dark,
-body.dark-theme .text-body {
     color: var(--bee-text-main) !important;
 }
 
+body.dark-theme .card, 
+body.dark-theme .modal-content, 
+body.dark-theme .dropdown-menu,
+body.dark-theme .auth-card {
+    background-color: var(--bee-card-bg) !important;
+    border-color: var(--bee-border) !important;
+    color: var(--bee-text-main) !important;
+}
+
+body.dark-theme .text-dark,
+body.dark-theme .text-secondary,
 body.dark-theme .text-muted {
     color: var(--bee-text-muted) !important;
 }
 
-body.dark-theme .border,
-body.dark-theme .border-bottom,
-body.dark-theme .border-top {
-    border-color: var(--bee-border) !important;
+body.dark-theme .text-dark.fw-bold,
+body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
+body.dark-theme h4, body.dark-theme h5, body.dark-theme h6 {
+    color: var(--bee-text-main) !important;
 }
 
 body.dark-theme .form-control,
 body.dark-theme .form-select {
-    background-color: #1C1917;
-    color: #FAFAF9;
-    border-color: #44403C;
+    background-color: #1C1917 !important;
+    color: #FAFAF9 !important;
+    border-color: var(--bee-border) !important;
 }
 
-body.dark-theme .form-control:focus,
-body.dark-theme .form-select:focus {
-    background-color: #1C1917;
-    color: #FAFAF9;
-    border-color: var(--bee-primary);
-    box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
-}
-
-body.dark-theme .modal-content {
-    background-color: var(--bee-card-bg);
-    color: var(--bee-text-main);
-}
-
-
-/* ==========================================================
-   Navbar (Gezinme Çubuğu)
-   ========================================================== */
-
+/* Navbar (Gezinme Çubuğu) */
 .navbar-custom {
     background-color: var(--bee-card-bg);
     border-bottom: 1px solid var(--bee-border);
-    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--bee-shadow);
 }
 
 body.dark-theme .navbar-custom {
@@ -357,66 +353,25 @@ body.dark-theme .btn-outline-danger:hover {
     border-color: var(--bee-primary);
 }
 
-@keyframes exaggerated-pulse-red {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.8), 0 0 0 0 rgba(255, 0, 0, 0.4);
-        transform: scale(1);
-        filter: blur(0);
-        opacity: 1;
-    }
-
-    50% {
-        box-shadow: 0 0 0 20px rgba(255, 0, 0, 0), 0 0 0 35px rgba(255, 0, 0, 0);
-        transform: scale(1.05);
-        filter: blur(2px);
-        opacity: 0.85;
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0), 0 0 0 0 rgba(255, 0, 0, 0);
-        transform: scale(1);
-        filter: blur(0);
-        opacity: 1;
-    }
-}
-
-@keyframes badge-pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    50% {
-        transform: scale(1.5);
-        opacity: 0.7;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+@keyframes glow-pulse-amber {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
 .has-new {
-    animation: exaggerated-pulse-red 2s infinite !important;
-    background-color: #ff0000 !important;
-    /* Gerçek kırmızı */
-    color: white !important;
-    border-color: #ff0000 !important;
-    font-weight: 800 !important;
+    animation: glow-pulse-amber 2s infinite !important;
+    background-color: var(--bee-primary) !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 700 !important;
     position: relative;
-    /* Badge için gerekli */
     z-index: 1;
     border-radius: 50px !important;
-    /* Tam oval (pill) görünümü */
 }
 
-/* Alt menüde yanıp sönmenin daha belli olması için alan aç */
-.bottom-nav-item.has-new {
-    margin: 6px 10px;
-    /* Biraz daha daraltarak vurguyu artır */
-    height: calc(100% - 12px) !important;
-    border-radius: 50px !important;
+.has-new i {
+    color: #000 !important;
 }
 
 .has-new i {
@@ -690,4 +645,23 @@ body.dark-theme .fab {
 .nav-btn {
     font-weight: bold;
     min-width: 120px;
+}
+
+/* Varroa Analizi Özel Stilleri */
+.border-dashed {
+    border: 2px dashed var(--bee-border) !important;
+    transition: all 0.3s ease;
+}
+.upload-container:hover {
+    border-color: var(--bee-primary) !important;
+    background-color: rgba(245, 158, 11, 0.05) !important;
+}
+#varroaCanvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+#varroaModal .modal-header {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
 }

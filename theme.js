@@ -1,15 +1,22 @@
 // theme.js
 // KovanTakip - Karanlık Mod Yönetimi (Dark Mode)
 
+(function() {
+    // Sayfa yüklenir yüklenmez temayı uygula (FOUC önlemek için)
+    const savedTheme = localStorage.getItem('kovanTakipTheme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+        // Body henüz hazır olmayabilir, DOMContentLoaded içinde body'ye de ekleyeceğiz
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Temayı Kayıtlı Tercihten Oku
-    const currentTheme = localStorage.getItem('kovanTakipTheme');
-
-    // 2. Eğer özel bir seçim yoksa sistem tercihine bak
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-
-    // Uygulanacak başlangıç teması
-    if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+    const isDark = document.documentElement.classList.contains('dark-theme') || 
+                   localStorage.getItem('kovanTakipTheme') === 'dark';
+    
+    if (isDark) {
         document.body.classList.add('dark-theme');
         updateThemeToggleUI(true);
     } else {
@@ -17,24 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
         updateThemeToggleUI(false);
     }
 
-    // 3. Tema Değiştirme Butonu Dinleyicisi
-    // Sayfada id'si "themeToggleBtn" olan bir buton ararız
-    const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
-
-    themeToggleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+    // Event Delegation: Dinamik olarak eklenen navbar'lar için de çalışır
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.theme-toggle-btn');
+        if (btn) {
             document.body.classList.toggle('dark-theme');
+            document.documentElement.classList.toggle('dark-theme');
 
-            let isDark = document.body.classList.contains('dark-theme');
-
-            // Seçimi kaydet
-            localStorage.setItem('kovanTakipTheme', isDark ? 'dark' : 'light');
-
-            // Arayüzdeki tüm ikonları güncelle
-            updateThemeToggleUI(isDark);
-        });
+            const isNowDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('kovanTakipTheme', isNowDark ? 'dark' : 'light');
+            updateThemeToggleUI(isNowDark);
+        }
     });
-
 });
 
 // Arayüzdeki (buton içindeki) ikonu güncelleyen fonksiyon

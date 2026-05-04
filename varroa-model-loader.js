@@ -31,6 +31,7 @@ export async function getVarroaModel() {
  */
 export async function warmupVarroaModel() {
     const model = await getVarroaModel();
+    const tf = await import('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.4.0/dist/tf.min.js');
     // Create a dummy tensor with the expected input shape (1, 416, 416, 3).
     const dummy = tf.zeros([1, 416, 416, 3]);
     await model.executeAsync(dummy);

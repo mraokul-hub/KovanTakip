@@ -19,13 +19,7 @@
     <script src="firebase-config.js"></script>
     <script src="ai-takvim.js"></script>
     <script src="weather.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        #reader {
-            width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-        }
 
         /* İMZA STİLİ */
         .footer-signature {
@@ -323,25 +317,6 @@
         </div>
     </div>
 
-    <!-- QR TARA MODAL -->
-    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><img src="Designer.jpg" class="me-2"
-                            style="height: 24px; vertical-align: sub;" alt="Tara">Barkod Tara</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        onclick="stopScanner()"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div id="reader"></div>
-                    <div id="scanResult" class="text-center p-3 d-none">
-                        <div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- BÖLGE VE ŞEHİR SEÇİM MODAL -->
     <div class="modal fade" id="bolgeModal" tabindex="-1">
@@ -403,13 +378,6 @@
         </div>
     </div>
 
-    <!-- FLOATING ACTION BUTTONS (Masaüstü ve Mobilde ekranın sağ altında sabit) -->
-    <div class="fab-container">
-        <button onclick="openScanner()" class="fab fab-secondary" title="QR veya Barkod Okut">
-            <img src="Designer.jpg" alt="Tara" style="width: 24px;">
-            <span class="fab-text">Barkod<br>Tara</span>
-        </button>
-    </div>
 
     <!-- ALT BİLGİ MENÜSÜ -->
     <nav class="bottom-nav">
@@ -527,7 +495,7 @@
                 let azalanUrunler = [];
                 snap.forEach(doc => {
                     const d = doc.data();
-                    if (d.miktar <= d.kritik) {
+                    if (d.miktar < d.kritik) {
                         azalanUrunler.push(`<strong>${d.ad}</strong> (${d.miktar} ${d.birim})`);
                     }
                 });
@@ -608,7 +576,28 @@
                 if (fetched) secilenAnaIrk = fetched;
             }
 
-            const data = { sahip: currentUser.uid, no: f.get('no'), barkod: f.get('barkod'), tip: f.get('tip'), irk: f.get('irk'), cerceve: Number(f.get('cerceve')), koken: f.get('koken'), hircinlik: Number(f.get('hircinlik')), taban: document.getElementById('taban').checked, polen: document.getElementById('polen').checked, ana: { dogum: f.get('ana_dogum'), irk: secilenAnaIrk, tur: f.get('ana_tur'), renk: f.get('ana_renk'), perf: f.get('ana_perf'), degisim: f.get('ana_degisim'), uretildigi_kovan: f.get('uretilen_kovan') || "" }, guncelleme: new Date().toISOString().split('T')[0] };
+            const data = { 
+                sahip: currentUser.uid, 
+                no: window.escapeHTML(f.get('no')), 
+                barkod: window.escapeHTML(f.get('barkod')), 
+                tip: f.get('tip'), 
+                irk: f.get('irk'), 
+                cerceve: window.validateNumber(f.get('cerceve')), 
+                koken: f.get('koken'), 
+                hircinlik: window.validateNumber(f.get('hircinlik'), 3), 
+                taban: document.getElementById('taban').checked, 
+                polen: document.getElementById('polen').checked, 
+                ana: { 
+                    dogum: f.get('ana_dogum'), 
+                    irk: secilenAnaIrk, 
+                    tur: f.get('ana_tur'), 
+                    renk: f.get('ana_renk'), 
+                    perf: f.get('ana_perf'), 
+                    degisim: f.get('ana_degisim'), 
+                    uretildigi_kovan: window.escapeHTML(f.get('uretilen_kovan') || "") 
+                }, 
+                guncelleme: new Date().toISOString().split('T')[0] 
+            };
             
             const secilenEnvanterId = document.getElementById('envanterMalzeme').value;
             const secilenMiktar = Number(document.getElementById('envanterMiktar').value) || 1;
@@ -625,59 +614,6 @@
             }).catch(err => { alert(err.message); btn.disabled = false; });
         });
 
-        let html5QrcodeScanner = null;
-        function openScanner() {
-            if (!currentUser) {
-                alert("Barkod okutmak için lütfen önce giriş yapın.");
-                return;
-            }
-            const m = new bootstrap.Modal(document.getElementById('scannerModal'));
-            m.show();
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
-                html5QrcodeScanner.render(onScanSuccess, () => { });
-            }
-        }
-
-        function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().then(_ => { html5QrcodeScanner = null; }).catch(e => console.error(e));
-            }
-        }
-
-        async function onScanSuccess(txt) {
-            if (html5QrcodeScanner) {
-                await html5QrcodeScanner.clear();
-                html5QrcodeScanner = null;
-            }
-            document.getElementById('reader').innerHTML = '';
-            const r = document.getElementById('scanResult');
-            r.innerHTML = `<div class="spinner-border text-primary spinner-border-sm"></div> Aranıyor: <strong>${txt}</strong>`;
-            r.classList.remove('d-none');
-
-            try {
-                // Ekleme ekranındayken barkod bulunduğu an "Barkod No" kutusuna yazdırmak mantıklı olabilir, 
-                // ya da direkt o kovanı açmak. Biz direkt o kovanı açalım.
-                const snap = await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").where("barkod", "==", txt).get();
-                if (!snap.empty) {
-                    const id = snap.docs[0].id;
-                    const no = snap.docs[0].data().no;
-                    r.innerHTML = `<div class="text-success fw-bold"><i class="fa-solid fa-check"></i> Bulundu! Kovan: ${no}</div>`;
-                    setTimeout(() => window.location.href = `detay.html?id=${id}`, 500);
-                } else {
-                    r.innerHTML = `<div class="text-danger fw-bold">Kovan bulunamadı! Barkod kopyalandı.</div>`;
-                    document.getElementById('barkod').value = txt; // Bulamazsa yeni kayıt için barkodu input'a at.
-                    setTimeout(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide();
-                    }, 1500);
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        document.getElementById('scannerModal').addEventListener('hidden.bs.modal', function () {
-            stopScanner();
-            document.getElementById('scanResult').classList.add('d-none');
-        });
 
         // Diğer scriptler...
     </script>

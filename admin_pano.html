@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -27,8 +27,8 @@
                 <img src="5.png" style="height: 28px; margin-right: 8px;" alt="Logo">Yönetim Paneli
             </a>
             <div class="d-flex align-items-center gap-2">
-                <button class="theme-toggle-btn d-lg-none" id="themeToggleMobile">
-                    <i class="fa-solid fa-moon"></i>
+                <button class="btn btn-nav-custom theme-toggle-btn d-lg-none" id="themeToggleMobile" title="Gece/Gündüz Modu">
+                    <i class="theme-icon fa-solid fa-moon"></i>
                 </button>
                 <div class="dropdown d-lg-none">
                     <button class="btn btn-nav-custom btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -49,13 +49,13 @@
             <div class="collapse navbar-collapse d-none d-lg-block">
                 <ul class="navbar-nav me-auto"></ul>
                 <div class="d-flex align-items-center gap-2">
-                    <button class="theme-toggle-btn d-none d-lg-flex me-2" id="themeToggleDesktop">
-                        <i class="fa-solid fa-moon"></i>
+                    <button class="btn btn-nav-custom theme-toggle-btn d-none d-lg-flex me-2" id="themeToggleDesktop" title="Gece/Gündüz Modu">
+                        <i class="theme-icon fa-solid fa-moon"></i>
                     </button>
                     <a href="pano.html" class="btn btn-nav-custom btn-sm fw-bold">
                         <i class="fa-solid fa-arrow-left me-1"></i> Panoya Dön
                     </a>
-                    <button id="logoutBtn" class="btn btn-danger btn-sm fw-bold ms-2">
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm fw-bold ms-2">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Çıkış
                     </button>
                 </div>
@@ -85,7 +85,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="submit" id="submitBtn"
-                                    class="btn btn-success flex-grow-1 fw-bold py-3 rounded-pill btn-touch shadow-sm">
+                                    class="btn btn-bee-primary flex-grow-1 fw-bold py-3 rounded-pill btn-touch shadow-sm border-0">
                                     <i class="fa-solid fa-paper-plane me-2"></i> Yayınla
                                 </button>
                                 <button type="button" id="cancelBtn" onclick="iptal()"
@@ -145,7 +145,6 @@
             </a>
         </nav>
 
-        <footer class="footer-signature">
 
             <script>
                 const db = firebase.firestore(); const auth = firebase.auth();

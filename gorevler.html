@@ -511,8 +511,8 @@
             const ilgiliKovanNo = targetSelect.options[targetSelect.selectedIndex]?.text || '';
 
             const data = {
-                baslik: baslik,
-                detay: document.getElementById('g_detay').value.trim(),
+                baslik: window.escapeHTML(baslik),
+                detay: window.escapeHTML(document.getElementById('g_detay').value.trim()),
                 tarih: tarih,
                 onem: document.getElementById('g_onem').value,
                 ilgiliKovanId: ilgiliKovanId,
@@ -539,13 +539,15 @@
             }
         });
 
+        let unsubscribeGorevler = null;
         function gorevleriYukle(uid) {
             const listBekleyen = document.getElementById('listeBekleyen');
             const listTamamlanan = document.getElementById('listeTamamlanan');
             const badgeBekleyen = document.getElementById('badgeBekleyen');
 
+            if (unsubscribeGorevler) unsubscribeGorevler();
             // Tarihe göre artan olarak sırala (yakından uzağa)
-            db.collection("kullanicilar").doc(uid).collection("gorevler").orderBy("tarih", "asc").onSnapshot(snap => {
+            unsubscribeGorevler = db.collection("kullanicilar").doc(uid).collection("gorevler").orderBy("tarih", "asc").onSnapshot(snap => {
                 document.getElementById('loading').style.display = 'none';
                 listBekleyen.innerHTML = '';
                 listTamamlanan.innerHTML = '';

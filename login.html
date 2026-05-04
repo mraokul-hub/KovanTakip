@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -25,6 +25,14 @@
             align-items: center;
             justify-content: center;
             font-family: 'Segoe UI', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
         }
 
         .auth-card {
@@ -140,7 +148,13 @@
     </style>
 </head>
 
-<body>
+<body class="bg-light">
+
+    <div class="theme-toggle-container">
+        <button class="btn btn-nav-custom theme-toggle-btn shadow-sm" title="Gece/Gündüz Modu">
+            <i class="theme-icon fa-solid fa-moon"></i>
+        </button>
+    </div>
 
     <div class="container d-flex justify-content-center">
         <div class="card auth-card">

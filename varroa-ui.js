@@ -7,11 +7,13 @@ import { detectVarroaInImage } from './varroa-detector.js';
 
 // Risk thresholds (same as backend logic)
 const riskLevels = [
-  { max: 0, label: 'Sağlıklı', color: 'success', recommendation: 'Kovanda Varroa tespit edilemedi. Kontrollere devam edin.' },
-  { max: 4, label: 'Düşük Risk', color: 'warning', recommendation: 'Az miktarda Varroa var. Doğal destekler (kekik yağı vb.) yeterli olabilir.' },
-  { max: 14, label: 'Orta Risk', color: 'danger', recommendation: 'Popülasyon artıyor. Organik asit (Formik/Oksalik) tedavisi düşünülmelidir.' },
-  { max: Infinity, label: 'Yüksek Risk!', color: 'danger', recommendation: 'ACİL Amitraz veya yoğun asit tedavisi şart. Kovan sönme riski çok yüksek!' }
+  { max: 0, label: 'Sağlıklı', color: 'success', recommendation: 'Kovanda Varroa tespit edilemedi. Kontrollere devam edin.', load: 'Yok' },
+  { max: 4, label: 'Düşük Risk', color: 'warning', recommendation: 'Az miktarda Varroa var. Doğal destekler (kekik yağı vb.) yeterli olabilir.', load: 'Az' },
+  { max: 14, label: 'Orta Risk', color: 'danger', recommendation: 'Popülasyon artıyor. Organik asit (Formik/Oksalik) tedavisi düşünülmelidir.', load: 'Orta' },
+  { max: Infinity, label: 'Yüksek Risk!', color: 'danger', recommendation: 'ACİL Amitraz veya yoğun asit tedavisi şart. Kovan sönme riski çok yüksek!', load: 'Çok' }
 ];
+
+let lastAnalysisResult = null;
 
 /**
  * Determine risk level based on mite count.
@@ -89,6 +91,14 @@ window.handleVarroaPhoto = async function (input) {
 
     const count = detections.length;
     const riskInfo = getRiskInfo(count);
+    
+    lastAnalysisResult = {
+      count: count,
+      risk: riskInfo.label,
+      recommendation: riskInfo.recommendation,
+      load: riskInfo.load
+    };
+
     document.getElementById('varroaCount').textContent = count;
     const riskBadge = document.getElementById('varroaRisk');
     riskBadge.textContent = riskInfo.label;
@@ -128,5 +138,55 @@ window.addEventListener('show.bs.modal', (event) => {
     // Reset file input
     const fileInput = document.querySelector('#varroaModal input[type="file"]');
     if (fileInput) fileInput.value = '';
+    lastAnalysisResult = null;
   }
 });
+
+/**
+ * Save the last analysis result to Firebase.
+ */
+window.saveVarroaResult = async function() {
+  if (!lastAnalysisResult) {
+    alert('Kaydedilecek analiz sonucu bulunamadı.');
+    return;
+  }
+
+  const db = window.db;
+  const currentUser = window.currentUser;
+  const kovanId = new URLSearchParams(window.location.search).get('id');
+
+  if (!db || !currentUser || !kovanId) {
+    alert('Oturum veya kovan bilgisi eksik. Lütfen sayfayı yenileyin.');
+    return;
+  }
+
+  const data = {
+    tarih: new Date().toISOString().split('T')[0],
+    islem: 'Varroa Analizi (AI)',
+    not: `AI tespiti: ${lastAnalysisResult.count} akar — ${lastAnalysisResult.risk}. ${lastAnalysisResult.recommendation}`,
+    varroaYuk: lastAnalysisResult.load
+  };
+
+  try {
+    await db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId).collection('bakimKayitlari').add(data);
+    alert('Varroa analiz sonucu Bakım / Besleme kayıtlarına eklendi.');
+    const modalEl = document.getElementById('varroaModal');
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modal.hide();
+    // Optional: refresh records if needed
+    if (window.yukle) window.yukle(); 
+  } catch (e) {
+    console.error("Kaydetme hatası:", e);
+    alert('Kayıt eklenemedi: ' + e.message);
+  }
+};
+
+/**
+ * Reset analysis UI.
+ */
+window.resetVarroaAnalysis = function() {
+  document.getElementById('varroaUploadStep').classList.remove('d-none');
+  document.getElementById('varroaProcessingStep').classList.add('d-none');
+  document.getElementById('varroaResultStep').classList.add('d-none');
+  lastAnalysisResult = null;
+};
