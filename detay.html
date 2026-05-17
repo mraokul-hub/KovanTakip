@@ -1329,8 +1329,11 @@
             let secilenEnvanterId = d.envanter_malzeme;
             let secilenMiktar = Number(d.envanter_miktar) || 1;
             
+            const toggleCb = e.target.querySelector('.envanter-toggle');
+            const isEnvanterActive = toggleCb && toggleCb.checked;
+            
             // Çerçeve Sayısı Artışı Tespiti (Çıta / Çerçeve Eklendiğinde)
-            if (!secilenEnvanterId && col === 'bakimKayitlari' && d.cerceveGuncelle) {
+            if (isEnvanterActive && !secilenEnvanterId && col === 'bakimKayitlari' && d.cerceveGuncelle) {
                 const yeniCerceve = parseInt(d.cerceveGuncelle);
                 if (kovanData && kovanData.cerceve !== undefined && yeniCerceve > kovanData.cerceve) {
                     const fark = yeniCerceve - kovanData.cerceve;
@@ -1356,7 +1359,7 @@
             }
 
             // Otomatik Envanter Tespiti (Metin İçeriğinden)
-            if (!secilenEnvanterId) {
+            if (isEnvanterActive && !secilenEnvanterId) {
                 const inputText = ((d.islem || '') + " " + (d.not || '') + " " + (d.ilac || '')).toLowerCase();
                 const sel = e.target.querySelector('.envanter-select');
                 if (sel) {
@@ -1678,19 +1681,50 @@
             const sourceRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(kovanId);
             const targetRef = db.collection("kullanicilar").doc(currentUser.uid).collection((hedefTip === 'bos') ? "bosKovanlar" : "kovanlar").doc(hedefId);
             if (!confirm("İşlemi onaylıyor musunuz?")) return;
+
+            const bakimDocs = []; const hastalikDocs = []; const hasatDocs = [];
             try {
-                await db.runTransaction(async (t) => {
+                const bSnap = await sourceRef.collection("bakimKayitlari").get(); bSnap.forEach(doc => bakimDocs.push({ id: doc.id, data: doc.data(), ref: doc.ref }));
+                const hSnap = await sourceRef.collection("hastalikKayitlari").get(); hSnap.forEach(doc => hastalikDocs.push({ id: doc.id, data: doc.data(), ref: doc.ref }));
+                const haSnap = await sourceRef.collection("hasatKayitlari").get(); haSnap.forEach(doc => hasatDocs.push({ id: doc.id, data: doc.data(), ref: doc.ref }));
+            } catch (e) { console.warn("Alt koleksiyonlar çekilemedi", e); }
+
+            try {
+                const islemSonucu = await db.runTransaction(async (t) => {
                     const sDoc = await t.get(sourceRef);
                     if (!sDoc.exists) throw "Kaynak kovan bulunamadı!";
                     const sData = sDoc.data();
                     const bugun = new Date().toISOString().split('T')[0];
                     let finalTargetRef = targetRef; let tData = {};
-                    if (hedefTip === 'bos') { const bDoc = await t.get(targetRef); if (!bDoc.exists) throw "Seçilen boş kovan bulunamadı!"; const bData = bDoc.data(); finalTargetRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(); tData = { no: bData.no || "", barkod: bData.barkod || "", tip: "Langstroth", irk: "-", cerceve: 0, koken: "", hircinlik: 3, olusturmaTarihi: bugun }; t.delete(targetRef); }
+                    if (hedefTip === 'bos') { const bDoc = await t.get(targetRef); if (!bDoc.exists) throw "Seçilen boş kovan bulunamadı!"; const bData = bDoc.data(); finalTargetRef = db.collection("kullanicilar").doc(currentUser.uid).collection("kovanlar").doc(); tData = { no: bData.no || "", barkod: bData.barkod || "", tip: "Langstroth", irk: "-", cerceve: 0, koken: "", hircinlik: 3, olusturmaTarihi: bugun, bolgeGrupId: sData.bolgeGrupId || null, bolgeGrupAdi: sData.bolgeGrupAdi || null }; t.delete(targetRef); }
                     else { const tDoc = await t.get(targetRef); if (!tDoc.exists) throw "Hedef kovan bulunamadı!"; tData = tDoc.data(); }
-                    if (tip === 'tasi') { t.set(finalTargetRef, { ...tData, irk: sData.irk, cerceve: sData.cerceve, ana: sData.ana, hircinlik: sData.hircinlik, koken: 'Aktarım', guncelleme: bugun }, { merge: true }); const bosRef = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id }); t.delete(sourceRef); }
-                    else if (tip === 'birlestir') { const mevcutAdet = sData.cerceve || 0; const hedefAdet = tData.cerceve || 0; if (aktarilacakAdet >= mevcutAdet) { const secilenAna = document.getElementById('kalacakAnaAri').value; let finalAna = secilenAna === 'kaynak' ? (sData.ana || null) : (tData.ana || null); let finalIrk = secilenAna === 'kaynak' ? (sData.irk || "-") : (tData.irk || "-"); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + mevcutAdet, ana: finalAna, irk: finalIrk, koken: 'Tam Birleştirme', guncelleme: bugun }, { merge: true }); const bosRef2 = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef2, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id }); t.delete(sourceRef); } else { t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun }); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, koken: 'Kısmi Birleştirme', guncelleme: bugun }, { merge: true }); } }
+                    
+                    let isSourceDeleted = false;
+                    
+                    if (tip === 'tasi') { t.set(finalTargetRef, { ...tData, irk: sData.irk, cerceve: sData.cerceve, ana: sData.ana, hircinlik: sData.hircinlik, koken: 'Aktarım', guncelleme: bugun }, { merge: true }); const bosRef = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id, bolgeGrupId: sData.bolgeGrupId || null, bolgeGrupAdi: sData.bolgeGrupAdi || null }); t.delete(sourceRef); isSourceDeleted = true; }
+                    else if (tip === 'birlestir') { const mevcutAdet = sData.cerceve || 0; const hedefAdet = tData.cerceve || 0; if (aktarilacakAdet >= mevcutAdet) { const secilenAna = document.getElementById('kalacakAnaAri').value; let finalAna = secilenAna === 'kaynak' ? (sData.ana || null) : (tData.ana || null); let finalIrk = secilenAna === 'kaynak' ? (sData.irk || "-") : (tData.irk || "-"); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + mevcutAdet, ana: finalAna, irk: finalIrk, koken: 'Tam Birleştirme', guncelleme: bugun }, { merge: true }); const bosRef2 = db.collection("kullanicilar").doc(currentUser.uid).collection("bosKovanlar").doc(); t.set(bosRef2, { no: sData.no || "", barkod: sData.barkod || "", olusturmaTarihi: bugun, eskiId: sourceRef.id, bolgeGrupId: sData.bolgeGrupId || null, bolgeGrupAdi: sData.bolgeGrupAdi || null }); t.delete(sourceRef); isSourceDeleted = true; } else { t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun }); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, koken: 'Kısmi Birleştirme', guncelleme: bugun }, { merge: true }); } }
                     else { const mevcutAdet = sData.cerceve || 0; const hedefAdet = tData.cerceve || 0; if (aktarilacakAdet >= mevcutAdet) throw "Bölme işleminde tüm çerçeveleri aktaramazsınız."; t.update(sourceRef, { cerceve: mevcutAdet - aktarilacakAdet, guncelleme: bugun }); t.set(finalTargetRef, { ...tData, cerceve: hedefAdet + aktarilacakAdet, irk: sData.irk, koken: 'Oğul/Bölme', guncelleme: bugun }, { merge: true }); }
+                    
+                    return { target: finalTargetRef, deleteSourceSub: isSourceDeleted };
                 });
+
+                if (islemSonucu && islemSonucu.target.id !== sourceRef.id) {
+                    const batch = db.batch();
+                    const moveDocs = (docsList, colName) => {
+                        docsList.forEach(d => {
+                            const newRef = islemSonucu.target.collection(colName).doc();
+                            batch.set(newRef, d.data);
+                            if (islemSonucu.deleteSourceSub) {
+                                batch.delete(d.ref);
+                            }
+                        });
+                    };
+                    moveDocs(bakimDocs, "bakimKayitlari");
+                    moveDocs(hastalikDocs, "hastalikKayitlari");
+                    moveDocs(hasatDocs, "hasatKayitlari");
+                    await batch.commit();
+                }
+
                 alert("Aktarım başarıyla tamamlandı!");
                 if (tip === 'tasi') window.location.href = "kovanlarim.html"; else location.reload();
             } catch (e) { console.error(e); alert("İşlem başarısız: " + e); }
