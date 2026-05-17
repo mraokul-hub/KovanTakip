@@ -583,11 +583,14 @@
 
                                     <div class="col-md-6 mt-2 pt-2 border-top">
                                         <div class="input-group input-group-sm">
-                                            <span class="input-group-text"><i class="fa-solid fa-boxes-stacked text-success me-1"></i>Envanterden Düş</span>
-                                            <select name="envanter_malzeme" class="form-select envanter-select">
+                                            <span class="input-group-text">
+                                                <input class="form-check-input mt-0 me-2 envanter-toggle" type="checkbox" onchange="toggleEnvanter(this)">
+                                                <i class="fa-solid fa-boxes-stacked text-success me-1"></i>Envanterden Düş
+                                            </span>
+                                            <select name="envanter_malzeme" class="form-select envanter-select" disabled>
                                                 <option value="">Seçilmedi</option>
                                             </select>
-                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;">
+                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;" disabled>
                                         </div>
                                     </div>
 
@@ -620,11 +623,14 @@
                                             placeholder="Notlar"></div>
                                     <div class="col-md-8 mt-2 pt-2 border-top">
                                         <div class="input-group input-group-sm">
-                                            <span class="input-group-text"><i class="fa-solid fa-boxes-stacked text-danger me-1"></i>Envanterden Düş</span>
-                                            <select name="envanter_malzeme" class="form-select envanter-select">
+                                            <span class="input-group-text">
+                                                <input class="form-check-input mt-0 me-2 envanter-toggle" type="checkbox" onchange="toggleEnvanter(this)">
+                                                <i class="fa-solid fa-boxes-stacked text-danger me-1"></i>Envanterden Düş
+                                            </span>
+                                            <select name="envanter_malzeme" class="form-select envanter-select" disabled>
                                                 <option value="">Seçilmedi</option>
                                             </select>
-                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;">
+                                            <input type="number" name="envanter_miktar" class="form-control envanter-miktar" placeholder="Miktar" value="1" min="1" style="max-width: 80px;" disabled>
                                         </div>
                                     </div>
                                     <div class="col-12 d-flex align-items-center gap-2 mt-2"><label
@@ -1301,6 +1307,21 @@
             });
         });
         function handlePhoto(input, imgId, hiddenId) { if (input.files[0]) { const r = new FileReader(); r.onload = function (e) { const img = new Image(); img.onload = function () { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w = img.width; let h = img.height; if (w > 800) { h *= 800 / w; w = 800; } c.width = w; c.height = h; ctx.drawImage(img, 0, 0, w, h); document.getElementById(imgId).src = c.toDataURL('image/jpeg', 0.7); document.getElementById(imgId).style.display = 'block'; document.getElementById(hiddenId).value = c.toDataURL('image/jpeg', 0.7); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); } }
+        function toggleEnvanter(cb) {
+            const group = cb.closest('.input-group');
+            const select = group.querySelector('.envanter-select');
+            const miktar = group.querySelector('.envanter-miktar');
+            if (cb.checked) {
+                select.removeAttribute('disabled');
+                miktar.removeAttribute('disabled');
+            } else {
+                select.setAttribute('disabled', 'true');
+                miktar.setAttribute('disabled', 'true');
+                select.value = '';
+                miktar.value = '1';
+            }
+        }
+
         async function kayitEkle(e, col) {
             e.preventDefault();
             const d = Object.fromEntries(new FormData(e.target));
@@ -1348,8 +1369,11 @@
                         // Tam eşleşme veya kelime bazlı eşleşme (örn: "ahşap çıta" içinden "çıta" kelimesi geçerse)
                         let isMatch = inputText.includes(itemLower);
                         if (!isMatch) {
-                            const words = itemLower.split(/\s+/).filter(w => w.length > 2);
-                            isMatch = words.some(w => inputText.includes(w));
+                            const stopWords = ['ana', 'arı', 'kovan', 'bal', 'yavru', 'polen', 'erkek', 'kutu', 'kutus', 'yuva', 'yuvası', 'için', 'ile', 'bir', 'adet', 'var', 'yok', 'çok', 'az', 'yapıldı', 'edildi'];
+                            const words = itemLower.split(/\s+/).filter(w => w.length > 2 && !stopWords.includes(w));
+                            if (words.length > 0) {
+                                isMatch = words.some(w => inputText.includes(w));
+                            }
                         }
 
                         if (itemName.length > 2 && isMatch) {

@@ -88,3 +88,20 @@ window.checkYeniDuyuru = function (db) {
     // Bu fonksiyon artık firebase-config.js içerisindeki onSnapshot tarafından otomatik yönetiliyor.
     // HTML sayfalarındaki eski çağrılar hata vermesin diye boş bırakılmıştır.
 };
+
+// Global Yardımcı Fonksiyonlar (Form Doğrulama ve Güvenlik İçin)
+window.validateNumber = function(val, fallback = null) {
+    if (val === null || val === undefined || val === '') return fallback;
+    const num = Number(val);
+    return isNaN(num) ? fallback : num;
+};
+
+window.escapeHTML = function(str) {
+    if (!str) return str;
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
